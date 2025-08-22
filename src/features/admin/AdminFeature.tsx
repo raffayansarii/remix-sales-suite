@@ -70,7 +70,7 @@ export function AdminFeature() {
         </Tabs>
 
         {/* Other Admin Sections */}
-        <div className="mt-8">
+        {/* <div className="mt-8">
           <h2 className="text-2xl font-bold text-foreground mb-6">Other System Configurations</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {adminSections.map((section, index) => (
@@ -94,10 +94,10 @@ export function AdminFeature() {
               </Card>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* System Status */}
-        <Card className="mt-8 bg-background">
+        {/* <Card className="mt-8 bg-background">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Settings className="w-5 h-5 text-primary" />
@@ -120,10 +120,10 @@ export function AdminFeature() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Recent Activity */}
-        <Card className="mt-6 bg-background">
+        {/* <Card className="mt-6 bg-background">
           <CardHeader>
             <CardTitle>Recent System Activity</CardTitle>
           </CardHeader>
@@ -147,7 +147,7 @@ export function AdminFeature() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </div>
   );
