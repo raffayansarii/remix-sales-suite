@@ -1,0 +1,1 @@
+export { ContactsFeature } from './ContactsFeature';
