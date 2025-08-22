@@ -1,7 +1,8 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowUpDown, MoreHorizontal } from 'lucide-react';
+import { ArrowUpDown, Eye, Edit, MoreHorizontal } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Opportunity } from '@/types/crm';
 import { useState } from 'react';
 
@@ -9,12 +10,12 @@ interface TableViewProps {
   opportunities: Opportunity[];
 }
 
-type SortField = 'title' | 'company' | 'value' | 'stage' | 'closeDate' | 'probability';
+type SortField = 'title' | 'company' | 'value' | 'stage' | 'awardType' | 'agency' | 'solicitation' | 'createdAt' | 'probability';
 type SortDirection = 'asc' | 'desc';
 
 export function TableView({ opportunities }: TableViewProps) {
-  const [sortField, setSortField] = useState<SortField>('closeDate');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [sortField, setSortField] = useState<SortField>('createdAt');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -29,7 +30,7 @@ export function TableView({ opportunities }: TableViewProps) {
     let aValue: any = a[sortField];
     let bValue: any = b[sortField];
 
-    if (sortField === 'closeDate') {
+    if (sortField === 'createdAt') {
       aValue = new Date(aValue).getTime();
       bValue = new Date(bValue).getTime();
     } else if (typeof aValue === 'string') {
@@ -53,6 +54,16 @@ export function TableView({ opportunities }: TableViewProps) {
     return stageColors[stage as keyof typeof stageColors] || 'bg-muted';
   };
 
+  const getAwardTypeColor = (awardType: string) => {
+    const awardTypeColors = {
+      'Contract': 'bg-primary text-primary-foreground',
+      'Grant': 'bg-success text-success-foreground',
+      'Cooperative Agreement': 'bg-warning text-warning-foreground',
+      'Purchase Order': 'bg-muted text-muted-foreground'
+    };
+    return awardTypeColors[awardType as keyof typeof awardTypeColors] || 'bg-muted';
+  };
+
   const SortButton = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
     <Button
       variant="ghost"
@@ -71,25 +82,24 @@ export function TableView({ opportunities }: TableViewProps) {
           <TableHeader>
             <TableRow className="border-b bg-muted/50">
               <TableHead className="font-semibold">
-                <SortButton field="title">Opportunity</SortButton>
+                <SortButton field="title">Title</SortButton>
               </TableHead>
               <TableHead className="font-semibold">
-                <SortButton field="company">Company</SortButton>
+                <SortButton field="stage">Status</SortButton>
               </TableHead>
               <TableHead className="font-semibold">
-                <SortButton field="value">Value</SortButton>
+                <SortButton field="awardType">Award Type</SortButton>
               </TableHead>
               <TableHead className="font-semibold">
-                <SortButton field="stage">Stage</SortButton>
+                <SortButton field="agency">Agency</SortButton>
               </TableHead>
               <TableHead className="font-semibold">
-                <SortButton field="probability">Probability</SortButton>
+                <SortButton field="solicitation">Solicitation</SortButton>
               </TableHead>
               <TableHead className="font-semibold">
-                <SortButton field="closeDate">Close Date</SortButton>
+                <SortButton field="createdAt">Created</SortButton>
               </TableHead>
-              <TableHead className="font-semibold">Contact</TableHead>
-              <TableHead className="w-12"></TableHead>
+              <TableHead className="font-semibold w-24">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -98,6 +108,7 @@ export function TableView({ opportunities }: TableViewProps) {
                 <TableCell>
                   <div>
                     <div className="font-medium text-sm">{opportunity.title}</div>
+                    <div className="text-xs text-muted-foreground mt-1">{opportunity.company}</div>
                     {opportunity.tags.length > 0 && (
                       <div className="flex gap-1 mt-1">
                         {opportunity.tags.slice(0, 2).map((tag) => (
@@ -114,38 +125,47 @@ export function TableView({ opportunities }: TableViewProps) {
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="text-sm">{opportunity.company}</TableCell>
-                <TableCell>
-                  <span className="font-semibold text-success">
-                    ${opportunity.value.toLocaleString()}
-                  </span>
-                </TableCell>
                 <TableCell>
                   <Badge className={`${getStageColor(opportunity.stage)} border-0`}>
                     {opportunity.stage}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
-                    <div className="w-full bg-muted rounded-full h-2 max-w-20">
-                      <div 
-                        className="bg-primary h-2 rounded-full transition-all" 
-                        style={{ width: `${opportunity.probability}%` }}
-                      />
-                    </div>
-                    <span className="text-sm font-medium">{opportunity.probability}%</span>
-                  </div>
+                  <Badge className={`${getAwardTypeColor(opportunity.awardType)} border-0 text-xs`}>
+                    {opportunity.awardType}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-sm">{opportunity.agency}</TableCell>
+                <TableCell>
+                  <Button 
+                    variant="link" 
+                    className="h-auto p-0 text-primary hover:text-primary-hover text-sm underline"
+                    onClick={() => {/* Handle edit */}}
+                  >
+                    {opportunity.solicitation}
+                  </Button>
                 </TableCell>
                 <TableCell className="text-sm">
-                  {new Date(opportunity.closeDate).toLocaleDateString()}
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {opportunity.contact}
+                  {new Date(opportunity.createdAt).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-background border shadow-lg">
+                      <DropdownMenuItem className="cursor-pointer">
+                        <Eye className="mr-2 h-4 w-4" />
+                        View
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer">
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}

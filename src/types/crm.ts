@@ -5,6 +5,9 @@ export interface Opportunity {
   contact: string;
   value: number;
   stage: 'Lead' | 'Qualified' | 'Proposal' | 'Negotiation' | 'Closed Won';
+  awardType: 'Contract' | 'Grant' | 'Cooperative Agreement' | 'Purchase Order';
+  agency: string;
+  solicitation: string;
   probability: number;
   closeDate: string;
   createdAt: string;
