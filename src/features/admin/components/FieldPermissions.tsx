@@ -71,8 +71,8 @@ export function FieldPermissions() {
   const [fieldPermissions, setFieldPermissions] = useState<FieldPermission[]>(mockFieldPermissions);
 
   const filteredPermissions = fieldPermissions.filter(permission => {
-    const matchesRole = !selectedRole || permission.roleId === selectedRole;
-    const matchesModule = !selectedModule || permission.module === selectedModule;
+    const matchesRole = !selectedRole || selectedRole === 'all-roles' || permission.roleId === selectedRole;
+    const matchesModule = !selectedModule || selectedModule === 'all-modules' || permission.module === selectedModule;
     const matchesField = !searchField || permission.fieldName.toLowerCase().includes(searchField.toLowerCase());
     
     return matchesRole && matchesModule && matchesField;
@@ -117,7 +117,7 @@ export function FieldPermissions() {
                   <SelectValue placeholder="All Roles" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Roles</SelectItem>
+                  <SelectItem value="all-roles">All Roles</SelectItem>
                   {mockRoles.map((role) => (
                     <SelectItem key={role.id} value={role.id}>
                       {role.name}
@@ -134,7 +134,7 @@ export function FieldPermissions() {
                   <SelectValue placeholder="All Modules" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Modules</SelectItem>
+                  <SelectItem value="all-modules">All Modules</SelectItem>
                   {appModules.map((module) => (
                     <SelectItem key={module} value={module}>
                       {module}
