@@ -10,6 +10,7 @@ import { FilterGroup } from '@/types/filters';
 import { KanbanView } from '@/components/pipelines/KanbanView';
 import { TableView } from '@/components/pipelines/TableView';
 import { FilterDrawer } from '@/components/pipelines/FilterDrawer';
+import { PipelineAnalytics } from '@/components/pipelines/PipelineAnalytics';
 
 export default function Pipelines() {
   const [viewType, setViewType] = useState<ViewType>('table');
@@ -17,6 +18,7 @@ export default function Pipelines() {
   const [opportunities] = useState<Opportunity[]>(mockOpportunities);
   const [activeFilters, setActiveFilters] = useState<FilterGroup[]>([]);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   // Apply search filter
   const searchFilteredOpportunities = opportunities.filter(opp => 
@@ -99,7 +101,11 @@ export default function Pipelines() {
           </div>
           
           <div className="flex items-center gap-2">
-            <Button variant="outline" className="gap-2">
+            <Button 
+              variant={showAnalytics ? "default" : "outline"} 
+              className="gap-2"
+              onClick={() => setShowAnalytics(!showAnalytics)}
+            >
               <BarChart3 className="w-4 h-4" />
               Analytics
             </Button>
@@ -184,7 +190,9 @@ export default function Pipelines() {
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-hidden">
-        {viewType === 'kanban' ? (
+        {showAnalytics ? (
+          <PipelineAnalytics opportunities={filteredOpportunities} />
+        ) : viewType === 'kanban' ? (
           <KanbanView opportunities={filteredOpportunities} />
         ) : (
           <TableView opportunities={filteredOpportunities} />
