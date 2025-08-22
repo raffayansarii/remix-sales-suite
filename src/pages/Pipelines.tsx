@@ -185,8 +185,8 @@ export default function Pipelines() {
             <div className="text-2xl font-bold text-stage-negotiation">{winRate.toFixed(1)}%</div>
             <div className="text-sm text-muted-foreground">Win Rate</div>
           </Card>
-        </div>
-      </div> */}
+        </div>*/}
+      </div>
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-hidden">
