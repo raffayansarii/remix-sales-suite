@@ -53,7 +53,7 @@ export default function Admin() {
       </div>
 
       {/* Admin Sections */}
-      {/* <div className="flex-1 p-6 overflow-auto">
+      <div className="flex-1 p-6 overflow-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {adminSections.map((section, index) => (
             <Card key={index} className="bg-background hover:shadow-md transition-shadow cursor-pointer">
@@ -75,7 +75,7 @@ export default function Admin() {
               </CardContent>
             </Card>
           ))}
-        </div> */}
+        </div>
 
         {/* System Status */}
         <Card className="mt-8 bg-background">
