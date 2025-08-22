@@ -168,7 +168,7 @@ export default function Pipelines() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-4 gap-4 mt-6">
+        {/* <div className="grid grid-cols-4 gap-4 mt-6">
           <Card className="p-4">
             <div className="text-2xl font-bold text-primary">{filteredOpportunities.length}</div>
             <div className="text-sm text-muted-foreground">Total Opportunities</div>
@@ -186,7 +186,7 @@ export default function Pipelines() {
             <div className="text-sm text-muted-foreground">Win Rate</div>
           </Card>
         </div>
-      </div>
+      </div> */}
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-hidden">
