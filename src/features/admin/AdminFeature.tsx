@@ -1,32 +1,27 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings, Users, Shield, Database, Bell, Palette } from 'lucide-react';
+import { RoleManagement } from './components/RoleManagement';
+import { ObjectPermissions } from './components/ObjectPermissions';
+import { FieldPermissions } from './components/FieldPermissions';
 
 export function AdminFeature() {
+  const [activeTab, setActiveTab] = useState('permissions');
+
   const adminSections = [
-    {
-      title: 'User Management',
-      description: 'Manage user accounts, roles, and permissions',
-      icon: Users,
-      color: 'text-primary'
-    },
-    {
-      title: 'Security Settings',
-      description: 'Configure security policies and access controls',
-      icon: Shield,
-      color: 'text-success'
-    },
-    {
-      title: 'Database Management',
-      description: 'Monitor and maintain database performance',
-      icon: Database,
-      color: 'text-warning'
-    },
     {
       title: 'System Settings',
       description: 'Configure global system preferences',
       icon: Settings,
       color: 'text-stage-negotiation'
+    },
+    {
+      title: 'Custom Fields',
+      description: 'Manage custom field configurations',
+      icon: Database,
+      color: 'text-warning'
     },
     {
       title: 'Notifications',
@@ -52,29 +47,53 @@ export function AdminFeature() {
         </div>
       </div>
 
-      {/* Admin Sections */}
+      {/* Main Content */}
       <div className="flex-1 p-6 overflow-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {adminSections.map((section, index) => (
-            <Card key={index} className="bg-background hover:shadow-md transition-shadow cursor-pointer">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg bg-muted ${section.color}`}>
-                    <section.icon className="w-6 h-6" />
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="permissions">Roles</TabsTrigger>
+            <TabsTrigger value="object-permissions">Object Permissions</TabsTrigger>
+            <TabsTrigger value="field-permissions">Field Permissions</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="permissions">
+            <RoleManagement />
+          </TabsContent>
+
+          <TabsContent value="object-permissions">
+            <ObjectPermissions />
+          </TabsContent>
+
+          <TabsContent value="field-permissions">
+            <FieldPermissions />
+          </TabsContent>
+        </Tabs>
+
+        {/* Other Admin Sections */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold text-foreground mb-6">Other System Configurations</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {adminSections.map((section, index) => (
+              <Card key={index} className="bg-background hover:shadow-md transition-shadow cursor-pointer">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg bg-muted ${section.color}`}>
+                      <section.icon className="w-6 h-6" />
+                    </div>
+                    <CardTitle className="text-lg">{section.title}</CardTitle>
                   </div>
-                  <CardTitle className="text-lg">{section.title}</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-sm mb-4">
-                  {section.description}
-                </p>
-                <Button variant="outline" size="sm" className="w-full">
-                  Configure
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground text-sm mb-4">
+                    {section.description}
+                  </p>
+                  <Button variant="outline" size="sm" className="w-full">
+                    Configure
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
 
         {/* System Status */}
