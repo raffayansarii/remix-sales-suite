@@ -2,41 +2,81 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Professional B2B CRM Design System - Multi-tenant Ready */
 
 @layer base {
   :root {
+    /* Primary brand colors - Professional blue palette */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    --foreground: 210 11% 15%;
+    
+    /* Card and surface colors */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 210 11% 15%;
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
+    --popover-foreground: 210 11% 15%;
+    
+    /* Primary CRM brand - Professional blue */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 217 91% 55%;
+    --primary-light: 217 91% 95%;
+    
+    /* Secondary colors - Neutral grays */
+    --secondary: 210 14% 97%;
+    --secondary-foreground: 210 11% 15%;
+    --secondary-hover: 210 14% 94%;
+    
+    /* Muted colors for backgrounds */
+    --muted: 210 14% 97%;
+    --muted-foreground: 210 6% 46%;
+    
+    /* Accent colors for highlights */
+    --accent: 210 14% 97%;
+    --accent-foreground: 210 11% 15%;
+    
+    /* Status colors for pipeline stages */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --success-light: 142 76% 95%;
+    
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --warning-light: 38 92% 95%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --destructive-light: 0 84% 95%;
+    
+    /* Border and input colors */
+    --border: 210 14% 89%;
+    --input: 210 14% 89%;
+    --ring: 217 91% 60%;
+    
+    /* Pipeline stage colors */
+    --stage-lead: 217 91% 60%;
+    --stage-qualified: 262 83% 58%;
+    --stage-proposal: 38 92% 50%;
+    --stage-negotiation: 25 95% 53%;
+    --stage-won: 142 76% 36%;
+    
+    /* Gradients for visual appeal */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 55%));
+    --gradient-success: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 76% 31%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 14% 99%));
+    
+    /* Shadows for depth */
+    --shadow-sm: 0 1px 2px 0 hsl(210 14% 89% / 0.2);
+    --shadow-md: 0 4px 6px -1px hsl(210 14% 89% / 0.3);
+    --shadow-lg: 0 10px 15px -3px hsl(210 14% 89% / 0.4);
+    --shadow-xl: 0 25px 50px -12px hsl(210 14% 89% / 0.5);
+    
+    /* Animation and transition */
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -65,11 +105,14 @@ All colors MUST be HSL.
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 217 91% 65%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 217 91% 60%;
+    --primary-light: 217 91% 20%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
+    --secondary-hover: 217.2 32.6% 20%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
@@ -79,10 +122,26 @@ All colors MUST be HSL.
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
+    --destructive-light: 0 62.8% 15%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --success-light: 142 76% 15%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --warning-light: 38 92% 15%;
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 217 91% 60%;
+
+    --stage-lead: 217 91% 65%;
+    --stage-qualified: 262 83% 63%;
+    --stage-proposal: 38 92% 55%;
+    --stage-negotiation: 25 95% 58%;
+    --stage-won: 142 76% 41%;
+
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
