@@ -1,11 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowUpDown, Eye, Edit, MoreHorizontal, Pin, PinOff } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ArrowUpDown, Eye, Edit, MoreHorizontal, Pin, PinOff, Palette } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '@/components/ui/dropdown-menu';
 import { Opportunity } from '@/types/crm';
 import { useState } from 'react';
-import { usePinnedItems } from '@/hooks/usePinnedItems';
+import { usePinnedItems, PIN_COLORS, PinColor } from '@/hooks/usePinnedItems';
 
 interface TableViewProps {
   opportunities: Opportunity[];
@@ -17,7 +17,7 @@ type SortDirection = 'asc' | 'desc';
 export function TableView({ opportunities }: TableViewProps) {
   const [sortField, setSortField] = useState<SortField>('createdAt');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const { togglePin, isPinned, separateItems } = usePinnedItems<Opportunity>();
+  const { togglePin, isPinned, setItemColor, getItemColor, separateItems } = usePinnedItems<Opportunity>();
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -115,95 +115,126 @@ export function TableView({ opportunities }: TableViewProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedOpportunities.map((opportunity) => (
-              <TableRow 
-                key={opportunity.id} 
-                className={`cursor-pointer transition-colors ${
-                  isPinned(opportunity.id) || opportunity.pinned
-                    ? 'bg-primary/5 hover:bg-primary/10 border-primary/20' 
-                    : 'hover:bg-muted/50'
-                }`}
-              >
-                <TableCell>
-                  <div>
-                    <div className="font-medium text-sm">{opportunity.title}</div>
-                    <div className="text-xs text-muted-foreground mt-1">{opportunity.company}</div>
-                    {opportunity.tags.length > 0 && (
-                      <div className="flex gap-1 mt-1">
-                        {opportunity.tags.slice(0, 2).map((tag) => (
-                          <Badge key={tag} variant="secondary" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                        {opportunity.tags.length > 2 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{opportunity.tags.length - 2}
-                          </Badge>
+            {sortedOpportunities.map((opportunity) => {
+              const pinned = isPinned(opportunity.id) || opportunity.pinned;
+              const color = getItemColor(opportunity.id);
+              
+              return (
+                <TableRow 
+                  key={opportunity.id} 
+                  className={`cursor-pointer transition-colors ${
+                    pinned && color
+                      ? `${color.bg} ${color.hover} ${color.border}` 
+                      : pinned 
+                        ? 'bg-primary/5 hover:bg-primary/10 border-primary/20' 
+                        : 'hover:bg-muted/50'
+                  }`}
+                >
+                  <TableCell>
+                    <div>
+                      <div className="font-medium text-sm">{opportunity.title}</div>
+                      <div className="text-xs text-muted-foreground mt-1">{opportunity.company}</div>
+                      {opportunity.tags.length > 0 && (
+                        <div className="flex gap-1 mt-1">
+                          {opportunity.tags.slice(0, 2).map((tag) => (
+                            <Badge key={tag} variant="secondary" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                          {opportunity.tags.length > 2 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{opportunity.tags.length - 2}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={`${getStageColor(opportunity.stage)} border-0`}>
+                      {opportunity.stage}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={`${getAwardTypeColor(opportunity.awardType)} border-0 text-xs`}>
+                      {opportunity.awardType}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm">{opportunity.agency}</TableCell>
+                  <TableCell>
+                    <Button 
+                      variant="link" 
+                      className="h-auto p-0 text-primary hover:text-primary-hover text-sm underline"
+                      onClick={() => {/* Handle edit */}}
+                    >
+                      {opportunity.solicitation}
+                    </Button>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {new Date(opportunity.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
+                        <DropdownMenuItem 
+                          className="cursor-pointer"
+                          onClick={() => togglePin(opportunity.id)}
+                        >
+                          {isPinned(opportunity.id) || opportunity.pinned ? (
+                            <>
+                              <PinOff className="mr-2 h-4 w-4" />
+                              Unpin
+                            </>
+                          ) : (
+                            <>
+                              <Pin className="mr-2 h-4 w-4" />
+                              Pin to top
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                        
+                        {(isPinned(opportunity.id) || opportunity.pinned) && (
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger className="cursor-pointer">
+                              <Palette className="mr-2 h-4 w-4" />
+                              Change color
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="bg-background border shadow-lg z-50">
+                              <div className="grid grid-cols-2 gap-1 p-2">
+                                {PIN_COLORS.map((color) => (
+                                  <DropdownMenuItem
+                                    key={color.name}
+                                    className="cursor-pointer"
+                                    onClick={() => setItemColor(opportunity.id, color)}
+                                  >
+                                    <div className={`w-4 h-4 rounded mr-2 ${color.bg} ${color.border} border`} />
+                                    <span className="text-xs">{color.name}</span>
+                                  </DropdownMenuItem>
+                                ))}
+                              </div>
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
                         )}
-                      </div>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge className={`${getStageColor(opportunity.stage)} border-0`}>
-                    {opportunity.stage}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge className={`${getAwardTypeColor(opportunity.awardType)} border-0 text-xs`}>
-                    {opportunity.awardType}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-sm">{opportunity.agency}</TableCell>
-                <TableCell>
-                  <Button 
-                    variant="link" 
-                    className="h-auto p-0 text-primary hover:text-primary-hover text-sm underline"
-                    onClick={() => {/* Handle edit */}}
-                  >
-                    {opportunity.solicitation}
-                  </Button>
-                </TableCell>
-                <TableCell className="text-sm">
-                  {new Date(opportunity.createdAt).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-background border shadow-lg">
-                      <DropdownMenuItem 
-                        className="cursor-pointer"
-                        onClick={() => togglePin(opportunity.id)}
-                      >
-                        {isPinned(opportunity.id) || opportunity.pinned ? (
-                          <>
-                            <PinOff className="mr-2 h-4 w-4" />
-                            Unpin
-                          </>
-                        ) : (
-                          <>
-                            <Pin className="mr-2 h-4 w-4" />
-                            Pin to top
-                          </>
-                        )}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer">
-                        <Eye className="mr-2 h-4 w-4" />
-                        View
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer">
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+                        
+                        <DropdownMenuItem className="cursor-pointer">
+                          <Eye className="mr-2 h-4 w-4" />
+                          View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer">
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
 
