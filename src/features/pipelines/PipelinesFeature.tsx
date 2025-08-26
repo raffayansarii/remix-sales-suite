@@ -92,39 +92,40 @@ export function PipelinesFeature() {
   return (
     <div className="flex-1 flex flex-col h-full bg-muted/30">
       {/* Header Section */}
-      <div className="bg-background border-b p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Opportunity Pipelines</h1>
-            <p className="text-muted-foreground mt-1">Manage and track your sales opportunities</p>
+      <div className="bg-background border-b p-4 sm:p-6 shrink-0">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4 sm:mb-6">
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground truncate">Opportunity Pipelines</h1>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base">Manage and track your sales opportunities</p>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <Button 
               variant={showAnalytics ? "default" : "outline"} 
-              className="gap-2"
+              className="gap-2 text-xs sm:text-sm"
+              size="sm"
               onClick={() => setShowAnalytics(!showAnalytics)}
             >
               <BarChart3 className="w-4 h-4" />
-              Analytics
+              <span className="hidden sm:inline">Analytics</span>
             </Button>
-            <Button className="gap-2 bg-gradient-primary hover:bg-primary-hover">
+            <Button className="gap-2 bg-gradient-primary hover:bg-primary-hover text-xs sm:text-sm" size="sm">
               <Plus className="w-4 h-4" />
-              Add Opportunity
+              <span className="hidden sm:inline">Add Opportunity</span>
             </Button>
           </div>
         </div>
 
         {/* Search and View Controls */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="relative w-80">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="relative w-full sm:w-80">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Search opportunities, agencies, solicitations..."
+                placeholder="Search opportunities..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-background"
+                className="pl-10 bg-background text-sm"
               />
             </div>
             
@@ -132,7 +133,7 @@ export function PipelinesFeature() {
               variant={activeFilters.length > 0 ? 'default' : 'outline'}
               size="sm"
               onClick={() => setIsFilterDrawerOpen(true)}
-              className="gap-2 relative"
+              className="gap-2 relative shrink-0"
             >
               <Filter className="w-4 h-4" />
               Filters
@@ -144,7 +145,7 @@ export function PipelinesFeature() {
             </Button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <Button
               variant={viewType === 'kanban' ? 'default' : 'outline'}
               size="sm"
@@ -152,7 +153,7 @@ export function PipelinesFeature() {
               className="gap-2"
             >
               <Kanban className="w-4 h-4" />
-              Kanban
+              <span className="hidden sm:inline">Kanban</span>
             </Button>
             <Button
               variant={viewType === 'table' ? 'default' : 'outline'}
@@ -161,7 +162,7 @@ export function PipelinesFeature() {
               className="gap-2"
             >
               <Table className="w-4 h-4" />
-              Grid
+              <span className="hidden sm:inline">Grid</span>
             </Button>
           </div>
         </div>
