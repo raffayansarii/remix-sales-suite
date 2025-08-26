@@ -168,7 +168,7 @@ export function PipelinesFeature() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-auto w-full border border-amber-800">
         {showAnalytics ? (
           <PipelineAnalytics opportunities={filteredOpportunities} />
         ) : viewType === 'kanban' ? (
