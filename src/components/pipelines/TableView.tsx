@@ -1,10 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowUpDown, Eye, Edit, MoreHorizontal } from 'lucide-react';
+import { ArrowUpDown, Eye, Edit, MoreHorizontal, Pin, PinOff } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Opportunity } from '@/types/crm';
 import { useState } from 'react';
+import { usePinnedItems } from '@/hooks/usePinnedItems';
 
 interface TableViewProps {
   opportunities: Opportunity[];
@@ -16,6 +17,7 @@ type SortDirection = 'asc' | 'desc';
 export function TableView({ opportunities }: TableViewProps) {
   const [sortField, setSortField] = useState<SortField>('createdAt');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const { togglePin, isPinned, separateItems } = usePinnedItems<Opportunity>();
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -26,22 +28,32 @@ export function TableView({ opportunities }: TableViewProps) {
     }
   };
 
-  const sortedOpportunities = [...opportunities].sort((a, b) => {
-    let aValue: any = a[sortField];
-    let bValue: any = b[sortField];
+  // Separate pinned and unpinned items
+  const { pinnedItems, unpinnedItems } = separateItems(opportunities);
+  
+  // Sort both pinned and unpinned items separately
+  const sortItems = (items: Opportunity[]) => {
+    return [...items].sort((a, b) => {
+      let aValue: any = a[sortField];
+      let bValue: any = b[sortField];
 
-    if (sortField === 'createdAt') {
-      aValue = new Date(aValue).getTime();
-      bValue = new Date(bValue).getTime();
-    } else if (typeof aValue === 'string') {
-      aValue = aValue.toLowerCase();
-      bValue = bValue.toLowerCase();
-    }
+      if (sortField === 'createdAt') {
+        aValue = new Date(aValue).getTime();
+        bValue = new Date(bValue).getTime();
+      } else if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
 
-    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
-    return 0;
-  });
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+
+  const sortedPinnedItems = sortItems(pinnedItems);
+  const sortedUnpinnedItems = sortItems(unpinnedItems);
+  const sortedOpportunities = [...sortedPinnedItems, ...sortedUnpinnedItems];
 
   const getStageColor = (stage: string) => {
     const stageColors = {
@@ -104,7 +116,14 @@ export function TableView({ opportunities }: TableViewProps) {
           </TableHeader>
           <TableBody>
             {sortedOpportunities.map((opportunity) => (
-              <TableRow key={opportunity.id} className="cursor-pointer hover:bg-muted/50 transition-colors">
+              <TableRow 
+                key={opportunity.id} 
+                className={`cursor-pointer transition-colors ${
+                  isPinned(opportunity.id) || opportunity.pinned
+                    ? 'bg-primary/5 hover:bg-primary/10 border-primary/20' 
+                    : 'hover:bg-muted/50'
+                }`}
+              >
                 <TableCell>
                   <div>
                     <div className="font-medium text-sm">{opportunity.title}</div>
@@ -156,6 +175,22 @@ export function TableView({ opportunities }: TableViewProps) {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-background border shadow-lg">
+                      <DropdownMenuItem 
+                        className="cursor-pointer"
+                        onClick={() => togglePin(opportunity.id)}
+                      >
+                        {isPinned(opportunity.id) || opportunity.pinned ? (
+                          <>
+                            <PinOff className="mr-2 h-4 w-4" />
+                            Unpin
+                          </>
+                        ) : (
+                          <>
+                            <Pin className="mr-2 h-4 w-4" />
+                            Pin to top
+                          </>
+                        )}
+                      </DropdownMenuItem>
                       <DropdownMenuItem className="cursor-pointer">
                         <Eye className="mr-2 h-4 w-4" />
                         View

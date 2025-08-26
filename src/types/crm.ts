@@ -14,6 +14,7 @@ export interface Opportunity {
   updatedAt: string;
   description?: string;
   tags: string[];
+  pinned?: boolean;
 }
 
 export interface Contact {
