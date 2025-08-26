@@ -59,7 +59,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className={`${isCollapsed ? 'w-16' : 'w-64'} transition-all duration-300 border-r bg-background`}>
+    <Sidebar className={`${isCollapsed ? 'w-16' : 'w-64'} transition-all duration-300 border-r bg-background z-50`}>
       <SidebarContent className="bg-background">
         <div className="p-6 border-b">
           <div className="flex items-center gap-3">
