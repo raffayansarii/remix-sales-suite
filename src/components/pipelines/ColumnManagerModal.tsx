@@ -14,11 +14,11 @@ interface ColumnManagerModalProps {
 const getColumnTypeStyles = (type: ColumnType) => {
   switch (type) {
     case 'system':
-      return 'bg-primary/10 border-primary/20 text-primary-foreground';
+      return 'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950 dark:border-blue-800 dark:text-blue-100';
     case 'default':
-      return 'bg-secondary/10 border-secondary/20 text-secondary-foreground';
+      return 'bg-green-50 border-green-200 text-green-900 dark:bg-green-950 dark:border-green-800 dark:text-green-100';
     case 'custom':
-      return 'bg-accent/10 border-accent/20 text-accent-foreground';
+      return 'bg-purple-50 border-purple-200 text-purple-900 dark:bg-purple-950 dark:border-purple-800 dark:text-purple-100';
     default:
       return 'bg-muted/10 border-muted/20';
   }
@@ -26,9 +26,9 @@ const getColumnTypeStyles = (type: ColumnType) => {
 
 const getColumnTypeBadge = (type: ColumnType) => {
   const styles = {
-    system: 'bg-primary/20 text-primary hover:bg-primary/30',
-    default: 'bg-secondary/20 text-secondary-foreground hover:bg-secondary/30',
-    custom: 'bg-accent/20 text-accent-foreground hover:bg-accent/30',
+    system: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+    default: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+    custom: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
   };
   
   const labels = {
@@ -38,7 +38,7 @@ const getColumnTypeBadge = (type: ColumnType) => {
   };
 
   return (
-    <Badge variant="secondary" className={`text-xs ${styles[type]}`}>
+    <Badge variant="secondary" className={`text-xs border-0 ${styles[type]}`}>
       {labels[type]}
     </Badge>
   );
@@ -55,38 +55,40 @@ function ColumnItem({ column, index, isDragDisabled = false }: ColumnItemProps) 
     <Draggable
       draggableId={column.id}
       index={index}
-      isDragDisabled={isDragDisabled || column.required}
+      isDragDisabled={isDragDisabled}
     >
       {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
           className={`
-            p-3 rounded-lg border transition-all duration-200
+            p-4 rounded-lg border-2 transition-all duration-200 bg-card hover:shadow-md
             ${getColumnTypeStyles(column.type)}
-            ${snapshot.isDragging ? 'shadow-lg rotate-1' : ''}
-            ${isDragDisabled || column.required ? 'opacity-60 cursor-not-allowed' : 'cursor-move'}
+            ${snapshot.isDragging ? 'shadow-xl scale-105 rotate-2 z-50' : 'shadow-sm'}
+            ${isDragDisabled ? 'opacity-60 cursor-not-allowed' : 'cursor-move hover:border-primary/40'}
           `}
         >
           <div className="flex items-center gap-3">
             <div
               {...provided.dragHandleProps}
-              className={isDragDisabled || column.required ? 'cursor-not-allowed' : 'cursor-grab'}
+              className={`p-1 rounded hover:bg-muted/50 ${isDragDisabled ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'}`}
             >
               <GripVertical className="h-4 w-4 text-muted-foreground" />
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-medium text-sm">{column.label}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-semibold text-sm truncate">{column.label}</span>
                 {getColumnTypeBadge(column.type)}
                 {column.required && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs border-red-200 text-red-700 bg-red-50">
                     Required
                   </Badge>
                 )}
               </div>
               {column.field && (
-                <span className="text-xs text-muted-foreground">Field: {column.field}</span>
+                <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                  {column.field}
+                </span>
               )}
             </div>
           </div>
@@ -116,32 +118,34 @@ export function ColumnManagerModal({ open, onOpenChange, columnManager }: Column
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0">
+      <DialogContent className="max-w-6xl max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0 pb-6 border-b">
           <div className="flex items-center justify-between">
-            <DialogTitle>Manage Table Columns</DialogTitle>
+            <div>
+              <DialogTitle className="text-xl font-bold">Manage Table Columns</DialogTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Drag columns between sections to customize your table view. Required system columns cannot be hidden.
+              </p>
+            </div>
             <Button
               variant="outline"
               size="sm"
               onClick={resetToDefault}
-              className="gap-2"
+              className="gap-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
             >
               <RotateCcw className="h-4 w-4" />
               Reset to Default
             </Button>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Drag columns between lists to show or hide them. System columns marked as required cannot be hidden.
-          </p>
         </DialogHeader>
 
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="flex gap-6 flex-1 overflow-hidden">
+          <div className="flex gap-8 flex-1 overflow-hidden py-6">
             {/* Hidden Columns */}
             <div className="flex-1 flex flex-col min-h-0">
-              <div className="flex items-center gap-2 mb-4">
-                <h3 className="font-semibold text-base">Available Columns</h3>
-                <Badge variant="secondary" className="text-xs">
+              <div className="flex items-center gap-3 mb-6">
+                <h3 className="font-bold text-lg text-muted-foreground">Available Columns</h3>
+                <Badge variant="outline" className="text-sm px-3 py-1 font-semibold">
                   {hiddenColumns.length}
                 </Badge>
               </div>
@@ -152,16 +156,20 @@ export function ColumnManagerModal({ open, onOpenChange, columnManager }: Column
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                     className={`
-                      flex-1 space-y-2 p-4 rounded-lg border-2 border-dashed min-h-32 overflow-y-auto
+                      flex-1 space-y-3 p-6 rounded-xl border-2 border-dashed min-h-96 overflow-y-auto transition-all
                       ${snapshot.isDraggingOver 
-                        ? 'border-primary bg-primary/5' 
-                        : 'border-muted-foreground/25 bg-muted/20'
+                        ? 'border-primary/50 bg-primary/5 shadow-inner' 
+                        : 'border-border/50 bg-muted/30 hover:bg-muted/40'
                       }
                     `}
                   >
                     {hiddenColumns.length === 0 ? (
-                      <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                        All columns are currently visible
+                      <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-3">
+                          <GripVertical className="w-6 h-6" />
+                        </div>
+                        <p className="text-sm font-medium">All columns are visible</p>
+                        <p className="text-xs mt-1">Drag columns here to hide them</p>
                       </div>
                     ) : (
                       hiddenColumns.map((column, index) => (
@@ -176,9 +184,9 @@ export function ColumnManagerModal({ open, onOpenChange, columnManager }: Column
 
             {/* Visible Columns */}
             <div className="flex-1 flex flex-col min-h-0">
-              <div className="flex items-center gap-2 mb-4">
-                <h3 className="font-semibold text-base">Visible Columns</h3>
-                <Badge variant="secondary" className="text-xs">
+              <div className="flex items-center gap-3 mb-6">
+                <h3 className="font-bold text-lg">Visible Columns</h3>
+                <Badge variant="default" className="text-sm px-3 py-1 font-semibold">
                   {visibleColumns.length}
                 </Badge>
               </div>
@@ -189,10 +197,10 @@ export function ColumnManagerModal({ open, onOpenChange, columnManager }: Column
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                     className={`
-                      flex-1 space-y-2 p-4 rounded-lg border-2 border-dashed min-h-32 overflow-y-auto
+                      flex-1 space-y-3 p-6 rounded-xl border-2 border-dashed min-h-96 overflow-y-auto transition-all
                       ${snapshot.isDraggingOver 
-                        ? 'border-primary bg-primary/5' 
-                        : 'border-muted-foreground/25 bg-muted/20'
+                        ? 'border-primary/50 bg-primary/5 shadow-inner' 
+                        : 'border-primary/30 bg-primary/5 hover:bg-primary/10'
                       }
                     `}
                   >
@@ -201,7 +209,7 @@ export function ColumnManagerModal({ open, onOpenChange, columnManager }: Column
                         key={column.id} 
                         column={column} 
                         index={index}
-                        isDragDisabled={column.required}
+                        isDragDisabled={false}
                       />
                     ))}
                     {provided.placeholder}
@@ -212,25 +220,30 @@ export function ColumnManagerModal({ open, onOpenChange, columnManager }: Column
           </div>
         </DragDropContext>
 
-        <div className="flex-shrink-0 border-t pt-4">
+        <div className="flex-shrink-0 border-t pt-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-6 text-sm">
               <div className="flex items-center gap-2">
                 {getColumnTypeBadge('system')}
-                <span>Essential system columns</span>
+                <span className="text-muted-foreground">Essential system columns</span>
               </div>
               <div className="flex items-center gap-2">
                 {getColumnTypeBadge('default')}
-                <span>Standard columns</span>
+                <span className="text-muted-foreground">Standard columns</span>
               </div>
               <div className="flex items-center gap-2">
                 {getColumnTypeBadge('custom')}
-                <span>Custom user columns</span>
+                <span className="text-muted-foreground">Custom user columns</span>
               </div>
             </div>
-            <Button onClick={() => onOpenChange(false)}>
-              Done
-            </Button>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => onOpenChange(false)}>
+                Apply Changes
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>

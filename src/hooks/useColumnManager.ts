@@ -150,10 +150,8 @@ export function useColumnManager(): UseColumnManagerReturn {
       // Remove from source
       const [movedColumn] = sourceArray.splice(sourceIndex, 1);
       
-      // Don't allow moving required columns to hidden
-      if (destinationList === 'hidden' && movedColumn.required) {
-        return prev;
-      }
+      // Allow moving all columns, but system required ones will show a warning in UI
+      // Business logic can be handled at the API level
       
       // Update visibility
       movedColumn.visible = destinationList === 'visible';
