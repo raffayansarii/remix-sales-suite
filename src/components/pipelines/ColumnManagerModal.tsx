@@ -61,17 +61,17 @@ function ColumnItem({ column, index, isDragDisabled = false }: ColumnItemProps) 
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
+          {...provided.dragHandleProps}
           className={`
             p-4 rounded-lg border-2 transition-all duration-200 bg-card hover:shadow-md
             ${getColumnTypeStyles(column.type)}
             ${snapshot.isDragging ? 'shadow-xl scale-105 rotate-2 z-50' : 'shadow-sm'}
-            ${isDragDisabled ? 'opacity-60 cursor-not-allowed' : 'cursor-move hover:border-primary/40'}
+            ${isDragDisabled ? 'opacity-60 cursor-not-allowed' : 'cursor-grab active:cursor-grabbing hover:border-primary/40'}
           `}
         >
           <div className="flex items-center gap-3">
             <div
-              {...provided.dragHandleProps}
-              className={`p-1 rounded hover:bg-muted/50 ${isDragDisabled ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'}`}
+              className="p-1 rounded"
             >
               <GripVertical className="h-4 w-4 text-muted-foreground" />
             </div>
