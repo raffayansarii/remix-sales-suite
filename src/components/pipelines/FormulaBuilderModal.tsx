@@ -42,6 +42,7 @@ const operators = [
 ];
 
 export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: FormulaBuilderModalProps) {
+  console.log('FormulaBuilderModal rendering - using React Flow, not DragDropContext');
   const [columnName, setColumnName] = useState('');
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
