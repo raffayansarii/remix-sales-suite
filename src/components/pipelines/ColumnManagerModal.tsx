@@ -62,6 +62,9 @@ function ColumnItem({ column, index, isDragDisabled = false }: ColumnItemProps) 
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
+          style={{
+            ...provided.draggableProps.style,
+          }}
           className={`
             p-4 rounded-lg border-2 transition-all duration-200 bg-card hover:shadow-md
             ${getColumnTypeStyles(column.type)}

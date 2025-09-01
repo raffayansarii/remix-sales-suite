@@ -17,16 +17,10 @@ export function KanbanCard({ opportunity, index }: KanbanCardProps) {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          style={{
-            ...provided.draggableProps.style,
-            ...(snapshot.isDragging && {
-              transform: provided.draggableProps.style?.transform,
-            })
-          }}
         >
           <Card 
             className={`cursor-pointer hover:shadow-md transition-shadow bg-background select-none ${
-              snapshot.isDragging ? 'shadow-xl opacity-90' : ''
+              snapshot.isDragging ? 'rotate-3 shadow-lg' : ''
             }`}
           >
             <CardHeader className="pb-3">
