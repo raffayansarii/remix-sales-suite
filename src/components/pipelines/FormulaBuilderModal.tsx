@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { ReactFlow, useNodesState, useEdgesState, addEdge, Connection, Node, Edge, Controls, Background } from '@xyflow/react';
-import { Plus, Minus, DivideIcon as Divide, Asterisk, Calculator, Trash2, ParenthesesIcon as Parentheses } from 'lucide-react';
+import { ReactFlow, useNodesState, useEdgesState, addEdge, Connection, Node, Edge, Controls, Background, Handle, Position, NodeProps } from '@xyflow/react';
+import { Plus, Minus, DivideIcon as Divide, Asterisk, Calculator, Trash2, ParenthesesIcon as Parentheses, X } from 'lucide-react';
 import '@xyflow/react/dist/style.css';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,15 @@ interface AvailableColumn {
   id: string;
   name: string;
   type: 'system' | 'default' | 'custom';
+}
+
+interface NodeData extends Record<string, unknown> {
+  label: string;
+  value: string;
+  nodeType: 'column' | 'operator' | 'number';
+  columnType?: string;
+  onDelete?: (id: string) => void;
+  onUpdate?: (id: string, value: string) => void;
 }
 
 interface FormulaBuilderModalProps {
@@ -37,95 +46,207 @@ const operators = [
   { id: 'subtract', symbol: '-', icon: Minus, label: 'Subtract' },
   { id: 'multiply', symbol: '*', icon: Asterisk, label: 'Multiply' },
   { id: 'divide', symbol: '/', icon: Divide, label: 'Divide' },
-  { id: 'open-bracket', symbol: '(', icon: Parentheses, label: 'Open' },
-  { id: 'close-bracket', symbol: ')', icon: Parentheses, label: 'Close' },
 ];
 
+// Custom Node Components
+function ColumnNode({ data, id }: { data: NodeData; id: string }) {
+  return (
+    <div className="relative bg-blue-50 border-2 border-blue-200 rounded-lg p-3 min-w-32 text-center">
+      <Handle type="source" position={Position.Right} className="w-3 h-3" />
+      <Handle type="target" position={Position.Left} className="w-3 h-3" />
+      <button
+        onClick={() => data.onDelete?.(id)}
+        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 text-xs"
+      >
+        <X className="w-3 h-3" />
+      </button>
+      <div className="text-sm font-medium text-blue-800">{data.label}</div>
+      <div className="text-xs text-blue-600">{data.columnType}</div>
+    </div>
+  );
+}
+
+function OperatorNode({ data, id }: { data: NodeData; id: string }) {
+  return (
+    <div className="relative bg-purple-50 border-2 border-purple-200 rounded-full w-16 h-16 flex items-center justify-center">
+      <Handle type="source" position={Position.Right} className="w-3 h-3" />
+      <Handle type="target" position={Position.Left} className="w-3 h-3" />
+      <button
+        onClick={() => data.onDelete?.(id)}
+        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 text-xs"
+      >
+        <X className="w-3 h-3" />
+      </button>
+      <div className="text-lg font-bold text-purple-800">{data.value}</div>
+    </div>
+  );
+}
+
+function NumberNode({ data, id }: { data: NodeData; id: string }) {
+  return (
+    <div className="relative bg-green-50 border-2 border-green-200 rounded-lg p-3 min-w-20 text-center">
+      <Handle type="source" position={Position.Right} className="w-3 h-3" />
+      <Handle type="target" position={Position.Left} className="w-3 h-3" />
+      <button
+        onClick={() => data.onDelete?.(id)}
+        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 text-xs"
+      >
+        <X className="w-3 h-3" />
+      </button>
+      <input
+        type="number"
+        value={data.value}
+        onChange={(e) => data.onUpdate?.(id, e.target.value)}
+        className="w-full bg-transparent border-none text-center text-sm font-medium text-green-800 focus:outline-none"
+        onClick={(e) => e.stopPropagation()}
+      />
+    </div>
+  );
+}
+
+const nodeTypes = {
+  column: ColumnNode,
+  operator: OperatorNode,
+  number: NumberNode,
+};
+
 export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: FormulaBuilderModalProps) {
-  console.log('FormulaBuilderModal rendering - using React Flow, not DragDropContext');
   const [columnName, setColumnName] = useState('');
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
+  const deleteNode = useCallback((nodeId: string) => {
+    setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+    setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
+  }, [setNodes, setEdges]);
+
+  const updateNodeValue = useCallback((nodeId: string, value: string) => {
+    setNodes((nds) => nds.map((node) => 
+      node.id === nodeId 
+        ? { ...node, data: { ...node.data, value } }
+        : node
+    ));
+  }, [setNodes]);
+
+  const isValidConnection = useCallback((connection: Connection) => {
+    if (!connection.source || !connection.target) return false;
+    
+    const sourceNode = nodes.find(node => node.id === connection.source);
+    const targetNode = nodes.find(node => node.id === connection.target);
+    
+    if (!sourceNode || !targetNode) return false;
+    
+    const sourceType = sourceNode.data.nodeType;
+    const targetType = targetNode.data.nodeType;
+    
+    // Allow connections: column -> operator, operator -> column, number -> operator, operator -> number
+    const validConnections = [
+      (sourceType === 'column' && targetType === 'operator'),
+      (sourceType === 'operator' && targetType === 'column'),
+      (sourceType === 'number' && targetType === 'operator'),
+      (sourceType === 'operator' && targetType === 'number'),
+    ];
+    
+    return validConnections.some(Boolean);
+  }, [nodes]);
+
   const onConnect = useCallback((params: Connection) => {
-    setEdges((eds) => addEdge(params, eds));
-  }, [setEdges]);
+    if (isValidConnection(params)) {
+      setEdges((eds) => addEdge(params, eds));
+    }
+  }, [setEdges, isValidConnection]);
 
   const addColumnNode = useCallback((column: AvailableColumn) => {
-    const newNode: Node = {
+    const newNode: Node<NodeData> = {
       id: `column-${column.id}-${Date.now()}`,
-      type: 'default',
+      type: 'column',
       position: { x: Math.random() * 400 + 100, y: Math.random() * 300 + 100 },
       data: { 
         label: column.name,
         value: column.id,
         nodeType: 'column',
-        columnType: column.type
-      },
-      style: { 
-        backgroundColor: getColumnTypeColor(column.type),
-        border: '2px solid',
-        borderColor: getColumnTypeBorderColor(column.type),
+        columnType: column.type,
+        onDelete: deleteNode
       },
     };
     setNodes((nds) => [...nds, newNode]);
-  }, [setNodes]);
+  }, [setNodes, deleteNode]);
 
   const addOperatorNode = useCallback((operator: typeof operators[0]) => {
-    const newNode: Node = {
+    const newNode: Node<NodeData> = {
       id: `operator-${operator.id}-${Date.now()}`,
-      type: 'default',
+      type: 'operator',
       position: { x: Math.random() * 400 + 100, y: Math.random() * 300 + 100 },
       data: { 
         label: operator.symbol,
         value: operator.symbol,
-        nodeType: 'operator'
-      },
-      style: { 
-        backgroundColor: operator.id.includes('bracket') ? '#fef3c7' : '#f3e8ff',
-        border: '2px solid',
-        borderColor: operator.id.includes('bracket') ? '#f59e0b' : '#8b5cf6',
-        minWidth: 50,
+        nodeType: 'operator',
+        onDelete: deleteNode
       },
     };
     setNodes((nds) => [...nds, newNode]);
-  }, [setNodes]);
+  }, [setNodes, deleteNode]);
 
   const addNumberNode = useCallback(() => {
-    const newNode: Node = {
+    const newNode: Node<NodeData> = {
       id: `number-${Date.now()}`,
-      type: 'default',
+      type: 'number',
       position: { x: Math.random() * 400 + 100, y: Math.random() * 300 + 100 },
       data: { 
         label: '0',
         value: '0',
-        nodeType: 'number'
-      },
-      style: { 
-        backgroundColor: '#dcfce7',
-        border: '2px solid #16a34a',
+        nodeType: 'number',
+        onDelete: deleteNode,
+        onUpdate: updateNodeValue
       },
     };
     setNodes((nds) => [...nds, newNode]);
-  }, [setNodes]);
+  }, [setNodes, deleteNode, updateNodeValue]);
 
-  const getColumnTypeColor = (type: string) => {
-    switch (type) {
-      case 'system': return '#fef2f2';
-      case 'default': return '#eff6ff';
-      case 'custom': return '#f0fdf4';
-      default: return '#f9fafb';
+  // Generate formula by traversing the connected graph
+  const generateFormulaFromGraph = useCallback(() => {
+    if (nodes.length === 0) return '';
+    
+    // Find nodes with no incoming edges (start nodes)
+    const nodeConnections = edges.reduce((acc, edge) => {
+      acc[edge.target] = edge.source;
+      return acc;
+    }, {} as Record<string, string>);
+    
+    const startNodes = nodes.filter(node => !nodeConnections[node.id]);
+    
+    if (startNodes.length === 0) {
+      // If no start node found, just list nodes
+      return nodes.map(node => {
+        if (node.data.nodeType === 'column') return `[${node.data.label}]`;
+        return node.data.value;
+      }).join(' ');
     }
-  };
-
-  const getColumnTypeBorderColor = (type: string) => {
-    switch (type) {
-      case 'system': return '#dc2626';
-      case 'default': return '#2563eb';
-      case 'custom': return '#16a34a';
-      default: return '#6b7280';
-    }
-  };
+    
+    // Traverse from start node following connections
+    const traverseNode = (nodeId: string, visited = new Set()): string => {
+      if (visited.has(nodeId)) return '';
+      visited.add(nodeId);
+      
+      const node = nodes.find(n => n.id === nodeId);
+      if (!node) return '';
+      
+      let result = node.data.nodeType === 'column' ? `[${node.data.label}]` : node.data.value;
+      
+      // Find connected nodes
+      const connectedEdges = edges.filter(edge => edge.source === nodeId);
+      if (connectedEdges.length > 0) {
+        const nextResults = connectedEdges.map(edge => traverseNode(edge.target, visited)).filter(Boolean);
+        if (nextResults.length > 0) {
+          result += ' ' + nextResults.join(' ');
+        }
+      }
+      
+      return result;
+    };
+    
+    return startNodes.map(node => traverseNode(node.id)).filter(Boolean).join(' ');
+  }, [nodes, edges]);
 
   const clearCanvas = useCallback(() => {
     setNodes([]);
@@ -135,11 +256,8 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
   const handleCreate = () => {
     if (!columnName.trim() || nodes.length === 0) return;
     
-    // Convert nodes and edges to formula string
-    const formulaString = nodes.map(node => {
-      if (node.data.nodeType === 'column') return `[${node.data.label}]`;
-      return node.data.value;
-    }).join(' ');
+    // Generate formula from connected graph
+    const formulaString = generateFormulaFromGraph();
 
     // Console log the result for debugging
     console.log('Formula creation result:', {
@@ -148,7 +266,8 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
       nodes: nodes.map(n => ({ id: n.id, type: n.data.nodeType, value: n.data.value, label: n.data.label })),
       edges: edges.map(e => ({ source: e.source, target: e.target })),
       rawNodes: nodes,
-      rawEdges: edges
+      rawEdges: edges,
+      generatedFormula: formulaString
     });
 
     onCreateColumn({
@@ -274,6 +393,8 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                   onNodesChange={onNodesChange}
                   onEdgesChange={onEdgesChange}
                   onConnect={onConnect}
+                  nodeTypes={nodeTypes}
+                  isValidConnection={isValidConnection}
                   fitView
                   className="rounded-xl"
                   style={{ backgroundColor: 'transparent' }}
@@ -291,17 +412,7 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                     Formula Preview:
                   </Label>
                   <div className="mt-2 p-3 bg-background/80 rounded-lg border font-mono text-sm leading-relaxed">
-                    {nodes.map((node, index) => (
-                      <span key={node.id} className={
-                        node.data.nodeType === 'column' ? 'text-blue-700 font-semibold' :
-                        node.data.nodeType === 'operator' ? (
-                          node.data.value === '(' || node.data.value === ')' ? 'text-amber-700 font-bold' : 'text-purple-700 font-bold'
-                        ) : 'text-green-700 font-semibold'
-                      }>
-                        {node.data.nodeType === 'column' ? `[${node.data.label}]` : node.data.value}
-                        {index < nodes.length - 1 ? ' ' : ''}
-                      </span>
-                    ))}
+                    {generateFormulaFromGraph() || 'Connect nodes to create formula...'}
                   </div>
                 </div>
               )}
