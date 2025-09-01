@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { X, Plus, Minus, DivideIcon as Divide, Asterisk, Calculator, Trash2 } from 'lucide-react';
+import { X, Plus, Minus, DivideIcon as Divide, Asterisk, Calculator, Trash2, ParenthesesIcon as Parentheses } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +42,8 @@ const operators = [
   { id: 'subtract', symbol: '-', icon: Minus, label: 'Subtract' },
   { id: 'multiply', symbol: '*', icon: Asterisk, label: 'Multiply' },
   { id: 'divide', symbol: '/', icon: Divide, label: 'Divide' },
+  { id: 'open-bracket', symbol: '(', icon: Parentheses, label: 'Open' },
+  { id: 'close-bracket', symbol: ')', icon: Parentheses, label: 'Close' },
 ];
 
 export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: FormulaBuilderModalProps) {
@@ -86,7 +88,7 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
     }
 
     // Dragging from operators to canvas
-    if (source.droppableId === 'operators' && destination.droppableId === 'formula-canvas') {
+    if ((source.droppableId === 'operators' || source.droppableId === 'brackets') && destination.droppableId === 'formula-canvas') {
       const operatorId = result.draggableId;
       const operator = operators.find(op => op.id === operatorId);
       
@@ -224,11 +226,11 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
 
                 {/* Operators */}
                 <div className="space-y-3">
-                  <h3 className="font-medium text-sm">Operators</h3>
+                  <h3 className="font-medium text-sm">Operators & Brackets</h3>
                   <Droppable droppableId="operators" isDropDisabled={true}>
                     {(provided) => (
                       <div ref={provided.innerRef} {...provided.droppableProps} className="grid grid-cols-2 gap-2">
-                        {operators.map((operator, index) => (
+                        {operators.slice(0, 4).map((operator, index) => (
                           <Draggable key={operator.id} draggableId={operator.id} index={index}>
                             {(provided, snapshot) => (
                               <div
@@ -238,12 +240,12 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                                 className={`
                                   p-3 rounded-lg border-2 cursor-grab active:cursor-grabbing 
                                   bg-purple-50 border-purple-200 text-purple-800 hover:bg-purple-100
-                                  flex items-center gap-2 text-sm font-medium transition-all
+                                  flex items-center justify-center gap-2 text-sm font-medium transition-all
                                   ${snapshot.isDragging ? 'shadow-lg scale-105 rotate-1 z-50' : 'shadow-sm'}
                                 `}
                               >
                                 <operator.icon className="w-4 h-4" />
-                                {operator.symbol}
+                                <span className="font-bold text-lg">{operator.symbol}</span>
                               </div>
                             )}
                           </Draggable>
@@ -252,6 +254,38 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                       </div>
                     )}
                   </Droppable>
+                  
+                  {/* Brackets */}
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-xs text-muted-foreground">Brackets</h4>
+                    <Droppable droppableId="brackets" isDropDisabled={true}>
+                      {(provided) => (
+                        <div ref={provided.innerRef} {...provided.droppableProps} className="grid grid-cols-2 gap-2">
+                          {operators.slice(4).map((operator, index) => (
+                            <Draggable key={operator.id} draggableId={operator.id} index={index + 4}>
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className={`
+                                    p-3 rounded-lg border-2 cursor-grab active:cursor-grabbing 
+                                    bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100
+                                    flex items-center justify-center gap-2 text-sm font-medium transition-all
+                                    ${snapshot.isDragging ? 'shadow-lg scale-105 rotate-1 z-50' : 'shadow-sm'}
+                                  `}
+                                >
+                                  <span className="font-bold text-xl">{operator.symbol}</span>
+                                  <span className="text-xs">{operator.label}</span>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </div>
                 </div>
 
                 {/* Add Number Button */}
@@ -278,64 +312,93 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                         ref={provided.innerRef}
                         {...provided.droppableProps}
                         className={`
-                          min-h-40 p-4 border-2 border-dashed rounded-lg transition-colors
-                          ${snapshot.isDraggingOver ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'}
+                          min-h-48 p-6 border-2 rounded-xl transition-all duration-300 
+                          ${snapshot.isDraggingOver 
+                            ? 'border-primary bg-gradient-to-br from-primary/5 to-primary/10 shadow-inner' 
+                            : 'border-dashed border-muted-foreground/30 bg-gradient-to-br from-muted/20 to-muted/5'
+                          }
                           ${formula.length === 0 ? 'flex items-center justify-center' : 'space-y-3'}
                         `}
                       >
                         {formula.length === 0 ? (
-                          <p className="text-muted-foreground text-sm">
-                            Drag columns, operators, and numbers here to build your formula
-                          </p>
+                          <div className="text-center space-y-2">
+                            <Calculator className="w-12 h-12 mx-auto text-muted-foreground/50" />
+                            <p className="text-muted-foreground text-sm font-medium">
+                              Build Your Formula
+                            </p>
+                            <p className="text-muted-foreground/70 text-xs">
+                              Drag columns, operators, brackets, and numbers here
+                            </p>
+                          </div>
                         ) : (
-                          formula.map((element, index) => (
-                            <Draggable key={element.id} draggableId={element.id} index={index}>
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className={`
-                                    group flex items-center gap-3 p-3 bg-background border rounded-lg
-                                    ${snapshot.isDragging ? 'shadow-lg scale-105 rotate-1 z-50' : 'shadow-sm'}
-                                  `}
-                                >
-                                  <div className="flex-1 flex items-center gap-2">
-                                    {element.type === 'column' && (
-                                      <Badge variant="outline" className={getColumnTypeStyles('default')}>
-                                        {element.label}
-                                      </Badge>
-                                    )}
-                                    {element.type === 'operator' && (
-                                      <Badge variant="outline" className="bg-purple-50 border-purple-200 text-purple-800">
-                                        {element.value} {element.label}
-                                      </Badge>
-                                    )}
-                                    {element.type === 'number' && (
-                                      <Input
-                                        type="number"
-                                        value={element.value}
-                                        onChange={(e) => updateNumber(element.id, e.target.value)}
-                                        className="w-24"
-                                        onClick={(e) => e.stopPropagation()}
-                                      />
-                                    )}
-                                  </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      removeElement(element.id);
-                                    }}
-                                    className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                          <div className="space-y-2">
+                            {formula.map((element, index) => (
+                              <Draggable key={element.id} draggableId={element.id} index={index}>
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    className={`
+                                      group relative flex items-center gap-3 p-3 rounded-lg transition-all duration-200
+                                      ${snapshot.isDragging 
+                                        ? 'shadow-xl scale-105 rotate-1 z-50 bg-background border-2 border-primary' 
+                                        : 'bg-background/80 backdrop-blur-sm border border-border/60 hover:border-primary/40 hover:shadow-md'
+                                      }
+                                    `}
                                   >
-                                    <X className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              )}
-                            </Draggable>
-                          ))
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-primary/60 to-primary/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    
+                                    <div className="flex-1 flex items-center gap-2 ml-2">
+                                      {element.type === 'column' && (
+                                        <Badge variant="outline" className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 text-blue-800 font-medium">
+                                          <span className="text-xs">📊</span>
+                                          <span className="ml-1">{element.label}</span>
+                                        </Badge>
+                                      )}
+                                      {element.type === 'operator' && (
+                                        <Badge variant="outline" className={`font-bold ${
+                                          element.value === '(' || element.value === ')' 
+                                            ? 'bg-gradient-to-r from-amber-50 to-amber-100 border-amber-200 text-amber-800' 
+                                            : 'bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 text-purple-800'
+                                        }`}>
+                                          <span className="text-lg">{element.value}</span>
+                                          {element.label && element.value !== '(' && element.value !== ')' && (
+                                            <span className="ml-1 text-xs font-normal">{element.label}</span>
+                                          )}
+                                        </Badge>
+                                      )}
+                                      {element.type === 'number' && (
+                                        <div className="flex items-center gap-2">
+                                          <Badge variant="outline" className="bg-gradient-to-r from-green-50 to-green-100 border-green-200 text-green-800">
+                                            <span className="text-xs">🔢</span>
+                                          </Badge>
+                                          <Input
+                                            type="number"
+                                            value={element.value}
+                                            onChange={(e) => updateNumber(element.id, e.target.value)}
+                                            className="w-20 h-8 text-sm font-mono bg-background/50"
+                                            onClick={(e) => e.stopPropagation()}
+                                          />
+                                        </div>
+                                      )}
+                                    </div>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        removeElement(element.id);
+                                      }}
+                                      className="opacity-0 group-hover:opacity-100 transition-all duration-200 text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                          </div>
                         )}
                         {provided.placeholder}
                       </div>
@@ -345,14 +408,24 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
 
                 {/* Formula Preview */}
                 {formula.length > 0 && (
-                  <div className="mt-4 p-3 bg-muted rounded-lg">
-                    <Label className="text-xs font-medium text-muted-foreground">Formula Preview:</Label>
-                    <p className="text-sm font-mono mt-1">
-                      {formula.map(element => {
-                        if (element.type === 'column') return `[${element.label}]`;
-                        return element.value;
-                      }).join(' ')}
-                    </p>
+                  <div className="mt-4 p-4 bg-gradient-to-r from-muted/50 to-muted/30 rounded-xl border border-border/50">
+                    <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
+                      <Calculator className="w-3 h-3" />
+                      Formula Preview:
+                    </Label>
+                    <div className="mt-2 p-3 bg-background/80 rounded-lg border font-mono text-sm leading-relaxed">
+                      {formula.map((element, index) => (
+                        <span key={element.id} className={
+                          element.type === 'column' ? 'text-blue-700 font-semibold' :
+                          element.type === 'operator' ? (
+                            element.value === '(' || element.value === ')' ? 'text-amber-700 font-bold' : 'text-purple-700 font-bold'
+                          ) : 'text-green-700 font-semibold'
+                        }>
+                          {element.type === 'column' ? `[${element.label}]` : element.value}
+                          {index < formula.length - 1 && element.type !== 'operator' && formula[index + 1]?.type !== 'operator' ? ' ' : ''}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
