@@ -65,15 +65,9 @@ function ColumnItem({ column, index, isDragDisabled = false }: ColumnItemProps) 
           className={`
             p-4 rounded-lg border-2 transition-all duration-200 bg-card hover:shadow-md
             ${getColumnTypeStyles(column.type)}
-            ${snapshot.isDragging ? 'shadow-xl z-[9999] bg-background border-primary !fixed !transform-none' : 'shadow-sm'}
+            ${snapshot.isDragging ? 'shadow-xl z-[9999] bg-background border-primary' : 'shadow-sm'}
             ${isDragDisabled ? 'opacity-60 cursor-not-allowed' : 'cursor-grab active:cursor-grabbing hover:border-primary/40'}
           `}
-          style={snapshot.isDragging ? {
-            position: 'fixed',
-            transform: 'none',
-            zIndex: 9999,
-            pointerEvents: 'none'
-          } : undefined}
         >
           <div className="flex items-center gap-3">
             <div
@@ -124,7 +118,7 @@ export function ColumnManagerModal({ open, onOpenChange, columnManager }: Column
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[85vh] overflow-hidden flex flex-col" style={{ transform: 'none' }}>
+      <DialogContent className="max-w-6xl max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0 pb-6 border-b">
           <div className="flex items-center justify-between">
             <div>

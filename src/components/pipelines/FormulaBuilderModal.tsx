@@ -163,7 +163,7 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl h-[90vh] flex flex-col" style={{ transform: 'none' }}>
+      <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calculator className="w-5 h-5" />
@@ -203,21 +203,15 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
-                                  className={`
-                                    px-2 py-1 rounded border cursor-grab active:cursor-grabbing 
-                                    ${operator.id.includes('bracket') 
-                                      ? 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100' 
-                                      : 'bg-purple-50 border-purple-200 text-purple-800 hover:bg-purple-100'
-                                    }
-                                    flex items-center gap-1 text-xs font-medium transition-all
-                                    ${snapshot.isDragging ? 'shadow-lg z-[9999] bg-background border-primary !fixed !transform-none' : 'shadow-sm'}
-                                  `}
-                                  style={snapshot.isDragging ? {
-                                    position: 'fixed',
-                                    transform: 'none',
-                                    zIndex: 9999,
-                                    pointerEvents: 'none'
-                                  } : undefined}
+                                   className={`
+                                     px-2 py-1 rounded border cursor-grab active:cursor-grabbing 
+                                     ${operator.id.includes('bracket') 
+                                       ? 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100' 
+                                       : 'bg-purple-50 border-purple-200 text-purple-800 hover:bg-purple-100'
+                                     }
+                                     flex items-center gap-1 text-xs font-medium transition-all
+                                     ${snapshot.isDragging ? 'shadow-lg z-[9999] bg-background border-primary' : 'shadow-sm'}
+                                   `}
                                 >
                                   {!operator.id.includes('bracket') && <operator.icon className="w-3 h-3" />}
                                   <span className={operator.id.includes('bracket') ? 'text-sm font-bold' : 'font-bold'}>
@@ -248,17 +242,11 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
-                                  className={`
-                                    p-3 rounded-lg border-2 cursor-grab active:cursor-grabbing text-sm font-medium transition-all
-                                    ${getColumnTypeStyles(column.type)}
-                                    ${snapshot.isDragging ? 'shadow-lg z-[9999] bg-background border-primary !fixed !transform-none' : 'shadow-sm'}
-                                  `}
-                                  style={snapshot.isDragging ? {
-                                    position: 'fixed',
-                                    transform: 'none',
-                                    zIndex: 9999,
-                                    pointerEvents: 'none'
-                                  } : undefined}
+                                   className={`
+                                     p-3 rounded-lg border-2 cursor-grab active:cursor-grabbing text-sm font-medium transition-all
+                                     ${getColumnTypeStyles(column.type)}
+                                     ${snapshot.isDragging ? 'shadow-lg z-[9999] bg-background border-primary' : 'shadow-sm'}
+                                   `}
                                 >
                                   {column.name}
                                   <Badge variant="outline" className="ml-2 text-xs">
@@ -326,19 +314,13 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
-                                    className={`
-                                      group relative flex items-center gap-3 p-3 rounded-lg transition-all duration-200
-                                       ${snapshot.isDragging 
-                                         ? 'shadow-xl z-[9999] bg-background border-2 border-primary !fixed !transform-none' 
-                                         : 'bg-background/80 backdrop-blur-sm border border-border/60 hover:border-primary/40 hover:shadow-md'
-                                       }
-                                    `}
-                                    style={snapshot.isDragging ? {
-                                      position: 'fixed',
-                                      transform: 'none',
-                                      zIndex: 9999,
-                                      pointerEvents: 'none'
-                                    } : undefined}
+                                     className={`
+                                       group relative flex items-center gap-3 p-3 rounded-lg transition-all duration-200
+                                        ${snapshot.isDragging 
+                                          ? 'shadow-xl z-[9999] bg-background border-2 border-primary' 
+                                          : 'bg-background/80 backdrop-blur-sm border border-border/60 hover:border-primary/40 hover:shadow-md'
+                                        }
+                                     `}
                                   >
                                     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-primary/60 to-primary/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
                                     
