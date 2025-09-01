@@ -46,6 +46,8 @@ const operators = [
   { id: 'subtract', symbol: '-', icon: Minus, label: 'Subtract' },
   { id: 'multiply', symbol: '*', icon: Asterisk, label: 'Multiply' },
   { id: 'divide', symbol: '/', icon: Divide, label: 'Divide' },
+  { id: 'bracket-open', symbol: '(', icon: Parentheses, label: 'Open Bracket' },
+  { id: 'bracket-close', symbol: ')', icon: Parentheses, label: 'Close Bracket' },
 ];
 
 // Custom Node Components
@@ -342,7 +344,7 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
               {/* Available Columns - Only Number Types */}
               <div className="space-y-3 flex-1 min-h-0">
                 <h3 className="font-medium text-sm">Available Number Columns</h3>
-                <ScrollArea className="flex-1 border rounded-lg">
+                <ScrollArea className="flex-1 border rounded-lg overflow-y-auto">
                   <div className="space-y-2 p-2">
                     {mockColumns.map((column) => (
                       <Button
