@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { X, Plus, Minus, DivideIcon as Divide, Asterisk, Calculator, Trash2, ParenthesesIcon as Parentheses } from 'lucide-react';
+import { X, Plus, Minus, DivideIcon as Divide, Asterisk, Calculator, Trash2, ParenthesesIcon as Parentheses, GripVertical } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -239,20 +239,27 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                             <Draggable key={column.id} draggableId={column.id} index={index}>
                               {(provided, snapshot) => (
                                 <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                   className={`
-                                     p-3 rounded-lg border-2 cursor-grab active:cursor-grabbing text-sm font-medium transition-all
-                                     ${getColumnTypeStyles(column.type)}
-                                     ${snapshot.isDragging ? 'shadow-lg z-[9999] bg-background border-primary' : 'shadow-sm'}
-                                   `}
-                                >
-                                  {column.name}
-                                  <Badge variant="outline" className="ml-2 text-xs">
-                                    {column.type}
-                                  </Badge>
-                                </div>
+                                   ref={provided.innerRef}
+                                   {...provided.draggableProps}
+                                   className="relative flex items-center gap-2"
+                                 >
+                                   <div
+                                     {...provided.dragHandleProps}
+                                     className="cursor-grab active:cursor-grabbing"
+                                   >
+                                     <GripVertical className="w-3 h-3 text-muted-foreground" />
+                                   </div>
+                                   <div className={`
+                                      p-3 rounded-lg border-2 text-sm font-medium transition-all flex items-center gap-2
+                                      ${getColumnTypeStyles(column.type)}
+                                      ${snapshot.isDragging ? 'shadow-lg z-[9999] bg-background border-primary' : 'shadow-sm'}
+                                    `}>
+                                     {column.name}
+                                     <Badge variant="outline" className="text-xs">
+                                       {column.type}
+                                     </Badge>
+                                   </div>
+                                 </div>
                               )}
                             </Draggable>
                           ))}
@@ -311,20 +318,25 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                               <Draggable key={element.id} draggableId={element.id} index={index}>
                                 {(provided, snapshot) => (
                                   <div
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
+                                     ref={provided.innerRef}
+                                     {...provided.draggableProps}
                                      className={`
-                                       group relative flex items-center gap-3 p-3 rounded-lg transition-all duration-200
-                                        ${snapshot.isDragging 
-                                          ? 'shadow-xl z-[9999] bg-background border-2 border-primary' 
-                                          : 'bg-background/80 backdrop-blur-sm border border-border/60 hover:border-primary/40 hover:shadow-md'
-                                        }
-                                     `}
-                                  >
-                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-primary/60 to-primary/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    
-                                    <div className="flex-1 flex items-center gap-2 ml-2">
+                                        group relative flex items-center gap-3 p-3 rounded-lg transition-all duration-200
+                                         ${snapshot.isDragging 
+                                           ? 'shadow-xl z-[9999] bg-background border-2 border-primary' 
+                                           : 'bg-background/80 backdrop-blur-sm border border-border/60 hover:border-primary/40 hover:shadow-md'
+                                         }
+                                      `}
+                                   >
+                                     <div
+                                       {...provided.dragHandleProps}
+                                       className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted/50 rounded"
+                                     >
+                                       <GripVertical className="w-3 h-3 text-muted-foreground" />
+                                     </div>
+                                     <div className="absolute left-6 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-primary/60 to-primary/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                                     
+                                     <div className="flex-1 flex items-center gap-2 ml-2">
                                       {element.type === 'column' && (
                                         <Badge variant="outline" className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 text-blue-800 font-medium">
                                           <span className="text-xs">📊</span>

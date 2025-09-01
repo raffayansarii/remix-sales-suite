@@ -61,7 +61,6 @@ function ColumnItem({ column, index, isDragDisabled = false }: ColumnItemProps) 
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          {...provided.dragHandleProps}
           style={{
             ...provided.draggableProps.style,
           }}
@@ -69,12 +68,13 @@ function ColumnItem({ column, index, isDragDisabled = false }: ColumnItemProps) 
             p-4 rounded-lg border-2 transition-all duration-200 bg-card hover:shadow-md
             ${getColumnTypeStyles(column.type)}
             ${snapshot.isDragging ? 'shadow-xl z-[9999] bg-background border-primary' : 'shadow-sm'}
-            ${isDragDisabled ? 'opacity-60 cursor-not-allowed' : 'cursor-grab active:cursor-grabbing hover:border-primary/40'}
+            ${isDragDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:border-primary/40'}
           `}
         >
           <div className="flex items-center gap-3">
             <div
-              className="p-1 rounded"
+              {...provided.dragHandleProps}
+              className="p-1 rounded cursor-grab active:cursor-grabbing hover:bg-muted/80"
             >
               <GripVertical className="h-4 w-4 text-muted-foreground" />
             </div>
