@@ -19,7 +19,7 @@ interface AvailableColumn {
 interface NodeData extends Record<string, unknown> {
   label: string;
   value: string;
-  nodeType: 'column' | 'operator' | 'number';
+  nodeType: 'column' | 'operator' | 'number' | 'bracket';
   columnType?: string;
   onDelete?: (id: string) => void;
   onUpdate?: (id: string, value: string) => void;
@@ -106,10 +106,27 @@ function NumberNode({ data, id }: { data: NodeData; id: string }) {
   );
 }
 
+function BracketNode({ data, id }: { data: NodeData; id: string }) {
+  return (
+    <div className="relative bg-amber-50 border-2 border-amber-200 rounded-lg w-12 h-16 flex items-center justify-center">
+      <Handle type="source" position={Position.Right} className="w-3 h-3" />
+      <Handle type="target" position={Position.Left} className="w-3 h-3" />
+      <button
+        onClick={() => data.onDelete?.(id)}
+        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 text-xs"
+      >
+        <X className="w-3 h-3" />
+      </button>
+      <div className="text-xl font-bold text-amber-800">{data.value}</div>
+    </div>
+  );
+}
+
 const nodeTypes = {
   column: ColumnNode,
   operator: OperatorNode,
   number: NumberNode,
+  bracket: BracketNode,
 };
 
 export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: FormulaBuilderModalProps) {
@@ -141,12 +158,19 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
     const sourceType = sourceNode.data.nodeType;
     const targetType = targetNode.data.nodeType;
     
-    // Allow connections: column -> operator, operator -> column, number -> operator, operator -> number
+    // Allow connections: 
+    // - column <-> operator
+    // - number <-> operator  
+    // - operator <-> bracket
+    // - bracket <-> bracket (for nested brackets)
     const validConnections = [
       (sourceType === 'column' && targetType === 'operator'),
       (sourceType === 'operator' && targetType === 'column'),
       (sourceType === 'number' && targetType === 'operator'),
       (sourceType === 'operator' && targetType === 'number'),
+      (sourceType === 'operator' && targetType === 'bracket'),
+      (sourceType === 'bracket' && targetType === 'operator'),
+      (sourceType === 'bracket' && targetType === 'bracket'),
     ];
     
     return validConnections.some(Boolean);
@@ -175,14 +199,15 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
   }, [setNodes, deleteNode]);
 
   const addOperatorNode = useCallback((operator: typeof operators[0]) => {
+    const nodeType = operator.id.includes('bracket') ? 'bracket' : 'operator';
     const newNode: Node<NodeData> = {
-      id: `operator-${operator.id}-${Date.now()}`,
-      type: 'operator',
+      id: `${nodeType}-${operator.id}-${Date.now()}`,
+      type: nodeType,
       position: { x: Math.random() * 400 + 100, y: Math.random() * 300 + 100 },
       data: { 
         label: operator.symbol,
         value: operator.symbol,
-        nodeType: 'operator',
+        nodeType,
         onDelete: deleteNode
       },
     };
@@ -342,9 +367,9 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
               </div>
 
               {/* Available Columns - Only Number Types */}
-              <div className="space-y-3 flex-1 min-h-0  overflow-y-auto">
+              <div className="space-y-3 flex-1 min-h-0">
                 <h3 className="font-medium text-sm">Available Number Columns</h3>
-                <ScrollArea className="flex-1 border rounded-lg">
+                <ScrollArea className="flex-1 border rounded-lg overflow-y-auto">
                   <div className="space-y-2 p-2">
                     {mockColumns.map((column) => (
                       <Button
