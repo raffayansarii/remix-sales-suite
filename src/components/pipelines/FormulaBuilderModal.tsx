@@ -210,7 +210,7 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                                       : 'bg-purple-50 border-purple-200 text-purple-800 hover:bg-purple-100'
                                     }
                                     flex items-center gap-1 text-xs font-medium transition-all
-                                    ${snapshot.isDragging ? 'shadow-lg scale-105 z-50' : 'shadow-sm'}
+                                    ${snapshot.isDragging ? 'shadow-lg z-50 bg-background border-primary' : 'shadow-sm'}
                                   `}
                                 >
                                   {!operator.id.includes('bracket') && <operator.icon className="w-3 h-3" />}
@@ -245,7 +245,7 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                                   className={`
                                     p-3 rounded-lg border-2 cursor-grab active:cursor-grabbing text-sm font-medium transition-all
                                     ${getColumnTypeStyles(column.type)}
-                                    ${snapshot.isDragging ? 'shadow-lg scale-105 rotate-1 z-50' : 'shadow-sm'}
+                                    ${snapshot.isDragging ? 'shadow-lg z-50 bg-background border-primary' : 'shadow-sm'}
                                   `}
                                 >
                                   {column.name}
@@ -316,10 +316,10 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                                     {...provided.dragHandleProps}
                                     className={`
                                       group relative flex items-center gap-3 p-3 rounded-lg transition-all duration-200
-                                      ${snapshot.isDragging 
-                                        ? 'shadow-xl scale-105 rotate-1 z-50 bg-background border-2 border-primary' 
-                                        : 'bg-background/80 backdrop-blur-sm border border-border/60 hover:border-primary/40 hover:shadow-md'
-                                      }
+                                       ${snapshot.isDragging 
+                                         ? 'shadow-xl z-50 bg-background border-2 border-primary' 
+                                         : 'bg-background/80 backdrop-blur-sm border border-border/60 hover:border-primary/40 hover:shadow-md'
+                                       }
                                     `}
                                   >
                                     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-primary/60 to-primary/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />

@@ -65,7 +65,7 @@ function ColumnItem({ column, index, isDragDisabled = false }: ColumnItemProps) 
           className={`
             p-4 rounded-lg border-2 transition-all duration-200 bg-card hover:shadow-md
             ${getColumnTypeStyles(column.type)}
-            ${snapshot.isDragging ? 'shadow-xl scale-105 rotate-2 z-50' : 'shadow-sm'}
+            ${snapshot.isDragging ? 'shadow-xl z-50 bg-background border-primary' : 'shadow-sm'}
             ${isDragDisabled ? 'opacity-60 cursor-not-allowed' : 'cursor-grab active:cursor-grabbing hover:border-primary/40'}
           `}
         >
