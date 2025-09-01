@@ -1,7 +1,7 @@
 import { Draggable } from 'react-beautiful-dnd';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, DollarSign, User } from 'lucide-react';
+import { Calendar, DollarSign, User, GripVertical } from 'lucide-react';
 import { Opportunity } from '@/types/crm';
 
 interface KanbanCardProps {
@@ -16,10 +16,26 @@ export function KanbanCard({ opportunity, index }: KanbanCardProps) {
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          {...provided.dragHandleProps}
+          className="relative"
         >
+          {/* Left Drag Handle */}
+          <div
+            {...provided.dragHandleProps}
+            className="absolute left-1 top-1/2 -translate-y-1/2 z-10 cursor-grab active:cursor-grabbing p-1 rounded bg-muted/80 hover:bg-muted opacity-0 hover:opacity-100 transition-opacity"
+          >
+            <GripVertical className="w-3 h-3 text-muted-foreground" />
+          </div>
+
+          {/* Right Drag Handle */}
+          <div
+            {...provided.dragHandleProps}
+            className="absolute right-1 top-1/2 -translate-y-1/2 z-10 cursor-grab active:cursor-grabbing p-1 rounded bg-muted/80 hover:bg-muted opacity-0 hover:opacity-100 transition-opacity"
+          >
+            <GripVertical className="w-3 h-3 text-muted-foreground" />
+          </div>
+
           <Card 
-            className={`cursor-pointer hover:shadow-md transition-shadow bg-background select-none ${
+            className={`hover:shadow-md transition-shadow bg-background select-none ${
               snapshot.isDragging ? 'rotate-3 shadow-lg' : ''
             }`}
           >
