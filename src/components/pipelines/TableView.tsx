@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { usePinnedItems, PIN_COLORS, PinColor } from '@/hooks/usePinnedItems';
 import { useColumnManager } from '@/hooks/useColumnManager';
 import { ColumnManagerModal } from './ColumnManagerModal';
+import { CreateColumnButton } from './CreateColumnButton';
 
 interface TableViewProps {
   opportunities: Opportunity[];
@@ -95,15 +96,18 @@ export function TableView({ opportunities }: TableViewProps) {
     <div className="p-6 h-full overflow-auto">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">Opportunities</h2>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setColumnModalOpen(true)}
-          className="gap-2"
-        >
-          <Settings className="h-4 w-4" />
-          Manage Columns
-        </Button>
+        <div className="flex items-center gap-2">
+          <CreateColumnButton />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setColumnModalOpen(true)}
+            className="gap-2"
+          >
+            <Settings className="h-4 w-4" />
+            Manage Columns
+          </Button>
+        </div>
       </div>
       
       <div className="bg-background rounded-lg border shadow-sm">
