@@ -171,9 +171,9 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 flex flex-col gap-4 overflow-hidden">
+        <div className="flex-1 flex flex-col gap-4 min-h-0">
           {/* Column Name Input */}
-          <div className="space-y-2">
+          <div className="space-y-2 shrink-0">
             <Label htmlFor="column-name">Column Name</Label>
             <Input
               id="column-name"
@@ -183,19 +183,19 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
             />
           </div>
 
-          <Separator />
+          <Separator className="shrink-0" />
 
           <DragDropContext onDragEnd={handleDragEnd}>
-            <div className="flex-1 flex gap-6 overflow-hidden">
+            <div className="flex-1 flex gap-6 min-h-0">
               {/* Left Panel - Available Elements */}
-              <div className="w-80 flex flex-col gap-4">
+              <div className="w-80 flex flex-col gap-4 min-h-0">
                 {/* Available Columns */}
-                <div className="space-y-3">
+                <div className="space-y-3 shrink-0">
                   <h3 className="font-medium text-sm">Available Columns</h3>
                   <Droppable droppableId="available-columns" isDropDisabled={true}>
                     {(provided) => (
-                      <ScrollArea className="h-48">
-                        <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2 p-1">
+                      <ScrollArea className="h-32 border rounded-lg">
+                        <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2 p-2">
                           {mockColumns.map((column, index) => (
                             <Draggable key={column.id} draggableId={column.id} index={index}>
                               {(provided, snapshot) => (
@@ -225,8 +225,8 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                 </div>
 
                 {/* Operators */}
-                <div className="space-y-3">
-                  <h3 className="font-medium text-sm">Operators & Brackets</h3>
+                <div className="space-y-3 shrink-0">
+                  <h3 className="font-medium text-sm">Operators</h3>
                   <Droppable droppableId="operators" isDropDisabled={true}>
                     {(provided) => (
                       <div ref={provided.innerRef} {...provided.droppableProps} className="grid grid-cols-2 gap-2">
@@ -254,50 +254,50 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                       </div>
                     )}
                   </Droppable>
+                </div>
                   
-                  {/* Brackets */}
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-xs text-muted-foreground">Brackets</h4>
-                    <Droppable droppableId="brackets" isDropDisabled={true}>
-                      {(provided) => (
-                        <div ref={provided.innerRef} {...provided.droppableProps} className="grid grid-cols-2 gap-2">
-                          {operators.slice(4).map((operator, index) => (
-                            <Draggable key={operator.id} draggableId={operator.id} index={index + 4}>
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className={`
-                                    p-3 rounded-lg border-2 cursor-grab active:cursor-grabbing 
-                                    bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100
-                                    flex items-center justify-center gap-2 text-sm font-medium transition-all
-                                    ${snapshot.isDragging ? 'shadow-lg scale-105 rotate-1 z-50' : 'shadow-sm'}
-                                  `}
-                                >
-                                  <span className="font-bold text-xl">{operator.symbol}</span>
-                                  <span className="text-xs">{operator.label}</span>
-                                </div>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  </div>
+                {/* Brackets */}
+                <div className="space-y-2 shrink-0">
+                  <h4 className="font-medium text-sm">Brackets</h4>
+                  <Droppable droppableId="brackets" isDropDisabled={true}>
+                    {(provided) => (
+                      <div ref={provided.innerRef} {...provided.droppableProps} className="grid grid-cols-2 gap-2">
+                        {operators.slice(4).map((operator, index) => (
+                          <Draggable key={operator.id} draggableId={operator.id} index={index + 4}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className={`
+                                  p-3 rounded-lg border-2 cursor-grab active:cursor-grabbing 
+                                  bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100
+                                  flex items-center justify-center gap-2 text-sm font-medium transition-all
+                                  ${snapshot.isDragging ? 'shadow-lg scale-105 rotate-1 z-50' : 'shadow-sm'}
+                                `}
+                              >
+                                <span className="font-bold text-xl">{operator.symbol}</span>
+                                <span className="text-xs">{operator.label}</span>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
                 </div>
 
                 {/* Add Number Button */}
-                <Button variant="outline" onClick={addNumber} className="gap-2">
+                <Button variant="outline" onClick={addNumber} className="gap-2 shrink-0">
                   <Plus className="w-4 h-4" />
                   Add Number
                 </Button>
               </div>
 
               {/* Right Panel - Formula Canvas */}
-              <div className="flex-1 flex flex-col">
-                <div className="flex items-center justify-between mb-4">
+              <div className="flex-1 flex flex-col min-h-0">
+                <div className="flex items-center justify-between mb-4 shrink-0">
                   <h3 className="font-medium text-sm">Formula Canvas</h3>
                   <Button variant="ghost" size="sm" onClick={clearFormula} className="gap-2 text-destructive">
                     <Trash2 className="w-4 h-4" />
@@ -433,7 +433,7 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
           </DragDropContext>
 
           {/* Footer Actions */}
-          <div className="flex justify-between pt-4 border-t">
+          <div className="flex justify-between pt-4 border-t shrink-0">
             <Button variant="outline" onClick={reset}>
               Reset
             </Button>
