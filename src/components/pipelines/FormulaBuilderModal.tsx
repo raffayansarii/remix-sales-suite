@@ -159,8 +159,8 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
     const targetType = targetNode.data.nodeType;
     
     // Allow connections: 
-    // - column <-> operator
-    // - number <-> operator  
+    // - column/number <-> operator
+    // - column/number <-> bracket (brackets can connect to operands)
     // - operator <-> bracket
     // - bracket <-> bracket (for nested brackets)
     const validConnections = [
@@ -168,6 +168,10 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
       (sourceType === 'operator' && targetType === 'column'),
       (sourceType === 'number' && targetType === 'operator'),
       (sourceType === 'operator' && targetType === 'number'),
+      (sourceType === 'column' && targetType === 'bracket'),
+      (sourceType === 'bracket' && targetType === 'column'),
+      (sourceType === 'number' && targetType === 'bracket'),
+      (sourceType === 'bracket' && targetType === 'number'),
       (sourceType === 'operator' && targetType === 'bracket'),
       (sourceType === 'bracket' && targetType === 'operator'),
       (sourceType === 'bracket' && targetType === 'bracket'),
@@ -422,6 +426,8 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                   onConnect={onConnect}
                   nodeTypes={nodeTypes}
                   isValidConnection={isValidConnection}
+                  snapToGrid={true}
+                  snapGrid={[20, 20]}
                   fitView
                   className="rounded-xl"
                   style={{ backgroundColor: 'transparent' }}
