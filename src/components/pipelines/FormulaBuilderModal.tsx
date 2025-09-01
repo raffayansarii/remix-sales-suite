@@ -229,7 +229,7 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                 </div>
 
                 {/* Available Columns */}
-                <div className="space-y-3 flex-1 min-h-0">
+                <div className="space-y-3 flex-1 min-h-0 overflow-y-auto">
                   <h3 className="font-medium text-sm">Available Columns</h3>
                   <Droppable droppableId="available-columns" isDropDisabled={true}>
                     {(provided) => (
