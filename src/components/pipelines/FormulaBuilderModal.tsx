@@ -88,7 +88,7 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
     }
 
     // Dragging from operators to canvas
-    if ((source.droppableId === 'operators' || source.droppableId === 'brackets') && destination.droppableId === 'formula-canvas') {
+    if ((source.droppableId.startsWith('operator-') || source.droppableId === 'operators' || source.droppableId === 'brackets') && destination.droppableId === 'formula-canvas') {
       const operatorId = result.draggableId;
       const operator = operators.find(op => op.id === operatorId);
       
@@ -189,12 +189,51 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
             <div className="flex-1 flex gap-6 min-h-0">
               {/* Left Panel - Available Elements */}
               <div className="w-80 flex flex-col gap-4 min-h-0">
+                {/* Operators - Single Line at Top */}
+                <div className="space-y-2 shrink-0">
+                  <h3 className="font-medium text-sm">Operators & Brackets</h3>
+                  <div className="flex gap-1 flex-wrap">
+                    {operators.map((operator, index) => (
+                      <Droppable key={`${operator.id}-droppable`} droppableId={`operator-${operator.id}`} isDropDisabled={true}>
+                        {(provided) => (
+                          <div ref={provided.innerRef} {...provided.droppableProps}>
+                            <Draggable draggableId={operator.id} index={index}>
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className={`
+                                    px-2 py-1 rounded border cursor-grab active:cursor-grabbing 
+                                    ${operator.id.includes('bracket') 
+                                      ? 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100' 
+                                      : 'bg-purple-50 border-purple-200 text-purple-800 hover:bg-purple-100'
+                                    }
+                                    flex items-center gap-1 text-xs font-medium transition-all
+                                    ${snapshot.isDragging ? 'shadow-lg scale-105 z-50' : 'shadow-sm'}
+                                  `}
+                                >
+                                  {!operator.id.includes('bracket') && <operator.icon className="w-3 h-3" />}
+                                  <span className={operator.id.includes('bracket') ? 'text-sm font-bold' : 'font-bold'}>
+                                    {operator.symbol}
+                                  </span>
+                                </div>
+                              )}
+                            </Draggable>
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Available Columns */}
-                <div className="space-y-3 shrink-0">
+                <div className="space-y-3 flex-1 min-h-0">
                   <h3 className="font-medium text-sm">Available Columns</h3>
                   <Droppable droppableId="available-columns" isDropDisabled={true}>
                     {(provided) => (
-                      <ScrollArea className="h-32 border rounded-lg">
+                      <ScrollArea className="flex-1 border rounded-lg">
                         <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2 p-2">
                           {mockColumns.map((column, index) => (
                             <Draggable key={column.id} draggableId={column.id} index={index}>
@@ -220,70 +259,6 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
                         </div>
                         {provided.placeholder}
                       </ScrollArea>
-                    )}
-                  </Droppable>
-                </div>
-
-                {/* Operators */}
-                <div className="space-y-3 shrink-0">
-                  <h3 className="font-medium text-sm">Operators</h3>
-                  <Droppable droppableId="operators" isDropDisabled={true}>
-                    {(provided) => (
-                      <div ref={provided.innerRef} {...provided.droppableProps} className="grid grid-cols-2 gap-2">
-                        {operators.slice(0, 4).map((operator, index) => (
-                          <Draggable key={operator.id} draggableId={operator.id} index={index}>
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className={`
-                                  p-3 rounded-lg border-2 cursor-grab active:cursor-grabbing 
-                                  bg-purple-50 border-purple-200 text-purple-800 hover:bg-purple-100
-                                  flex items-center justify-center gap-2 text-sm font-medium transition-all
-                                  ${snapshot.isDragging ? 'shadow-lg scale-105 rotate-1 z-50' : 'shadow-sm'}
-                                `}
-                              >
-                                <operator.icon className="w-4 h-4" />
-                                <span className="font-bold text-lg">{operator.symbol}</span>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </div>
-                  
-                {/* Brackets */}
-                <div className="space-y-2 shrink-0">
-                  <h4 className="font-medium text-sm">Brackets</h4>
-                  <Droppable droppableId="brackets" isDropDisabled={true}>
-                    {(provided) => (
-                      <div ref={provided.innerRef} {...provided.droppableProps} className="grid grid-cols-2 gap-2">
-                        {operators.slice(4).map((operator, index) => (
-                          <Draggable key={operator.id} draggableId={operator.id} index={index + 4}>
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className={`
-                                  p-3 rounded-lg border-2 cursor-grab active:cursor-grabbing 
-                                  bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100
-                                  flex items-center justify-center gap-2 text-sm font-medium transition-all
-                                  ${snapshot.isDragging ? 'shadow-lg scale-105 rotate-1 z-50' : 'shadow-sm'}
-                                `}
-                              >
-                                <span className="font-bold text-xl">{operator.symbol}</span>
-                                <span className="text-xs">{operator.label}</span>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </div>
                     )}
                   </Droppable>
                 </div>
