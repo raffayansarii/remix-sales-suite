@@ -342,9 +342,9 @@ export function FormulaBuilderModal({ isOpen, onClose, onCreateColumn }: Formula
               </div>
 
               {/* Available Columns - Only Number Types */}
-              <div className="space-y-3 flex-1 min-h-0">
+              <div className="space-y-3 flex-1 min-h-0  overflow-y-auto">
                 <h3 className="font-medium text-sm">Available Number Columns</h3>
-                <ScrollArea className="flex-1 border rounded-lg overflow-y-auto">
+                <ScrollArea className="flex-1 border rounded-lg">
                   <div className="space-y-2 p-2">
                     {mockColumns.map((column) => (
                       <Button
