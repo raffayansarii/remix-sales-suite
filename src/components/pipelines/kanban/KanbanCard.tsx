@@ -20,8 +20,9 @@ export function KanbanCard({ opportunity, index }: KanbanCardProps) {
         >
           <Card 
             className={`cursor-pointer hover:shadow-md transition-shadow bg-background select-none ${
-              snapshot.isDragging ? 'rotate-3 shadow-lg' : ''
+              snapshot.isDragging ? 'shadow-xl opacity-90' : ''
             }`}
+            style={snapshot.isDragging ? { transform: 'none' } : undefined}
           >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
