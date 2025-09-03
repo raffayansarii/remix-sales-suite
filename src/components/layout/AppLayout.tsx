@@ -41,7 +41,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                       onChange={(e) => console.log('🔍 [GLOBAL_SEARCH] Query:', e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
-                          console.log('🔍 [GLOBAL_SEARCH] Search executed - implement navigation');
+                          console.log('[GLOBAL_SEARCH] Search executed - implement navigation');
                         }
                       }}
                     />
