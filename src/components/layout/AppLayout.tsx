@@ -9,6 +9,8 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
+  console.log('🏗️ [APP_LAYOUT] Rendering AppLayout with global search');
+  
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -20,8 +22,30 @@ export function AppLayout({ children }: AppLayoutProps) {
               <SidebarTrigger className="hover:bg-muted rounded-md p-2 transition-colors" />
               
               <div className="flex-1 flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4">
                   <h1 className="text-xl font-semibold text-foreground">CRM Dashboard</h1>
+                  
+                  {/* TODO: Global Search Integration - Backend Integration Needed:
+                      - Elasticsearch/Algolia/Backend search endpoint: GET /api/search?q={query}
+                      - Autocomplete suggestions: POST /api/search/suggestions
+                      - Libraries to consider: @elastic/search-ui, react-instantsearch, Fuse.js
+                      - Search across: opportunities, contacts, companies, tasks, notes
+                      - Features: keyboard shortcuts, search history, filters
+                  */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 z-10" />
+                    <Input
+                      placeholder="🔍 Global Search... (Ctrl+K)"
+                      className="pl-10 pr-4 w-72 bg-background border-2 border-primary/30 focus:border-primary shadow-sm"
+                      onFocus={() => console.log('🔍 [GLOBAL_SEARCH] Search focused - ready for backend integration')}
+                      onChange={(e) => console.log('🔍 [GLOBAL_SEARCH] Query:', e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          console.log('🔍 [GLOBAL_SEARCH] Search executed - implement navigation');
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
                 
                 <div className="flex items-center gap-4">
