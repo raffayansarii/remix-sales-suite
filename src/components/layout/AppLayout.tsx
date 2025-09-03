@@ -35,10 +35,10 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 z-10" />
                     <Input
-                      placeholder="🔍 Global Search... (Ctrl+K)"
+                      placeholder="Global Search... (Ctrl+K)"
                       className="pl-10 pr-4 w-72 bg-background border-2 border-primary/30 focus:border-primary shadow-sm"
-                      onFocus={() => console.log('🔍 [GLOBAL_SEARCH] Search focused - ready for backend integration')}
-                      onChange={(e) => console.log('🔍 [GLOBAL_SEARCH] Query:', e.target.value)}
+                      onFocus={() => console.log('[GLOBAL_SEARCH] Search focused - ready for backend integration')}
+                      onChange={(e) => console.log('[GLOBAL_SEARCH] Query:', e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           console.log('[GLOBAL_SEARCH] Search executed - implement navigation');
