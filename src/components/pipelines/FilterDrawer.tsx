@@ -36,11 +36,15 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
     }
   }, [activeFilters]);
 
+  // TODO: Replace with API calls to backend for filter persistence
   // Load saved configs from localStorage
   useEffect(() => {
+    console.log('💾 [FILTERS] Loading saved filter configurations');
     const saved = localStorage.getItem('filterConfigs');
     if (saved) {
-      setSavedConfigs(JSON.parse(saved));
+      const configs = JSON.parse(saved);
+      setSavedConfigs(configs);
+      console.log('💾 [FILTERS] Loaded', configs.length, 'saved configurations');
     }
   }, []);
 
@@ -78,6 +82,10 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
       group.field && group.operator && 
       (!['is_empty', 'is_not_empty'].includes(group.operator) ? group.value : true)
     );
+    
+    console.log('🔧 [FILTERS] Applying filters:', validGroups.length, 'valid filter groups');
+    console.log('🌐 [API] Would call POST /api/opportunities/filter with filters:', validGroups);
+    
     onApplyFilters(validGroups);
     toast({
       title: "Filters applied",
@@ -95,6 +103,8 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
       return;
     }
 
+    console.log('💾 [FILTERS] Saving filter configuration:', configName);
+
     const validGroups = filterGroups.filter(group => 
       group.field && group.operator && 
       (!['is_empty', 'is_not_empty'].includes(group.operator) ? group.value : true)
@@ -108,17 +118,22 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
       updatedAt: new Date().toISOString()
     };
 
+    console.log('🌐 [API] Would call POST /api/filter-configs', newConfig);
+
     const existingIndex = savedConfigs.findIndex(config => config.name === configName);
     let updatedConfigs;
     
     if (existingIndex >= 0) {
+      console.log('💾 [FILTERS] Updating existing configuration');
       updatedConfigs = [...savedConfigs];
       updatedConfigs[existingIndex] = { ...newConfig, id: savedConfigs[existingIndex].id };
     } else {
+      console.log('💾 [FILTERS] Creating new configuration');
       updatedConfigs = [...savedConfigs, newConfig];
     }
 
     setSavedConfigs(updatedConfigs);
+    // TODO: Replace localStorage with API call - POST /api/filter-configs
     localStorage.setItem('filterConfigs', JSON.stringify(updatedConfigs));
     setConfigName('');
     setShowSaveForm(false);

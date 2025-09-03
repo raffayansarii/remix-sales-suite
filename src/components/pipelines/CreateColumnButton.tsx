@@ -7,8 +7,15 @@ export function CreateColumnButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleCreateColumn = (columnData: { name: string; formula: string }) => {
-    console.log('Creating column:', columnData);
-    // TODO: Implement actual column creation logic
+    console.log('📊 [FORMULA] Creating column:', columnData);
+    // TODO: Replace with actual backend API call
+    // Expected API: POST /api/opportunities/columns
+    // Body: { name: columnData.name, formula: columnData.formula }
+    console.log('🌐 [API] Would call POST /api/opportunities/columns', columnData);
+    
+    // TODO: After successful creation, refresh the opportunities data
+    // and update the table/kanban view to show the new calculated column
+    
     setIsModalOpen(false);
   };
 

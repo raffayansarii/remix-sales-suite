@@ -9,10 +9,14 @@ import { mockTasks } from '@/data/mockData';
 import { Task } from '@/types/crm';
 
 export function TasksFeature() {
+  // TODO: Replace with API call - GET /api/tasks
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
 
+  console.log('✅ [TASKS] TasksFeature initialized with tasks:', tasks.length);
+
+  // TODO: Replace with backend filtering - POST /api/tasks/filter
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filter === 'all' || 
@@ -21,10 +25,18 @@ export function TasksFeature() {
     return matchesSearch && matchesFilter;
   });
 
+  console.log('🔍 [TASKS] Filtered tasks:', filteredTasks.length, 'of', tasks.length);
+
   const toggleTaskCompletion = (taskId: string) => {
+    console.log('🔄 [TASKS] Toggling task completion:', taskId);
+    
+    // Optimistic update
     setTasks(tasks.map(task => 
       task.id === taskId ? { ...task, completed: !task.completed } : task
     ));
+    
+    // TODO: Replace with API call - PATCH /api/tasks/${taskId} { completed: !completed }
+    console.log('🌐 [API] Would call PATCH /api/tasks/' + taskId, { completed: true });
   };
 
   const getPriorityIcon = (priority: string) => {
@@ -52,6 +64,7 @@ export function TasksFeature() {
           <Button className="gap-2 bg-gradient-primary hover:bg-primary-hover">
             <Plus className="w-4 h-4" />
             Add Task
+            {/* TODO: Add onClick handler for creating new task - POST /api/tasks */}
           </Button>
         </div>
 
@@ -62,7 +75,11 @@ export function TasksFeature() {
             <Input
               placeholder="Search tasks..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                console.log('🔍 [TASKS] Search term changed:', e.target.value);
+                setSearchTerm(e.target.value);
+                // TODO: Debounce search and call backend API
+              }}
               className="pl-10 bg-background"
             />
           </div>

@@ -14,12 +14,18 @@ import { PipelineAnalytics } from '@/components/pipelines/PipelineAnalytics';
 export function PipelinesFeature() {
   const [viewType, setViewType] = useState<ViewType>('table');
   const [searchTerm, setSearchTerm] = useState('');
+  // TODO: Replace with API call - GET /api/opportunities with real-time updates
   const [opportunities] = useState<Opportunity[]>(mockOpportunities);
   const [activeFilters, setActiveFilters] = useState<FilterGroup[]>([]);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
 
+  console.log('🔍 [PIPELINES] Component initialized with opportunities:', opportunities.length);
+  console.log('🔍 [PIPELINES] Current search term:', searchTerm);
+  console.log('🔍 [PIPELINES] Active filters:', activeFilters);
+
   // Apply search filter
+  // TODO: Replace with backend search - POST /api/opportunities/search
   const searchFilteredOpportunities = opportunities.filter(opp => 
     opp.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     opp.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -28,8 +34,13 @@ export function PipelinesFeature() {
     opp.solicitation.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  console.log('🔍 [SEARCH] Filtered opportunities:', searchFilteredOpportunities.length, 'of', opportunities.length);
+
   // Apply advanced filters
+  // TODO: Replace with backend filtering - POST /api/opportunities/filter
   const applyFilters = (opportunities: Opportunity[], filters: FilterGroup[]): Opportunity[] => {
+    console.log('🔧 [FILTERS] Applying filters:', filters.length, 'filters to', opportunities.length, 'opportunities');
+    
     return opportunities.filter(opportunity => {
       return filters.every(filter => {
         const fieldValue = opportunity[filter.field as keyof Opportunity];
@@ -84,10 +95,14 @@ export function PipelinesFeature() {
   };
 
   const filteredOpportunities = applyFilters(searchFilteredOpportunities, activeFilters);
+  console.log('📊 [ANALYTICS] Final filtered opportunities:', filteredOpportunities.length);
 
+  // TODO: Replace with real-time analytics from backend - GET /api/analytics/pipeline
   const totalValue = filteredOpportunities.reduce((sum, opp) => sum + opp.value, 0);
   const averageDealSize = totalValue / filteredOpportunities.length || 0;
   const winRate = (filteredOpportunities.filter(opp => opp.stage === 'Closed Won').length / filteredOpportunities.length * 100) || 0;
+
+  console.log('📊 [ANALYTICS] Total value:', totalValue, 'Average deal size:', averageDealSize, 'Win rate:', winRate);
 
   return (
     <div className="flex-1 flex flex-col h-full bg-muted/30">
@@ -112,6 +127,7 @@ export function PipelinesFeature() {
             <Button className="gap-2 bg-gradient-primary hover:bg-primary-hover text-xs sm:text-sm" size="sm">
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Add Opportunity</span>
+              {/* TODO: Add onClick handler for creating new opportunity - POST /api/opportunities */}
             </Button>
           </div>
         </div>
@@ -124,7 +140,11 @@ export function PipelinesFeature() {
               <Input
                 placeholder="Search opportunities..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  console.log('🔍 [SEARCH] Search term changed:', e.target.value);
+                  setSearchTerm(e.target.value);
+                  // TODO: Debounce search and call backend API
+                }}
                 className="pl-10 bg-background text-sm"
               />
             </div>

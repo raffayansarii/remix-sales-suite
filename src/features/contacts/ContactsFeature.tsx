@@ -8,15 +8,21 @@ import { mockContacts } from '@/data/mockData';
 import { Contact } from '@/types/crm';
 
 export function ContactsFeature() {
+  // TODO: Replace with API call - GET /api/contacts
   const [contacts] = useState<Contact[]>(mockContacts);
   const [searchTerm, setSearchTerm] = useState('');
 
+  console.log('👥 [CONTACTS] ContactsFeature initialized with contacts:', contacts.length);
+
+  // TODO: Replace with backend search - POST /api/contacts/search  
   const filteredContacts = contacts.filter(contact => 
     contact.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     contact.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     contact.company.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  console.log('🔍 [CONTACTS] Filtered contacts:', filteredContacts.length, 'of', contacts.length);
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -35,6 +41,7 @@ export function ContactsFeature() {
           <Button className="gap-2 bg-gradient-primary hover:bg-primary-hover">
             <Plus className="w-4 h-4" />
             Add Contact
+            {/* TODO: Add onClick handler for creating new contact - POST /api/contacts */}
           </Button>
         </div>
 
@@ -44,7 +51,11 @@ export function ContactsFeature() {
           <Input
             placeholder="Search contacts..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              console.log('🔍 [CONTACTS] Search term changed:', e.target.value);
+              setSearchTerm(e.target.value);
+              // TODO: Debounce search and call backend API
+            }}
             className="pl-10 bg-background"
           />
         </div>

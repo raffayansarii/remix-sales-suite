@@ -1,5 +1,12 @@
 import { Opportunity, Contact, Task } from '@/types/crm';
 
+// TODO: Replace with actual API calls to backend
+// This mock data will be replaced by:
+// - GET /api/opportunities - fetch all opportunities
+// - GET /api/contacts - fetch all contacts  
+// - GET /api/tasks - fetch all tasks
+console.log('💾 [MOCK DATA] Using mock data - will be replaced by backend API calls');
+
 export const mockOpportunities: Opportunity[] = [
   {
     id: '1',
@@ -122,6 +129,7 @@ export const mockOpportunities: Opportunity[] = [
   }
 ];
 
+// TODO: Replace with API call: GET /api/contacts
 export const mockContacts: Contact[] = [
   {
     id: '1',
@@ -155,6 +163,7 @@ export const mockContacts: Contact[] = [
   }
 ];
 
+// TODO: Replace with API call: GET /api/tasks
 export const mockTasks: Task[] = [
   {
     id: '1',
