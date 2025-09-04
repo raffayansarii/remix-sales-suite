@@ -3,6 +3,7 @@ import { AppSidebar } from './AppSidebar';
 import { ReactNode } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { TenantSwitcher } from '@/components/guards';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -49,6 +50,9 @@ export function AppLayout({ children }: AppLayoutProps) {
                 </div>
                 
                 <div className="flex items-center gap-4">
+                  {/* TODO: Replace with real tenant switcher connected to backend */}
+                  <TenantSwitcher />
+                  
                   <div className="text-sm text-muted-foreground">
                     Welcome back, John Doe
                   </div>
