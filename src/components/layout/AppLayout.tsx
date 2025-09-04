@@ -51,7 +51,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 
                 <div className="flex items-center gap-4">
                   {/* TODO: Replace with real tenant switcher connected to backend */}
-                  <TenantSwitcher />
+                  {/* <TenantSwitcher /> */}
                   
                   <div className="text-sm text-muted-foreground">
                     Welcome back, John Doe
