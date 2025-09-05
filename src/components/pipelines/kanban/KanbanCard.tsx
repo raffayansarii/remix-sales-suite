@@ -7,9 +7,10 @@ import { Opportunity } from '@/types/crm';
 interface KanbanCardProps {
   opportunity: Opportunity;
   index: number;
+  onOpportunityClick?: (opportunity: Opportunity) => void;
 }
 
-export function KanbanCard({ opportunity, index }: KanbanCardProps) {
+export function KanbanCard({ opportunity, index, onOpportunityClick }: KanbanCardProps) {
   return (
     <Draggable draggableId={opportunity.id} index={index}>
       {(provided, snapshot) => (
@@ -35,9 +36,10 @@ export function KanbanCard({ opportunity, index }: KanbanCardProps) {
           </div>
 
           <Card 
-            className={`hover:shadow-md transition-shadow bg-background select-none ${
+            className={`hover:shadow-md transition-shadow bg-background select-none cursor-pointer ${
               snapshot.isDragging ? 'rotate-3 shadow-lg' : ''
             }`}
+            onClick={() => onOpportunityClick?.(opportunity)}
           >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">

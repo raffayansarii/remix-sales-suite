@@ -12,9 +12,10 @@ interface Stage {
 interface KanbanColumnProps {
   stage: Stage;
   opportunities: Opportunity[];
+  onOpportunityClick?: (opportunity: Opportunity) => void;
 }
 
-export function KanbanColumn({ stage, opportunities }: KanbanColumnProps) {
+export function KanbanColumn({ stage, opportunities, onOpportunityClick }: KanbanColumnProps) {
   const stageValue = opportunities.reduce((sum, opp) => sum + opp.value, 0);
 
   return (
@@ -39,6 +40,7 @@ export function KanbanColumn({ stage, opportunities }: KanbanColumnProps) {
                 key={opportunity.id}
                 opportunity={opportunity}
                 index={index}
+                onOpportunityClick={onOpportunityClick}
               />
             ))}
             

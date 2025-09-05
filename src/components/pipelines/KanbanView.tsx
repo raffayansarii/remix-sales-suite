@@ -1,15 +1,20 @@
 import { useState, useEffect } from 'react';
 import { KanbanBoard } from './kanban/KanbanBoard';
+import { OpportunityDetailModal } from './OpportunityDetailModal';
 import { Opportunity } from '@/types/crm';
 import { toast } from '@/hooks/use-toast';
 
 interface KanbanViewProps {
   opportunities: Opportunity[];
+  onOpportunityUpdate?: (updatedOpportunity: Opportunity) => void;
+  onOpportunityDelete?: (opportunityId: string) => void;
 }
 
-export function KanbanView({ opportunities: initialOpportunities }: KanbanViewProps) {
+export function KanbanView({ opportunities: initialOpportunities, onOpportunityUpdate, onOpportunityDelete }: KanbanViewProps) {
   // TODO: This will be replaced by real-time opportunity data from backend
   const [opportunities, setOpportunities] = useState<Opportunity[]>(initialOpportunities);
+  const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   console.log('📋 [KANBAN] KanbanView initialized with opportunities:', opportunities.length);
 
@@ -18,6 +23,11 @@ export function KanbanView({ opportunities: initialOpportunities }: KanbanViewPr
     console.log('📋 [KANBAN] Opportunities updated from parent:', initialOpportunities.length);
     setOpportunities(initialOpportunities);
   }, [initialOpportunities]);
+
+  const handleOpportunityClick = (opportunity: Opportunity) => {
+    setSelectedOpportunity(opportunity);
+    setDetailModalOpen(true);
+  };
 
   const handleOpportunityMove = async (opportunityId: string, newStage: string) => {
     console.log('🔄 [KANBAN] Moving opportunity:', opportunityId, 'to stage:', newStage);
@@ -57,9 +67,20 @@ export function KanbanView({ opportunities: initialOpportunities }: KanbanViewPr
   };
 
   return (
-    <KanbanBoard 
-      opportunities={opportunities} 
-      onOpportunityMove={handleOpportunityMove}
-    />
+    <>
+      <KanbanBoard 
+        opportunities={opportunities} 
+        onOpportunityMove={handleOpportunityMove}
+        onOpportunityClick={handleOpportunityClick}
+      />
+      
+      <OpportunityDetailModal
+        opportunity={selectedOpportunity}
+        open={detailModalOpen}
+        onOpenChange={setDetailModalOpen}
+        onUpdate={onOpportunityUpdate}
+        onDelete={onOpportunityDelete}
+      />
+    </>
   );
 }

@@ -104,6 +104,20 @@ export function PipelinesFeature() {
 
   console.log('📊 [ANALYTICS] Total value:', totalValue, 'Average deal size:', averageDealSize, 'Win rate:', winRate);
 
+  const handleOpportunityUpdate = (updatedOpportunity: Opportunity) => {
+    // TODO: Replace with actual API call to backend
+    // PUT /api/opportunities/:id
+    console.log('🔄 [API CALL] PUT /api/opportunities/' + updatedOpportunity.id, updatedOpportunity);
+    console.log('✅ [PIPELINES] Opportunity updated successfully');
+  };
+
+  const handleOpportunityDelete = (opportunityId: string) => {
+    // TODO: Replace with actual API call to backend
+    // DELETE /api/opportunities/:id
+    console.log('🗑️ [API CALL] DELETE /api/opportunities/' + opportunityId);
+    console.log('✅ [PIPELINES] Opportunity deleted successfully');
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full bg-muted/30">
       {/* Header Section */}
@@ -193,9 +207,17 @@ export function PipelinesFeature() {
         {showAnalytics ? (
           <PipelineAnalytics opportunities={filteredOpportunities} />
         ) : viewType === 'kanban' ? (
-          <KanbanView opportunities={filteredOpportunities} />
+          <KanbanView 
+            opportunities={filteredOpportunities}
+            onOpportunityUpdate={handleOpportunityUpdate}
+            onOpportunityDelete={handleOpportunityDelete}
+          />
         ) : (
-          <TableView opportunities={filteredOpportunities} />
+          <TableView 
+            opportunities={filteredOpportunities}
+            onOpportunityUpdate={handleOpportunityUpdate}
+            onOpportunityDelete={handleOpportunityDelete}
+          />
         )}
       </div>
 

@@ -5,6 +5,7 @@ import { Opportunity } from '@/types/crm';
 interface KanbanBoardProps {
   opportunities: Opportunity[];
   onOpportunityMove?: (opportunityId: string, newStage: string) => void;
+  onOpportunityClick?: (opportunity: Opportunity) => void;
 }
 
 const stages = [
@@ -15,7 +16,7 @@ const stages = [
   { name: 'Closed Won', color: 'bg-stage-won', textColor: 'text-white' }
 ];
 
-export function KanbanBoard({ opportunities, onOpportunityMove }: KanbanBoardProps) {
+export function KanbanBoard({ opportunities, onOpportunityMove, onOpportunityClick }: KanbanBoardProps) {
   const getOpportunitiesByStage = (stageName: string) => {
     return opportunities.filter(opp => opp.stage === stageName);
   };
@@ -53,6 +54,7 @@ export function KanbanBoard({ opportunities, onOpportunityMove }: KanbanBoardPro
                 key={stage.name}
                 stage={stage}
                 opportunities={stageOpportunities}
+                onOpportunityClick={onOpportunityClick}
               />
             );
           })}

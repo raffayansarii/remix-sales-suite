@@ -1,27 +1,32 @@
+import { Opportunity } from '@/types/crm';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowUpDown, Eye, Edit, MoreHorizontal, Pin, PinOff, Palette, Settings } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '@/components/ui/dropdown-menu';
-import { Opportunity } from '@/types/crm';
+import { ArrowUpDown, MoreHorizontal, Eye, Edit, Pin, PinOff, Columns } from 'lucide-react';
 import { useState } from 'react';
-import { usePinnedItems, PIN_COLORS, PinColor } from '@/hooks/usePinnedItems';
+import { usePinnedItems } from '@/hooks/usePinnedItems';
 import { useColumnManager } from '@/hooks/useColumnManager';
 import { ColumnManagerModal } from './ColumnManagerModal';
-import { CreateColumnButton } from './CreateColumnButton';
+import { OpportunityDetailModal } from './OpportunityDetailModal';
 
 interface TableViewProps {
   opportunities: Opportunity[];
+  onOpportunityUpdate?: (updatedOpportunity: Opportunity) => void;
+  onOpportunityDelete?: (opportunityId: string) => void;
 }
 
 type SortField = 'title' | 'company' | 'value' | 'stage' | 'awardType' | 'agency' | 'solicitation' | 'createdAt' | 'probability';
 type SortDirection = 'asc' | 'desc';
 
-export function TableView({ opportunities }: TableViewProps) {
+export function TableView({ opportunities, onOpportunityUpdate, onOpportunityDelete }: TableViewProps) {
   const [sortField, setSortField] = useState<SortField>('createdAt');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [columnModalOpen, setColumnModalOpen] = useState(false);
-  const { togglePin, isPinned, setItemColor, getItemColor, separateItems } = usePinnedItems<Opportunity>();
+  const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const { togglePin, isPinned } = usePinnedItems<Opportunity>();
   const columnManager = useColumnManager();
 
   const handleSort = (field: SortField) => {
@@ -33,8 +38,19 @@ export function TableView({ opportunities }: TableViewProps) {
     }
   };
 
+  const handleRowClick = (opportunity: Opportunity) => {
+    setSelectedOpportunity(opportunity);
+    setDetailModalOpen(true);
+  };
+
+  const handleViewOpportunity = (opportunity: Opportunity) => {
+    setSelectedOpportunity(opportunity);
+    setDetailModalOpen(true);
+  };
+
   // Separate pinned and unpinned items
-  const { pinnedItems, unpinnedItems } = separateItems(opportunities);
+  const pinnedItems = opportunities.filter(opp => isPinned(opp.id) || opp.pinned);
+  const unpinnedItems = opportunities.filter(opp => !isPinned(opp.id) && !opp.pinned);
   
   // Sort both pinned and unpinned items separately
   const sortItems = (items: Opportunity[]) => {
@@ -97,14 +113,13 @@ export function TableView({ opportunities }: TableViewProps) {
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">Opportunities</h2>
         <div className="flex items-center gap-2">
-          <CreateColumnButton />
           <Button
             variant="outline"
             size="sm"
             onClick={() => setColumnModalOpen(true)}
             className="gap-2"
           >
-            <Settings className="h-4 w-4" />
+            <Columns className="h-4 w-4" />
             Manage Columns
           </Button>
         </div>
@@ -128,18 +143,14 @@ export function TableView({ opportunities }: TableViewProps) {
           <TableBody>
             {sortedOpportunities.map((opportunity) => {
               const pinned = isPinned(opportunity.id) || opportunity.pinned;
-              const color = getItemColor(opportunity.id);
               
               return (
                 <TableRow 
-                  key={opportunity.id} 
-                  className={`cursor-pointer transition-colors ${
-                    pinned && color
-                      ? `${color.bg} ${color.hover} ${color.border}` 
-                      : pinned 
-                        ? 'bg-primary/5 hover:bg-primary/10 border-primary/20' 
-                        : 'hover:bg-muted/50'
+                  key={opportunity.id}
+                  className={`hover:bg-muted/50 transition-colors cursor-pointer ${
+                    pinned ? 'border-l-4 border-primary bg-muted/20' : ''
                   }`}
+                  onClick={() => handleRowClick(opportunity)}
                 >
                   {columnManager.visibleColumns.map((column) => {
                     // Render cell content based on column
@@ -209,54 +220,46 @@ export function TableView({ opportunities }: TableViewProps) {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
-                                <DropdownMenuItem 
-                                  className="cursor-pointer"
-                                  onClick={() => togglePin(opportunity.id)}
-                                >
-                                  {isPinned(opportunity.id) || opportunity.pinned ? (
-                                    <>
-                                      <PinOff className="mr-2 h-4 w-4" />
-                                      Unpin
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Pin className="mr-2 h-4 w-4" />
-                                      Pin to top
-                                    </>
-                                  )}
-                                </DropdownMenuItem>
+                                 <DropdownMenuItem 
+                                   className="cursor-pointer"
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     togglePin(opportunity.id);
+                                   }}
+                                 >
+                                   {isPinned(opportunity.id) || opportunity.pinned ? (
+                                     <>
+                                       <PinOff className="mr-2 h-4 w-4" />
+                                       Unpin
+                                     </>
+                                   ) : (
+                                     <>
+                                       <Pin className="mr-2 h-4 w-4" />
+                                       Pin to top
+                                     </>
+                                   )}
+                                 </DropdownMenuItem>
                                 
-                                {(isPinned(opportunity.id) || opportunity.pinned) && (
-                                  <DropdownMenuSub>
-                                    <DropdownMenuSubTrigger className="cursor-pointer">
-                                      <Palette className="mr-2 h-4 w-4" />
-                                      Change color
-                                    </DropdownMenuSubTrigger>
-                                    <DropdownMenuSubContent className="bg-background border shadow-lg z-50">
-                                      <div className="grid grid-cols-2 gap-1 p-2">
-                                        {PIN_COLORS.map((color) => (
-                                          <DropdownMenuItem
-                                            key={color.name}
-                                            className="cursor-pointer"
-                                            onClick={() => setItemColor(opportunity.id, color)}
-                                          >
-                                            <div className={`w-4 h-4 rounded mr-2 ${color.bg} ${color.border} border`} />
-                                            <span className="text-xs">{color.name}</span>
-                                          </DropdownMenuItem>
-                                        ))}
-                                      </div>
-                                    </DropdownMenuSubContent>
-                                  </DropdownMenuSub>
-                                )}
-                                
-                                <DropdownMenuItem className="cursor-pointer">
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  View
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="cursor-pointer">
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  Edit
-                                </DropdownMenuItem>
+                                 <DropdownMenuItem 
+                                   className="cursor-pointer"
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     handleViewOpportunity(opportunity);
+                                   }}
+                                 >
+                                   <Eye className="mr-2 h-4 w-4" />
+                                   View
+                                 </DropdownMenuItem>
+                                 <DropdownMenuItem 
+                                   className="cursor-pointer"
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     handleViewOpportunity(opportunity);
+                                   }}
+                                 >
+                                   <Edit className="mr-2 h-4 w-4" />
+                                   Edit
+                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           );
@@ -267,11 +270,14 @@ export function TableView({ opportunities }: TableViewProps) {
                       }
                     };
 
-                    return (
-                      <TableCell key={column.id}>
-                        {renderCellContent()}
-                      </TableCell>
-                    );
+                     return (
+                       <TableCell 
+                         key={column.id}
+                         onClick={column.id === 'actions' ? (e) => e.stopPropagation() : undefined}
+                       >
+                         {renderCellContent()}
+                       </TableCell>
+                     );
                   })}
                 </TableRow>
               );
@@ -290,6 +296,14 @@ export function TableView({ opportunities }: TableViewProps) {
         open={columnModalOpen}
         onOpenChange={setColumnModalOpen}
         columnManager={columnManager}
+      />
+
+      <OpportunityDetailModal
+        opportunity={selectedOpportunity}
+        open={detailModalOpen}
+        onOpenChange={setDetailModalOpen}
+        onUpdate={onOpportunityUpdate}
+        onDelete={onOpportunityDelete}
       />
     </div>
   );
