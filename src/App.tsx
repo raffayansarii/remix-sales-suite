@@ -9,6 +9,7 @@ import Pipelines from "./pages/Pipelines";
 import Tasks from "./pages/Tasks";
 import Contacts from "./pages/Contacts";
 import Admin from "./pages/Admin";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/contacts" element={<Contacts />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
