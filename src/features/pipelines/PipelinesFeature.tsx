@@ -10,6 +10,7 @@ import { KanbanView } from '@/components/pipelines/KanbanView';
 import { TableView } from '@/components/pipelines/TableView';
 import { FilterDrawer } from '@/components/pipelines/FilterDrawer';
 import { PipelineAnalytics } from '@/components/pipelines/PipelineAnalytics';
+import { CreateOpportunityModal } from '@/components/pipelines/CreateOpportunityModal';
 
 export function PipelinesFeature() {
   const [viewType, setViewType] = useState<ViewType>('table');
@@ -19,6 +20,7 @@ export function PipelinesFeature() {
   const [activeFilters, setActiveFilters] = useState<FilterGroup[]>([]);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   console.log('🔍 [PIPELINES] Component initialized with opportunities:', opportunities.length);
   console.log('🔍 [PIPELINES] Current search term:', searchTerm);
@@ -138,10 +140,13 @@ export function PipelinesFeature() {
               <BarChart3 className="w-4 h-4" />
               <span className="hidden sm:inline">Analytics</span>
             </Button>
-            <Button className="gap-2 bg-gradient-primary hover:bg-primary-hover text-xs sm:text-sm" size="sm">
+            <Button 
+              className="gap-2 bg-gradient-primary hover:bg-primary-hover text-xs sm:text-sm" 
+              size="sm"
+              onClick={() => setIsCreateModalOpen(true)}
+            >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Add Opportunity</span>
-              {/* TODO: Add onClick handler for creating new opportunity - POST /api/opportunities */}
             </Button>
           </div>
         </div>
@@ -227,6 +232,12 @@ export function PipelinesFeature() {
         onClose={() => setIsFilterDrawerOpen(false)}
         onApplyFilters={setActiveFilters}
         activeFilters={activeFilters}
+      />
+
+      {/* Create Opportunity Modal */}
+      <CreateOpportunityModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
       />
     </div>
   );
