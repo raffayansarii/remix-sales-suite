@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { mockContacts } from '@/data/mockData';
 import { Contact } from '@/types/crm';
+import { useGetTenantsQuery } from '@/api/tenants/tenantsApi';
 
 export function ContactsFeature() {
   // TODO: Replace with API call - GET /api/contacts
@@ -14,6 +15,8 @@ export function ContactsFeature() {
 
   console.log('👥 [CONTACTS] ContactsFeature initialized with contacts:', contacts.length);
 
+  const {data} = useGetTenantsQuery({})
+  console.log(data)
   // TODO: Replace with backend search - POST /api/contacts/search  
   const filteredContacts = contacts.filter(contact => 
     contact.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||

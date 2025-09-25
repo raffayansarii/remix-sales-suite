@@ -15,8 +15,8 @@ import { useToast } from '@/hooks/use-toast';
 interface FilterDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onApplyFilters: (groups: FilterGroupType[]) => void;
-  activeFilters: FilterGroupType[];
+  onApplyFilters: (queryString: string ) => void;
+  activeFilters: string;
 }
 
 export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }: FilterDrawerProps) {
@@ -29,8 +29,11 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
 
   // Initialize with active filters or create a default group
   useEffect(() => {
-    if (activeFilters.length > 0) {
-      setFilterGroups(activeFilters);
+    if (activeFilters && typeof activeFilters === 'string' && activeFilters.length > 0) {
+      // Optionally, parse the query string back to filterGroups if needed
+      // For now, just reset to a single default group
+      setFilterGroups([]);
+      addFilterGroup();
     } else if (filterGroups.length === 0) {
       addFilterGroup();
     }
@@ -74,7 +77,7 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
   const clearAllFilters = () => {
     setFilterGroups([]);
     addFilterGroup();
-    onApplyFilters([]);
+    onApplyFilters('');
   };
 
   const applyFilters = () => {
@@ -83,10 +86,8 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
       (!['is_empty', 'is_not_empty'].includes(group.operator) ? group.value : true)
     );
     
-    console.log('🔧 [FILTERS] Applying filters:', validGroups.length, 'valid filter groups');
-    console.log('🌐 [API] Would call POST /api/opportunities/filter with filters:', validGroups);
-    
-    onApplyFilters(validGroups);
+    const filterString = buildPostgresQueryString(validGroups)
+    onApplyFilters(filterString);
     toast({
       title: "Filters applied",
       description: `Applied ${validGroups.length} filter rule(s)`,
@@ -171,6 +172,45 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
       });
     }
   };
+
+  function buildPostgresQueryString(groups: FilterGroupType[]): string {
+    return groups
+      .map(group => {
+        let op = '';
+        let val = group.value;
+        switch (group.operator) {
+          case 'contains_exactly':
+            op = 'ilike';
+            val = `%${val}%`;
+            break;
+          case 'equals':
+            op = 'eq';
+            break;
+          case 'not_equals':
+            op = 'neq';
+            break;
+          case 'greater_than':
+            op = 'gt';
+            break;
+          case 'less_than':
+            op = 'lt';
+            break;
+          case 'is_empty':
+            op = 'is';
+            val = 'null';
+            break;
+          case 'is_not_empty':
+            op = 'not.is';
+            val = 'null';
+            break;
+          // Add more as needed
+          default:
+            op = group.operator;
+        }
+        return `${group.field}=${op}.${val}`;
+      })
+      .join('&');
+  }
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>

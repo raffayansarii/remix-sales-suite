@@ -14,12 +14,13 @@ import { PermissionGuard } from '@/components/guards';
 import { Opportunity } from '@/types/crm';
 import { Calendar, DollarSign, User, Building, FileText, Tag, Clock, Edit, Trash2, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { IOpportunity } from '@/api/opportunity/opportunityTypes';
 
 interface OpportunityDetailModalProps {
-  opportunity: Opportunity | null;
+  opportunity: IOpportunity | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpdate?: (updatedOpportunity: Opportunity) => void;
+  onUpdate?: (updatedOpportunity: IOpportunity) => void;
   onDelete?: (opportunityId: string) => void;
 }
 
@@ -31,7 +32,7 @@ export function OpportunityDetailModal({
   onDelete 
 }: OpportunityDetailModalProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState<Opportunity | null>(null);
+  const [editForm, setEditForm] = useState<IOpportunity | null>(null);
 
   if (!opportunity) return null;
 
@@ -265,11 +266,11 @@ export function OpportunityDetailModal({
                   </div>
 
                   <div>
-                    <Label htmlFor="awardType">Award Type</Label>
+                    <Label htmlFor="award_type">Award Type</Label>
                     {isEditing ? (
                       <Select
-                        value={editForm?.awardType}
-                        onValueChange={(value) => setEditForm(prev => prev ? {...prev, awardType: value as any} : null)}
+                        value={editForm?.award_type}
+                        onValueChange={(value) => setEditForm(prev => prev ? {...prev, award_type: value as any} : null)}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -282,8 +283,8 @@ export function OpportunityDetailModal({
                         </SelectContent>
                       </Select>
                     ) : (
-                      <Badge className={`${getAwardTypeColor(currentOpportunity.awardType)} text-white border-0`}>
-                        {currentOpportunity.awardType}
+                      <Badge className={`${getAwardTypeColor(currentOpportunity.award_type)} text-white border-0`}>
+                        {currentOpportunity.award_type}
                       </Badge>
                     )}
                   </div>
@@ -305,19 +306,19 @@ export function OpportunityDetailModal({
                   </div>
 
                   <div>
-                    <Label htmlFor="closeDate">Close Date</Label>
+                    <Label htmlFor="close_date">Close Date</Label>
                     {isEditing ? (
                       <Input
-                        id="closeDate"
+                        id="close_date"
                         type="date"
-                        value={editForm?.closeDate}
-                        onChange={(e) => setEditForm(prev => prev ? {...prev, closeDate: e.target.value} : null)}
+                        value={editForm?.close_date}
+                        onChange={(e) => setEditForm(prev => prev ? {...prev, close_date: e.target.value} : null)}
                       />
                     ) : (
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
                         <span className="text-sm">
-                          {new Date(currentOpportunity.closeDate).toLocaleDateString()}
+                          {new Date(currentOpportunity.close_date).toLocaleDateString()}
                         </span>
                       </div>
                     )}
@@ -392,11 +393,11 @@ export function OpportunityDetailModal({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {currentOpportunity.tags.length > 0 ? (
+                {currentOpportunity?.tags?.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {currentOpportunity.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
-                        {tag}
+                      <Badge key={tag.name} variant="secondary" className="text-xs">
+                        {tag.name}
                       </Badge>
                     ))}
                   </div>
@@ -419,7 +420,7 @@ export function OpportunityDetailModal({
                     <div>
                       <p className="text-sm font-medium">Opportunity Created</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(currentOpportunity.createdAt).toLocaleDateString()}
+                        {new Date(currentOpportunity.created_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
@@ -428,7 +429,7 @@ export function OpportunityDetailModal({
                     <div>
                       <p className="text-sm font-medium">Last Updated</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(currentOpportunity.updatedAt).toLocaleDateString()}
+                        {new Date(currentOpportunity.updated_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>

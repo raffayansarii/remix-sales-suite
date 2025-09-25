@@ -2,6 +2,7 @@ import { Droppable } from 'react-beautiful-dnd';
 import { KanbanHeader } from './KanbanHeader';
 import { KanbanCard } from './KanbanCard';
 import { Opportunity } from '@/types/crm';
+import { IOpportunity } from '@/api/opportunity/opportunityTypes';
 
 interface Stage {
   name: string;
@@ -11,8 +12,8 @@ interface Stage {
 
 interface KanbanColumnProps {
   stage: Stage;
-  opportunities: Opportunity[];
-  onOpportunityClick?: (opportunity: Opportunity) => void;
+  opportunities: IOpportunity[];
+  onOpportunityClick?: (opportunity: IOpportunity) => void;
 }
 
 export function KanbanColumn({ stage, opportunities, onOpportunityClick }: KanbanColumnProps) {
@@ -57,3 +58,5 @@ export function KanbanColumn({ stage, opportunities, onOpportunityClick }: Kanba
     </div>
   );
 }
+
+// Please share the contents of KanbanColumn.tsx so I can review the Droppable and Draggable setup.

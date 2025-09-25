@@ -1,11 +1,11 @@
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { KanbanColumn } from './KanbanColumn';
-import { Opportunity } from '@/types/crm';
+import { IOpportunity } from '@/api/opportunity/opportunityTypes';
 
 interface KanbanBoardProps {
-  opportunities: Opportunity[];
-  onOpportunityMove?: (opportunityId: string, newStage: string) => void;
-  onOpportunityClick?: (opportunity: Opportunity) => void;
+  opportunities: IOpportunity[];
+  onOpportunityMove?: (opportunityId: string, newStage: string , movedOpportunity: IOpportunity) => void;
+  onOpportunityClick?: (opportunity: IOpportunity) => void;
 }
 
 const stages = [
@@ -37,15 +37,19 @@ export function KanbanBoard({ opportunities, onOpportunityMove, onOpportunityCli
 
     // Get the new stage from droppableId
     const newStage = destination.droppableId;
-    
+
+    // Find the opportunity being moved
+    const movedOpportunity = opportunities.find(opp => opp.id === draggableId);
+    if (!movedOpportunity) return;
+
     // Call the callback if provided (for future backend integration)
-    onOpportunityMove?.(draggableId, newStage);
+    onOpportunityMove?.(draggableId, newStage , movedOpportunity);
   };
 
   return (
-    <div className="p-6 h-full overflow-auto">
+    <div className="p-6 h-full w-full overflow-auto">
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex gap-6 min-w-max">
+        <div className="flex gap-6 ">
           {stages.map((stage) => {
             const stageOpportunities = getOpportunitiesByStage(stage.name);
             

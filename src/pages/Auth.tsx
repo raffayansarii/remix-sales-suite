@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { SignupForm } from "@/components/auth/SignupForm";
-import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
+import React, { useState } from "react";
 
 type AuthView = "login" | "signup" | "forgot-password";
 
@@ -35,7 +35,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/10">
+   <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/10">
       {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 blur-3xl animate-pulse" />
@@ -50,14 +50,8 @@ const Auth = () => {
       {/* Main content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <div className="backdrop-blur-sm bg-background/90 border-2 border-primary/20 rounded-2xl p-2 shadow-2xl relative overflow-hidden">
-            {/* Inner border glow effect */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/10 via-transparent to-accent/10 p-[1px]">
-              <div className="w-full h-full rounded-2xl bg-background/95" />
-            </div>
-            <div className="relative z-10">
-              {renderAuthForm()}
-            </div>
+          <div className="backdrop-blur-sm bg-background/80 border border-border/50 rounded-2xl p-1 shadow-2xl">
+            {renderAuthForm()}
           </div>
         </div>
       </div>

@@ -19,9 +19,10 @@ import {
   AreaChart
 } from 'recharts';
 import { Opportunity } from '@/types/crm';
+import { IOpportunity } from '@/api/opportunity/opportunityTypes';
 
 interface PipelineAnalyticsProps {
-  opportunities: Opportunity[];
+  opportunities: IOpportunity[];
 }
 
 const STAGE_COLORS = {
@@ -57,14 +58,14 @@ export function PipelineAnalytics({ opportunities }: PipelineAnalyticsProps) {
     // Award Type Distribution
     const awardTypeData = Object.entries(
       opportunities.reduce((acc, opp) => {
-        acc[opp.awardType] = (acc[opp.awardType] || 0) + opp.value;
+        acc[opp.award_type] = (acc[opp.award_type] || 0) + opp.value;
         return acc;
       }, {} as Record<string, number>)
-    ).map(([type, value]) => ({ type, value, count: opportunities.filter(o => o.awardType === type).length }));
+    ).map(([type, value]) => ({ type, value, count: opportunities.filter(o => o.award_type === type).length }));
 
     // Monthly Trends (mock data based on created dates)
     const monthlyData = opportunities.reduce((acc, opp) => {
-      const month = new Date(opp.createdAt).toLocaleString('default', { month: 'short' });
+      const month = new Date(opp.created_at).toLocaleString('default', { month: 'short' });
       if (!acc[month]) acc[month] = { month, opportunities: 0, value: 0 };
       acc[month].opportunities += 1;
       acc[month].value += opp.value;

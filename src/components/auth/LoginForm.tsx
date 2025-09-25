@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLoginMutation } from "@/api/auth/authApi";
+import { useNavigate } from "react-router-dom";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -23,8 +25,9 @@ interface LoginFormProps {
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignup, onSwitchToForgotPassword }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const [loginHandler , loginStatus] = useLoginMutation()
+  const navigate = useNavigate();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -35,29 +38,23 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignup, onSwitch
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true);
     
-    // 🔐 [AUTH] Login attempt console logs
-    console.log("🔐 [AUTH] Login form submitted:", {
-      email: data.email,
-      passwordLength: data.password.length,
-      timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-    });
-
-    // Simulate API call
-    setTimeout(() => {
-      console.log("🔐 [AUTH] Login API call would be made here");
-      console.log("🔐 [AUTH] Expected API endpoint: POST /auth/login");
-      console.log("🔐 [AUTH] Request payload:", { email: data.email });
-      
+    loginHandler({email: data.email, password: data.password}).unwrap().then((res) => {
+      // Store token and user in localStorage
+      localStorage.setItem('token', res.access_token);
+      localStorage.setItem('user', JSON.stringify(res.user));
       toast({
-        title: "Login Attempted",
-        description: "Check console for login details",
+        title: "Login Successful",
+        description: "You have been logged in successfully",
       });
-      
-      setIsLoading(false);
-    }, 1000);
+      navigate("/");
+    }).catch((error) => {
+      toast({
+        title: "Login Failed",
+        description: error.data?.message || "An error occurred during login",
+        variant: "destructive",
+      });
+    });
   };
 
   return (
@@ -101,7 +98,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignup, onSwitch
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
+                className="absolute right-4 top-2 h-4 w-4 text-muted-foreground hover:text-foreground"
               >
                 {showPassword ? <EyeOff /> : <Eye />}
               </button>
@@ -121,8 +118,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignup, onSwitch
             </button>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? (
+          <Button type="submit" className="w-full" disabled={loginStatus.isLoading}>
+            {loginStatus.isLoading ? (
               "Signing in..."
             ) : (
               <>
