@@ -1,22 +1,14 @@
-# Welcome to your Lovable project
+# CRM React App
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/aa851069-0c30-4a96-b686-a5352ebcce8b
-
 ## How can I edit this code?
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/aa851069-0c30-4a96-b686-a5352ebcce8b) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
+You can edit your application using your preferred IDE or directly in GitHub.
 
 **Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+If you want to work locally using your own IDE, you can clone this repo and push changes.
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
@@ -60,14 +52,41 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Authentication & Supabase Integration
 
-Simply open [Lovable](https://lovable.dev/projects/aa851069-0c30-4a96-b686-a5352ebcce8b) and click on Share -> Publish.
+- Uses Supabase Auth (email/password) for secure authentication.
+- Environment variables required in `.env` (placed in `ui/` directory):
+  ```env
+  VITE_SUPABASE_URL=your_supabase_url
+  VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+  ```
+- If these keys are missing or invalid, the app will log an error but continue running.
 
-## Can I connect a custom domain to my Lovable project?
+## State Management & Data Fetching
 
-Yes, you can!
+- Uses Redux Toolkit and RTK Query for state management and API calls.
+- RTK Query baseApi is set up in `src/api/baseApi.ts` and ready for endpoint injection.
+- Redux store is configured in `src/api/store.ts`.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Routing & Layout
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- Routing is handled with `react-router-dom`.
+- The `/login` page is rendered outside of the main layout (`AppLayout`).
+- All other routes are wrapped with `AppLayout` and use `<Outlet />` for nested content.
+
+## How to Run the App
+
+1. Install dependencies:
+   ```sh
+   npm install
+   ```
+2. Set up your `.env` file in the `ui/` directory with the required Supabase keys.
+3. Start the development server:
+   ```sh
+   npm run dev
+   ```
+4. Visit `/login` to access the authentication page.
+
+## Notes
+- If environment variables are missing, the app will not crash but Supabase features will be disabled.
+- You can inject RTK Query endpoints in separate files using `baseApi.injectEndpoints`.
