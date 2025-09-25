@@ -142,7 +142,7 @@ export function TableView({
               <TableRow
                 key={opportunity.id}
                 className={` ${
-                  opportunity.pinned
+                  (typeof opportunity.pinned === 'boolean' ? opportunity.pinned : opportunity.pinned?.state)
                     ? "bg-yellow-50 dark:bg-yellow-950/30 hover:bg-yellow-100"
                     : "hover:bg-muted/50"
                 }`}
@@ -275,7 +275,7 @@ export function TableView({
                                 }}
                               >
                                 {isPinned(opportunity.id) ||
-                                opportunity.pinned ? (
+                                (typeof opportunity.pinned === 'boolean' ? opportunity.pinned : opportunity.pinned?.state) ? (
                                   <>
                                     <PinOff className="mr-2 h-4 w-4" />
                                     Unpin
