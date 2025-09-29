@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,15 +9,30 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { PermissionGuard } from '@/components/guards';
-import { Opportunity } from '@/types/crm';
 import { Calendar, DollarSign, User, Building, FileText, Tag, Clock, Edit, Trash2, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { IOpportunity } from '@/api/opportunity/opportunityTypes';
+
+const opportunitySchema = z.object({
+  title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
+  company: z.string().min(1, 'Company is required').max(100, 'Company must be less than 100 characters'),
+  contact: z.string().min(1, 'Contact is required').max(100, 'Contact must be less than 100 characters'),
+  value: z.number().min(0, 'Value must be positive'),
+  stage: z.string().min(1, 'Stage is required'),
+  award_type: z.string().min(1, 'Award type is required'),
+  agency: z.string().min(1, 'Agency is required').max(100, 'Agency must be less than 100 characters'),
+  solicitation: z.string().min(1, 'Solicitation is required').max(100, 'Solicitation must be less than 100 characters'),
+  probability: z.number().min(0, 'Probability must be between 0 and 100').max(100, 'Probability must be between 0 and 100'),
+  close_date: z.string().min(1, 'Close date is required'),
+  description: z.string().max(1000, 'Description must be less than 1000 characters').optional(),
+});
+
+type OpportunityFormData = z.infer<typeof opportunitySchema>;
 
 interface OpportunityDetailModalProps {
   opportunity: IOpportunity | null;
@@ -32,35 +50,64 @@ export function OpportunityDetailModal({
   onDelete 
 }: OpportunityDetailModalProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState<IOpportunity | null>(null);
+
+  const form = useForm<OpportunityFormData>({
+    resolver: zodResolver(opportunitySchema),
+    defaultValues: {
+      title: '',
+      company: '',
+      contact: '',
+      value: 0,
+      stage: '',
+      award_type: '',
+      agency: '',
+      solicitation: '',
+      probability: 0,
+      close_date: '',
+      description: '',
+    }
+  });
 
   if (!opportunity) return null;
 
   const handleEdit = () => {
-    setEditForm({ ...opportunity });
+    // Populate form with current opportunity data
+    form.reset({
+      title: opportunity.title,
+      company: opportunity.company,
+      contact: opportunity.contact,
+      value: opportunity.value,
+      stage: opportunity.stage,
+      award_type: opportunity.award_type,
+      agency: opportunity.agency,
+      solicitation: opportunity.solicitation,
+      probability: opportunity.probability,
+      close_date: opportunity.close_date,
+      description: opportunity.description || '',
+    });
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    if (editForm) {
-      // TODO: Replace with actual API call to backend
-      // PUT /api/opportunities/:id
-      console.log('🔄 [API CALL] PUT /api/opportunities/' + editForm.id, editForm);
-      
-      onUpdate?.(editForm);
-      setIsEditing(false);
-      toast.success('Opportunity updated successfully');
-    }
+  const handleSave = (data: OpportunityFormData) => {
+    const updatedOpportunity: IOpportunity = {
+      ...opportunity,
+      ...data,
+    };
+    
+    console.log('🚀 [OPPORTUNITY MODAL] Form submitted with data:', data);
+    console.log('🔄 [API CALL] PUT /api/opportunities/' + opportunity.id, updatedOpportunity);
+    
+    onUpdate?.(updatedOpportunity);
+    setIsEditing(false);
+    toast.success('Opportunity updated successfully');
   };
 
   const handleCancel = () => {
-    setEditForm(null);
+    form.reset();
     setIsEditing(false);
   };
 
   const handleDelete = () => {
-    // TODO: Replace with actual API call to backend  
-    // DELETE /api/opportunities/:id
     console.log('🗑️ [API CALL] DELETE /api/opportunities/' + opportunity.id);
     
     onDelete?.(opportunity.id);
@@ -88,8 +135,6 @@ export function OpportunityDetailModal({
       default: return 'bg-gray-500';
     }
   };
-
-  const currentOpportunity = isEditing ? editForm! : opportunity;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -140,7 +185,7 @@ export function OpportunityDetailModal({
                     <X className="w-4 h-4 mr-2" />
                     Cancel
                   </Button>
-                  <Button size="sm" onClick={handleSave}>
+                  <Button type="submit" form="opportunity-form" size="sm">
                     <Save className="w-4 h-4 mr-2" />
                     Save Changes
                   </Button>
@@ -158,254 +203,377 @@ export function OpportunityDetailModal({
           </TabsList>
 
           <TabsContent value="details" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Basic Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center">
-                    <Building className="w-5 h-5 mr-2" />
-                    Basic Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="title">Title</Label>
-                    {isEditing ? (
-                      <Input
-                        id="title"
-                        value={editForm?.title}
-                        onChange={(e) => setEditForm(prev => prev ? {...prev, title: e.target.value} : null)}
-                      />
-                    ) : (
-                      <p className="text-sm font-medium">{currentOpportunity.title}</p>
-                    )}
+            {isEditing ? (
+              <Form {...form}>
+                <form id="opportunity-form" onSubmit={form.handleSubmit(handleSave)} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Basic Information */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg flex items-center">
+                          <Building className="w-5 h-5 mr-2" />
+                          Basic Information
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="title"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Title</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="company"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Company</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="contact"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Contact</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="value"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Value</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  {...field} 
+                                  onChange={(e) => field.onChange(Number(e.target.value))}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </CardContent>
+                    </Card>
+
+                    {/* Status & Timing */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg flex items-center">
+                          <Clock className="w-5 h-5 mr-2" />
+                          Status & Timing
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="stage"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Stage</FormLabel>
+                              <FormControl>
+                                <Select value={field.value} onValueChange={field.onChange}>
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="Lead">Lead</SelectItem>
+                                    <SelectItem value="Qualified">Qualified</SelectItem>
+                                    <SelectItem value="Proposal">Proposal</SelectItem>
+                                    <SelectItem value="Negotiation">Negotiation</SelectItem>
+                                    <SelectItem value="Closed Won">Closed Won</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="award_type"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Award Type</FormLabel>
+                              <FormControl>
+                                <Select value={field.value} onValueChange={field.onChange}>
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="Contract">Contract</SelectItem>
+                                    <SelectItem value="Grant">Grant</SelectItem>
+                                    <SelectItem value="Cooperative Agreement">Cooperative Agreement</SelectItem>
+                                    <SelectItem value="Purchase Order">Purchase Order</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="probability"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Probability</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  min="0" 
+                                  max="100" 
+                                  {...field} 
+                                  onChange={(e) => field.onChange(Number(e.target.value))}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="close_date"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Close Date</FormLabel>
+                              <FormControl>
+                                <Input type="date" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </CardContent>
+                    </Card>
                   </div>
 
-                  <div>
-                    <Label htmlFor="company">Company</Label>
-                    {isEditing ? (
-                      <Input
-                        id="company"
-                        value={editForm?.company}
-                        onChange={(e) => setEditForm(prev => prev ? {...prev, company: e.target.value} : null)}
+                  {/* Government Details */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center">
+                        <FileText className="w-5 h-5 mr-2" />
+                        Government Details
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="agency"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Agency</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    ) : (
-                      <p className="text-sm">{currentOpportunity.company}</p>
-                    )}
-                  </div>
 
-                  <div>
-                    <Label htmlFor="contact">Contact</Label>
-                    {isEditing ? (
-                      <Input
-                        id="contact"
-                        value={editForm?.contact}
-                        onChange={(e) => setEditForm(prev => prev ? {...prev, contact: e.target.value} : null)}
+                      <FormField
+                        control={form.control}
+                        name="solicitation"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Solicitation</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        <span className="text-sm">{currentOpportunity.contact}</span>
+                    </CardContent>
+                  </Card>
+
+                  {/* Description */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Description</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Textarea rows={4} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
+                </form>
+              </Form>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Basic Information */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center">
+                        <Building className="w-5 h-5 mr-2" />
+                        Basic Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <Label htmlFor="title">Title</Label>
+                        <p className="text-sm font-medium">{opportunity.title}</p>
                       </div>
-                    )}
-                  </div>
 
-                  <div>
-                    <Label htmlFor="value">Value</Label>
-                    {isEditing ? (
-                      <Input
-                        id="value"
-                        type="number"
-                        value={editForm?.value}
-                        onChange={(e) => setEditForm(prev => prev ? {...prev, value: Number(e.target.value)} : null)}
-                      />
-                    ) : (
-                      <div className="flex items-center gap-2 text-green-600">
-                        <DollarSign className="w-4 h-4" />
-                        <span className="text-sm font-semibold">
-                          ${currentOpportunity.value.toLocaleString()}
-                        </span>
+                      <div>
+                        <Label htmlFor="company">Company</Label>
+                        <p className="text-sm">{opportunity.company}</p>
                       </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
 
-              {/* Status & Timing */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center">
-                    <Clock className="w-5 h-5 mr-2" />
-                    Status & Timing
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="stage">Stage</Label>
-                    {isEditing ? (
-                      <Select
-                        value={editForm?.stage}
-                        onValueChange={(value) => setEditForm(prev => prev ? {...prev, stage: value as any} : null)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Lead">Lead</SelectItem>
-                          <SelectItem value="Qualified">Qualified</SelectItem>
-                          <SelectItem value="Proposal">Proposal</SelectItem>
-                          <SelectItem value="Negotiation">Negotiation</SelectItem>
-                          <SelectItem value="Closed Won">Closed Won</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <Badge className={`${getStageColor(currentOpportunity.stage)} text-white border-0`}>
-                        {currentOpportunity.stage}
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="award_type">Award Type</Label>
-                    {isEditing ? (
-                      <Select
-                        value={editForm?.award_type}
-                        onValueChange={(value) => setEditForm(prev => prev ? {...prev, award_type: value as any} : null)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Contract">Contract</SelectItem>
-                          <SelectItem value="Grant">Grant</SelectItem>
-                          <SelectItem value="Cooperative Agreement">Cooperative Agreement</SelectItem>
-                          <SelectItem value="Purchase Order">Purchase Order</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <Badge className={`${getAwardTypeColor(currentOpportunity.award_type)} text-white border-0`}>
-                        {currentOpportunity.award_type}
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="probability">Probability</Label>
-                    {isEditing ? (
-                      <Input
-                        id="probability"
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={editForm?.probability}
-                        onChange={(e) => setEditForm(prev => prev ? {...prev, probability: Number(e.target.value)} : null)}
-                      />
-                    ) : (
-                      <p className="text-sm">{currentOpportunity.probability}%</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="close_date">Close Date</Label>
-                    {isEditing ? (
-                      <Input
-                        id="close_date"
-                        type="date"
-                        value={editForm?.close_date}
-                        onChange={(e) => setEditForm(prev => prev ? {...prev, close_date: e.target.value} : null)}
-                      />
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        <span className="text-sm">
-                          {new Date(currentOpportunity.close_date).toLocaleDateString()}
-                        </span>
+                      <div>
+                        <Label htmlFor="contact">Contact</Label>
+                        <div className="flex items-center gap-2">
+                          <User className="w-4 h-4" />
+                          <span className="text-sm">{opportunity.contact}</span>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
 
-            {/* Government Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center">
-                  <FileText className="w-5 h-5 mr-2" />
-                  Government Details
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="agency">Agency</Label>
-                  {isEditing ? (
-                    <Input
-                      id="agency"
-                      value={editForm?.agency}
-                      onChange={(e) => setEditForm(prev => prev ? {...prev, agency: e.target.value} : null)}
-                    />
-                  ) : (
-                    <p className="text-sm">{currentOpportunity.agency}</p>
-                  )}
+                      <div>
+                        <Label htmlFor="value">Value</Label>
+                        <div className="flex items-center gap-2 text-green-600">
+                          <DollarSign className="w-4 h-4" />
+                          <span className="text-sm font-semibold">
+                            ${opportunity.value.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Status & Timing */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center">
+                        <Clock className="w-5 h-5 mr-2" />
+                        Status & Timing
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <Label htmlFor="stage">Stage</Label>
+                        <Badge className={`${getStageColor(opportunity.stage)} text-white border-0`}>
+                          {opportunity.stage}
+                        </Badge>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="award_type">Award Type</Label>
+                        <Badge className={`${getAwardTypeColor(opportunity.award_type)} text-white border-0`}>
+                          {opportunity.award_type}
+                        </Badge>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="probability">Probability</Label>
+                        <p className="text-sm">{opportunity.probability}%</p>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="close_date">Close Date</Label>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          <span className="text-sm">
+                            {new Date(opportunity.close_date).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
 
-                <div>
-                  <Label htmlFor="solicitation">Solicitation</Label>
-                  {isEditing ? (
-                    <Input
-                      id="solicitation"
-                      value={editForm?.solicitation}
-                      onChange={(e) => setEditForm(prev => prev ? {...prev, solicitation: e.target.value} : null)}
-                    />
-                  ) : (
-                    <p className="text-sm font-mono">{currentOpportunity.solicitation}</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                {/* Government Details */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center">
+                      <FileText className="w-5 h-5 mr-2" />
+                      Government Details
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="agency">Agency</Label>
+                      <p className="text-sm">{opportunity.agency}</p>
+                    </div>
 
-            {/* Description */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Description</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isEditing ? (
-                  <Textarea
-                    value={editForm?.description || ''}
-                    onChange={(e) => setEditForm(prev => prev ? {...prev, description: e.target.value} : null)}
-                    rows={4}
-                  />
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    {currentOpportunity.description || 'No description available'}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+                    <div>
+                      <Label htmlFor="solicitation">Solicitation</Label>
+                      <p className="text-sm font-mono">{opportunity.solicitation}</p>
+                    </div>
+                  </CardContent>
+                </Card>
 
-            {/* Tags */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center">
-                  <Tag className="w-5 h-5 mr-2" />
-                  Tags
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {currentOpportunity?.tags?.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {currentOpportunity.tags.map((tag) => (
-                      <Badge key={tag.name} variant="secondary" className="text-xs">
-                        {tag.name}
-                      </Badge>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No tags added</p>
-                )}
-              </CardContent>
-            </Card>
+                {/* Description */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Description</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      {opportunity.description || 'No description available'}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Tags */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center">
+                      <Tag className="w-5 h-5 mr-2" />
+                      Tags
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {opportunity?.tags?.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {opportunity.tags.map((tag, index) => (
+                          <Badge key={tag.id || index} variant="secondary" className="text-xs">
+                            {tag.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No tags added</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </>
+            )}
           </TabsContent>
 
           <TabsContent value="timeline" className="space-y-4">
@@ -420,7 +588,7 @@ export function OpportunityDetailModal({
                     <div>
                       <p className="text-sm font-medium">Opportunity Created</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(currentOpportunity.created_at).toLocaleDateString()}
+                        {new Date(opportunity.created_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
@@ -429,7 +597,7 @@ export function OpportunityDetailModal({
                     <div>
                       <p className="text-sm font-medium">Last Updated</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(currentOpportunity.updated_at).toLocaleDateString()}
+                        {new Date(opportunity.updated_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
@@ -445,7 +613,7 @@ export function OpportunityDetailModal({
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Notes and comments feature coming soon...
+                  Notes functionality coming soon...
                 </p>
               </CardContent>
             </Card>
