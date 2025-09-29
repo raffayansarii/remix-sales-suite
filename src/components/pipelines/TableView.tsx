@@ -17,6 +17,7 @@ import {
   PinOff,
   Palette,
   Settings,
+  Trash2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -33,6 +34,7 @@ import { useColumnManager } from "@/hooks/useColumnManager";
 import { ColumnManagerModal } from "./ColumnManagerModal";
 import { CreateColumnButton } from "./CreateColumnButton";
 import { IOpportunity } from "@/api/opportunity/opportunityTypes";
+import { DeleteModal } from "@/components/ui/delete-modal";
 import {
   Pagination,
   PaginationContent,
@@ -74,6 +76,8 @@ export function TableView({
   const [selectedOpportunity, setSelectedOpportunity] =
     useState<IOpportunity | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [opportunityToDelete, setOpportunityToDelete] = useState<IOpportunity | null>(null);
 
   const columnManager = useColumnManager();
   const { togglePin, isPinned } = usePinnedItems<IOpportunity>();
@@ -81,6 +85,19 @@ export function TableView({
   const handleViewOpportunity = (opportunity: IOpportunity) => {
     setSelectedOpportunity(opportunity);
     setDetailModalOpen(true);
+  };
+
+  const handleDeleteOpportunity = (opportunity: IOpportunity) => {
+    setOpportunityToDelete(opportunity);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDeleteOpportunity = async () => {
+    if (opportunityToDelete) {
+      console.log("Deleting opportunity:", opportunityToDelete);
+      // Add your delete API call here
+      setOpportunityToDelete(null);
+    }
   };
 
   const getStageColor = (stage: string) => {
@@ -308,6 +325,16 @@ export function TableView({
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit
                               </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="cursor-pointer text-destructive focus:text-destructive"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteOpportunity(opportunity);
+                                }}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         ); // Server-side: actions handled elsewhere
@@ -369,6 +396,13 @@ export function TableView({
         open={columnModalOpen}
         onOpenChange={setColumnModalOpen}
         columnManager={columnManager}
+      />
+      <DeleteModal
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        title="Delete Opportunity"
+        itemName={opportunityToDelete?.title}
+        onConfirm={confirmDeleteOpportunity}
       />
     </div>
   );
