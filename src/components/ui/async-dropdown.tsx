@@ -113,9 +113,9 @@ export function AsyncDropdown({
     }
   }, [debouncedSearch, searchConfig])
 
-  // Use the RTK Query hook
+  // Use the RTK Query hook - only when dropdown is open
   const { data, isLoading, isError } = useSearchQuery({
-    search: searchParams,
+    search: open ? searchParams : undefined,
     limit: searchConfig.limit
   })
 
