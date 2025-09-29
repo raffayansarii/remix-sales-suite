@@ -81,9 +81,12 @@ export function AsyncDropdown({
 
   // Build PostgREST query parameters
   const searchParams = useMemo(() => {
-    if (!debouncedSearch.trim()) return {}
-    
     const { searchFields, operator = "ilike" } = searchConfig
+    
+    // If no search term, return empty params to get all results (with limit)
+    if (!debouncedSearch.trim()) {
+      return {}
+    }
     
     // Create PostgREST query for multiple fields
     if (searchFields.length === 1) {
