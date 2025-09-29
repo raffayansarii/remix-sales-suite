@@ -31,7 +31,7 @@ export interface AsyncDropdownProps {
   disabled?: boolean
   className?: string
   // RTK Query hook - should be a lazy query hook
-  useSearchQuery: (arg: { search: string; limit?: number }) => {
+  useSearchQuery: (arg: { search: any; limit?: number }) => {
     data?: any[]
     isLoading: boolean
     isError: boolean
@@ -79,29 +79,40 @@ export function AsyncDropdown({
     return () => clearTimeout(timer)
   }, [searchValue, debounceMs])
 
-  // Build PostgREST query string
-  const searchQuery = useMemo(() => {
-    if (!debouncedSearch.trim()) return ""
+  // Build PostgREST query parameters
+  const searchParams = useMemo(() => {
+    if (!debouncedSearch.trim()) return {}
     
     const { searchFields, operator = "ilike" } = searchConfig
     
     // Create PostgREST query for multiple fields
-    const conditions = searchFields.map(field => {
+    if (searchFields.length === 1) {
+      const field = searchFields[0]
       if (operator === "ilike") {
-        return `${field}.${operator}.*${debouncedSearch}*`
+        return { [field]: `ilike.*${debouncedSearch}*` }
       } else if (operator === "fts") {
-        return `${field}.${operator}.${debouncedSearch}`
+        return { [field]: `fts.${debouncedSearch}` }
       } else {
-        return `${field}.${operator}.${debouncedSearch}`
+        return { [field]: `${operator}.${debouncedSearch}` }
       }
-    })
-    
-    return conditions.length > 1 ? `or=(${conditions.join(",")})` : conditions[0]
+    } else {
+      // Multiple fields - use 'or' condition
+      const conditions = searchFields.map(field => {
+        if (operator === "ilike") {
+          return `${field}.ilike.*${debouncedSearch}*`
+        } else if (operator === "fts") {
+          return `${field}.fts.${debouncedSearch}`
+        } else {
+          return `${field}.${operator}.${debouncedSearch}`
+        }
+      })
+      return { or: `(${conditions.join(",")})` }
+    }
   }, [debouncedSearch, searchConfig])
 
   // Use the RTK Query hook
   const { data, isLoading, isError } = useSearchQuery({
-    search: searchQuery,
+    search: searchParams,
     limit: searchConfig.limit
   })
 
