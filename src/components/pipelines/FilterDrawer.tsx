@@ -203,42 +203,103 @@ export function FilterDrawer({
   };
 
   function buildPostgresQueryString(groups: FilterGroupType[]): string {
-    return groups
-      .map((group) => {
-        let op = "";
-        let val = group.value;
-        switch (group.operator) {
-          case "contains_exactly":
-            op = "ilike";
-            val = `%${val}%`;
-            break;
-          case "equals":
-            op = "eq";
-            break;
-          case "not_equals":
-            op = "neq";
-            break;
-          case "greater_than":
-            op = "gt";
-            break;
-          case "less_than":
-            op = "lt";
-            break;
-          case "is_empty":
-            op = "is";
-            val = "null";
-            break;
-          case "is_not_empty":
-            op = "not.is";
-            val = "null";
-            break;
-          // Add more as needed
-          default:
-            op = group.operator;
-        }
-        return `${group.field}=${op}.${val}`;
-      })
-      .join("&");
+    const params: string[] = [];
+
+    groups.forEach((group) => {
+      const field = group.field;
+      const value = group.value;
+
+      switch (group.operator) {
+        // Text operators
+        case "contains_exactly":
+          params.push(`${field}=ilike.%${value}%`);
+          break;
+        case "contains_any_of":
+          if (Array.isArray(value)) {
+            params.push(`${field}=in.(${value.join(",")})`);
+          } else {
+            const values = value.split(",").map((v) => v.trim());
+            params.push(`${field}=in.(${values.join(",")})`);
+          }
+          break;
+        case "contains_all_of":
+          if (Array.isArray(value)) {
+            value.forEach((v) => params.push(`${field}=cs.{${v}}`));
+          } else {
+            const values = value.split(",").map((v) => v.trim());
+            values.forEach((v) => params.push(`${field}=cs.{${v}}`));
+          }
+          break;
+        case "doesnt_contain_exactly":
+          params.push(`${field}=not.ilike.%${value}%`);
+          break;
+        case "ends_with_any_of":
+          if (Array.isArray(value)) {
+            params.push(`${field}=ilike.%${value.join("|%")}`);
+          } else {
+            params.push(`${field}=ilike.%${value}`);
+          }
+          break;
+        case "starts_with_any_of":
+          if (Array.isArray(value)) {
+            params.push(`${field}=ilike.${value.join("%|")}%`);
+          } else {
+            params.push(`${field}=ilike.${value}%`);
+          }
+          break;
+        case "has_never_contained_exactly":
+          params.push(`${field}=not.ilike.%${value}%`);
+          break;
+
+        // Equality operators
+        case "equals":
+          params.push(`${field}=eq.${value}`);
+          break;
+        case "not_equals":
+          params.push(`${field}=neq.${value}`);
+          break;
+
+        // Null checks
+        case "is_empty":
+          params.push(`${field}=is.null`);
+          break;
+        case "is_not_empty":
+          params.push(`${field}=not.is.null`);
+          break;
+
+        // Numeric comparisons
+        case "greater_than":
+          params.push(`${field}=gt.${value}`);
+          break;
+        case "less_than":
+          params.push(`${field}=lt.${value}`);
+          break;
+        case "between":
+          if (Array.isArray(value) && value.length === 2) {
+            params.push(`${field}=gte.${value[0]}`);
+            params.push(`${field}=lte.${value[1]}`);
+          }
+          break;
+
+        // Date operators
+        case "before_date":
+          params.push(`${field}=lt.${value}`);
+          break;
+        case "after_date":
+          params.push(`${field}=gt.${value}`);
+          break;
+        case "in_last_days":
+          const daysAgo = new Date();
+          daysAgo.setDate(daysAgo.getDate() - parseInt(value as string));
+          params.push(`${field}=gte.${daysAgo.toISOString()}`);
+          break;
+
+        default:
+          console.warn(`Unknown operator: ${group.operator}`);
+      }
+    });
+
+    return params.join("&");
   }
 
   return (
