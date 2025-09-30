@@ -106,11 +106,12 @@ export function FilterDrawer({
     );
 
     const filterString = buildPostgresQueryString(validGroups);
+    console.log(filterString , validGroups)
     onApplyFilters(filterString);
-    toast({
-      title: "Filters applied",
-      description: `Applied ${validGroups.length} filter rule(s)`,
-    });
+    // toast({
+    //   title: "Filters applied",
+    //   description: `Applied ${validGroups.length} filter rule(s)`,
+    // });
   };
 
   const saveFilterConfig = () => {
