@@ -1,35 +1,46 @@
-import { useState, useEffect } from 'react';
-import { X, Plus, Save, FolderOpen, Trash2, Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { FilterGroup } from './FilterGroup';
-import { FilterGroup as FilterGroupType, FilterConfig, FILTER_FIELDS } from '@/types/filters';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { X, Plus, Save, FolderOpen, Trash2, Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { FilterGroup } from "./FilterGroup";
+import {
+  FilterGroup as FilterGroupType,
+  FilterConfig,
+  FILTER_FIELDS,
+} from "@/types/filters";
+import { useToast } from "@/hooks/use-toast";
+import { FilterDrawerProps } from "./types-and-schemas";
 
-interface FilterDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onApplyFilters: (queryString: string ) => void;
-  activeFilters: string;
-}
-
-export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }: FilterDrawerProps) {
+export function FilterDrawer({
+  isOpen,
+  onClose,
+  onApplyFilters,
+  activeFilters,
+}: FilterDrawerProps) {
   const [filterGroups, setFilterGroups] = useState<FilterGroupType[]>([]);
   const [savedConfigs, setSavedConfigs] = useState<FilterConfig[]>([]);
-  const [selectedConfig, setSelectedConfig] = useState<string>('');
-  const [configName, setConfigName] = useState('');
+  const [selectedConfig, setSelectedConfig] = useState<string>("");
+  const [configName, setConfigName] = useState("");
   const [showSaveForm, setShowSaveForm] = useState(false);
   const { toast } = useToast();
 
   // Initialize with active filters or create a default group
   useEffect(() => {
-    if (activeFilters && typeof activeFilters === 'string' && activeFilters.length > 0) {
+    if (
+      activeFilters &&
+      typeof activeFilters === "string" &&
+      activeFilters.length > 0
+    ) {
       // Optionally, parse the query string back to filterGroups if needed
       // For now, just reset to a single default group
       setFilterGroups([]);
@@ -42,12 +53,16 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
   // TODO: Replace with API calls to backend for filter persistence
   // Load saved configs from localStorage
   useEffect(() => {
-    console.log('💾 [FILTERS] Loading saved filter configurations');
-    const saved = localStorage.getItem('filterConfigs');
+    console.log("💾 [FILTERS] Loading saved filter configurations");
+    const saved = localStorage.getItem("filterConfigs");
     if (saved) {
       const configs = JSON.parse(saved);
       setSavedConfigs(configs);
-      console.log('💾 [FILTERS] Loaded', configs.length, 'saved configurations');
+      console.log(
+        "💾 [FILTERS] Loaded",
+        configs.length,
+        "saved configurations"
+      );
     }
   }, []);
 
@@ -57,8 +72,8 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
     const newGroup: FilterGroupType = {
       id: generateId(),
       field: FILTER_FIELDS[0].value,
-      operator: 'contains_exactly',
-      value: ''
+      operator: "contains_exactly",
+      value: "",
     };
     setFilterGroups([...filterGroups, newGroup]);
   };
@@ -76,22 +91,27 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
 
   const clearAllFilters = () => {
     setFilterGroups([]);
-    addFilterGroup();
-    onApplyFilters('');
+    // addFilterGroup();
+    onApplyFilters("");
   };
 
   const applyFilters = () => {
-    const validGroups = filterGroups.filter(group => 
-      group.field && group.operator && 
-      (!['is_empty', 'is_not_empty'].includes(group.operator) ? group.value : true)
+    const validGroups = filterGroups.filter(
+      (group) =>
+        group.field &&
+        group.operator &&
+        (!["is_empty", "is_not_empty"].includes(group.operator)
+          ? group.value
+          : true)
     );
-    
-    const filterString = buildPostgresQueryString(validGroups)
-    onApplyFilters(filterString);
-    toast({
-      title: "Filters applied",
-      description: `Applied ${validGroups.length} filter rule(s)`,
-    });
+
+    const filterString = buildPostgresQueryString(validGroups);
+    console.log(filterString , validGroups)
+    // onApplyFilters(filterString);
+    // toast({
+    //   title: "Filters applied",
+    //   description: `Applied ${validGroups.length} filter rule(s)`,
+    // });
   };
 
   const saveFilterConfig = () => {
@@ -99,16 +119,20 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
       toast({
         title: "Error",
         description: "Please enter a configuration name",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
-    console.log('💾 [FILTERS] Saving filter configuration:', configName);
+    console.log("💾 [FILTERS] Saving filter configuration:", configName);
 
-    const validGroups = filterGroups.filter(group => 
-      group.field && group.operator && 
-      (!['is_empty', 'is_not_empty'].includes(group.operator) ? group.value : true)
+    const validGroups = filterGroups.filter(
+      (group) =>
+        group.field &&
+        group.operator &&
+        (!["is_empty", "is_not_empty"].includes(group.operator)
+          ? group.value
+          : true)
     );
 
     const newConfig: FilterConfig = {
@@ -116,29 +140,34 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
       name: configName,
       groups: validGroups,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
-    console.log('🌐 [API] Would call POST /api/filter-configs', newConfig);
+    console.log("🌐 [API] Would call POST /api/filter-configs", newConfig);
 
-    const existingIndex = savedConfigs.findIndex(config => config.name === configName);
+    const existingIndex = savedConfigs.findIndex(
+      (config) => config.name === configName
+    );
     let updatedConfigs;
-    
+
     if (existingIndex >= 0) {
-      console.log('💾 [FILTERS] Updating existing configuration');
+      console.log("💾 [FILTERS] Updating existing configuration");
       updatedConfigs = [...savedConfigs];
-      updatedConfigs[existingIndex] = { ...newConfig, id: savedConfigs[existingIndex].id };
+      updatedConfigs[existingIndex] = {
+        ...newConfig,
+        id: savedConfigs[existingIndex].id,
+      };
     } else {
-      console.log('💾 [FILTERS] Creating new configuration');
+      console.log("💾 [FILTERS] Creating new configuration");
       updatedConfigs = [...savedConfigs, newConfig];
     }
 
     setSavedConfigs(updatedConfigs);
     // TODO: Replace localStorage with API call - POST /api/filter-configs
-    localStorage.setItem('filterConfigs', JSON.stringify(updatedConfigs));
-    setConfigName('');
+    localStorage.setItem("filterConfigs", JSON.stringify(updatedConfigs));
+    setConfigName("");
     setShowSaveForm(false);
-    
+
     toast({
       title: "Configuration saved",
       description: `Filter configuration "${newConfig.name}" has been saved`,
@@ -146,7 +175,7 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
   };
 
   const loadFilterConfig = (configId: string) => {
-    const config = savedConfigs.find(c => c.id === configId);
+    const config = savedConfigs.find((c) => c.id === configId);
     if (config) {
       setFilterGroups(config.groups);
       setSelectedConfig(configId);
@@ -158,13 +187,13 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
   };
 
   const deleteFilterConfig = (configId: string) => {
-    const config = savedConfigs.find(c => c.id === configId);
+    const config = savedConfigs.find((c) => c.id === configId);
     if (config) {
-      const updated = savedConfigs.filter(c => c.id !== configId);
+      const updated = savedConfigs.filter((c) => c.id !== configId);
       setSavedConfigs(updated);
-      localStorage.setItem('filterConfigs', JSON.stringify(updated));
+      localStorage.setItem("filterConfigs", JSON.stringify(updated));
       if (selectedConfig === configId) {
-        setSelectedConfig('');
+        setSelectedConfig("");
       }
       toast({
         title: "Configuration deleted",
@@ -175,91 +204,41 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
 
   function buildPostgresQueryString(groups: FilterGroupType[]): string {
     return groups
-      .map(group => {
-        let op = '';
-        let val: string | string[] = group.value;
-        
+      .map((group) => {
+        let op = "";
+        let val = group.value;
         switch (group.operator) {
-          // Text operators
-          case 'contains_exactly':
-            op = 'ilike';
+          case "contains_exactly":
+            op = "ilike";
             val = `%${val}%`;
             break;
-          case 'contains_any_of':
-            // Split by comma and create OR condition with ilike
-            const anyValues = Array.isArray(val) ? val : String(val).split(',').map(v => v.trim());
-            return anyValues.map(v => `${group.field}=ilike.%${v}%`).join('&');
-          case 'contains_all_of':
-            // Split by comma and create AND condition with ilike
-            const allValues = Array.isArray(val) ? val : String(val).split(',').map(v => v.trim());
-            return allValues.map(v => `${group.field}=ilike.%${v}%`).join('&');
-          case 'doesnt_contain_exactly':
-            op = 'not.ilike';
-            val = `%${val}%`;
+          case "equals":
+            op = "eq";
             break;
-          case 'ends_with_any_of':
-            const endsValues = Array.isArray(val) ? val : String(val).split(',').map(v => v.trim());
-            return endsValues.map(v => `${group.field}=ilike.%${v}`).join('&');
-          case 'starts_with_any_of':
-            const startsValues = Array.isArray(val) ? val : String(val).split(',').map(v => v.trim());
-            return startsValues.map(v => `${group.field}=ilike.${v}%`).join('&');
-          case 'has_never_contained_exactly':
-            op = 'not.ilike';
-            val = `%${val}%`;
+          case "not_equals":
+            op = "neq";
             break;
-          
-          // Equality operators
-          case 'equals':
-            op = 'eq';
+          case "greater_than":
+            op = "gt";
             break;
-          case 'not_equals':
-            op = 'neq';
+          case "less_than":
+            op = "lt";
             break;
-          
-          // Comparison operators
-          case 'greater_than':
-            op = 'gt';
+          case "is_empty":
+            op = "is";
+            val = "null";
             break;
-          case 'less_than':
-            op = 'lt';
+          case "is_not_empty":
+            op = "not.is";
+            val = "null";
             break;
-          case 'between':
-            // Expects value as "min,max"
-            const [min, max] = Array.isArray(val) ? val : String(val).split(',').map(v => v.trim());
-            return `${group.field}=gte.${min}&${group.field}=lte.${max}`;
-          
-          // Date operators
-          case 'before_date':
-            op = 'lt';
-            break;
-          case 'after_date':
-            op = 'gt';
-            break;
-          case 'in_last_days':
-            // Calculate date X days ago and use gte
-            const daysAgo = new Date();
-            daysAgo.setDate(daysAgo.getDate() - parseInt(String(val)));
-            op = 'gte';
-            val = daysAgo.toISOString().split('T')[0];
-            break;
-          
-          // Null/Empty operators
-          case 'is_empty':
-            op = 'is';
-            val = 'null';
-            break;
-          case 'is_not_empty':
-            op = 'not.is';
-            val = 'null';
-            break;
-          
+          // Add more as needed
           default:
             op = group.operator;
         }
-        
         return `${group.field}=${op}.${val}`;
       })
-      .join('&');
+      .join("&");
   }
 
   return (
@@ -277,7 +256,9 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
             {/* Saved Configurations */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">Saved Filter Configurations</Label>
+                <Label className="text-sm font-medium">
+                  Saved Filter Configurations
+                </Label>
                 <Button
                   variant="outline"
                   size="sm"
@@ -300,7 +281,11 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
                   <Button size="sm" onClick={saveFilterConfig}>
                     Save
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => setShowSaveForm(false)}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowSaveForm(false)}
+                  >
                     Cancel
                   </Button>
                 </div>
@@ -309,11 +294,15 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
               {savedConfigs.length > 0 && (
                 <div className="space-y-2">
                   {savedConfigs.map((config) => (
-                    <div key={config.id} className="flex items-center gap-2 p-2 border rounded bg-card">
+                    <div
+                      key={config.id}
+                      className="flex items-center gap-2 p-2 border rounded bg-card"
+                    >
                       <div className="flex-1">
                         <div className="font-medium text-sm">{config.name}</div>
                         <div className="text-xs text-muted-foreground">
-                          {config.groups.length} rule(s) • {new Date(config.createdAt).toLocaleDateString()}
+                          {config.groups.length} rule(s) •{" "}
+                          {new Date(config.createdAt).toLocaleDateString()}
                         </div>
                       </div>
                       <Button
@@ -354,7 +343,9 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
                   <FilterGroup
                     key={group.id}
                     group={group}
-                    onUpdate={(updatedGroup) => updateFilterGroup(index, updatedGroup)}
+                    onUpdate={(updatedGroup) =>
+                      updateFilterGroup(index, updatedGroup)
+                    }
                     onRemove={() => removeFilterGroup(index)}
                     canRemove={filterGroups.length > 1}
                   />

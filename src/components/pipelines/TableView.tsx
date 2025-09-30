@@ -34,7 +34,6 @@ import { useColumnManager } from "@/hooks/useColumnManager";
 import { ColumnManagerModal } from "./ColumnManagerModal";
 import { CreateColumnButton } from "./CreateColumnButton";
 import { IOpportunity } from "@/api/opportunity/opportunityTypes";
-import { DeleteModal } from "@/components/ui/delete-modal";
 import {
   Pagination,
   PaginationContent,
@@ -43,27 +42,10 @@ import {
   PaginationNext,
   PaginationLink,
 } from "@/components/ui/pagination";
-
-interface TableViewProps {
-  opportunities: IOpportunity[];
-  currentPage: number;
-  rowsPerPage: number;
-  totalCount: number;
-  onPageChange: (page: number) => void;
-}
-
-type SortField =
-  | "title"
-  | "company"
-  | "value"
-  | "stage"
-  | "awardType"
-  | "agency"
-  | "solicitation"
-  | "createdAt"
-  | "probability";
-
-type SortDirection = "asc" | "desc";
+import { TableViewProps } from "./types-and-schemas";
+import { EditOpportunityModal } from "./EditOpportunityModal";
+import { useDeleteOpportunityMutation, useUpdateOpportunityMutation } from "@/api/opportunity/opportunityApi";
+import { DeleteModal } from "../ui/delete-modal";
 
 export function TableView({
   opportunities,
@@ -72,19 +54,25 @@ export function TableView({
   totalCount,
   onPageChange,
 }: TableViewProps) {
+
   const [columnModalOpen, setColumnModalOpen] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] =
     useState<IOpportunity | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [opportunityToDelete, setOpportunityToDelete] = useState<IOpportunity | null>(null);
+  const [opportunityToDelete, setOpportunityToDelete] =
+    useState<IOpportunity | null>(null);
 
   const columnManager = useColumnManager();
   const { togglePin, isPinned } = usePinnedItems<IOpportunity>();
 
-  const handleViewOpportunity = (opportunity: IOpportunity) => {
+  const handleViewOpportunity = (
+    opportunity: IOpportunity,
+    mode: "view" | "edit"
+  ) => {
     setSelectedOpportunity(opportunity);
-    setDetailModalOpen(true);
+    mode === "view" ? setViewModalOpen(true) : setDetailModalOpen(true);
   };
 
   const handleDeleteOpportunity = (opportunity: IOpportunity) => {
@@ -92,13 +80,22 @@ export function TableView({
     setDeleteModalOpen(true);
   };
 
-  const confirmDeleteOpportunity = async () => {
+    const confirmDeleteOpportunity = async () => {
     if (opportunityToDelete) {
       console.log("Deleting opportunity:", opportunityToDelete);
+      deleteTrigger(opportunityToDelete.id)
+        .unwrap()
+        .then(() => {
+          setDeleteModalOpen(false);
+          setOpportunityToDelete(null);
+        })
+        .catch(() => {
+          // Handle error (optional)
+        });
       // Add your delete API call here
-      setOpportunityToDelete(null);
     }
   };
+
 
   const getStageColor = (stage: string) => {
     const stageColors = {
@@ -124,7 +121,8 @@ export function TableView({
   };
 
   const totalPages = Math.ceil(totalCount / rowsPerPage);
-
+  const [updateTrigger, updateStatus] = useUpdateOpportunityMutation();
+  const [deleteTrigger, deleteStatus] = useDeleteOpportunityMutation();
   return (
     <div className="p-6 h-full overflow-auto">
       <div className="mb-4 flex items-center justify-between">
@@ -159,7 +157,7 @@ export function TableView({
               <TableRow
                 key={opportunity.id}
                 className={` ${
-                  (typeof opportunity.pinned === 'boolean' ? opportunity.pinned : opportunity.pinned?.state)
+                  opportunity.pinned
                     ? "bg-yellow-50 dark:bg-yellow-950/30 hover:bg-yellow-100"
                     : "hover:bg-muted/50"
                 }`}
@@ -292,7 +290,7 @@ export function TableView({
                                 }}
                               >
                                 {isPinned(opportunity.id) ||
-                                (typeof opportunity.pinned === 'boolean' ? opportunity.pinned : opportunity.pinned?.state) ? (
+                                opportunity.pinned ? (
                                   <>
                                     <PinOff className="mr-2 h-4 w-4" />
                                     Unpin
@@ -309,7 +307,7 @@ export function TableView({
                                 className="cursor-pointer"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleViewOpportunity(opportunity);
+                                  handleViewOpportunity(opportunity, "view");
                                 }}
                               >
                                 <Eye className="mr-2 h-4 w-4" />
@@ -319,7 +317,7 @@ export function TableView({
                                 className="cursor-pointer"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleViewOpportunity(opportunity);
+                                  handleViewOpportunity(opportunity, "edit");
                                 }}
                               >
                                 <Edit className="mr-2 h-4 w-4" />
@@ -397,12 +395,53 @@ export function TableView({
         onOpenChange={setColumnModalOpen}
         columnManager={columnManager}
       />
-      <DeleteModal
+      {detailModalOpen && (
+        <EditOpportunityModal
+          isOpen
+          onClose={() => setDetailModalOpen(false)}
+          onSubmit={(data) => {
+            updateTrigger({
+              id: selectedOpportunity.id,
+              body: data,
+            })
+              .unwrap()
+              .then(() => {
+                setDetailModalOpen(false);
+              })
+              .catch(() => {});
+          }}
+          status={updateStatus}
+          initialData={{
+            ...selectedOpportunity,
+            value: selectedOpportunity.value.toString(),
+          }}
+        />
+      )}
+      {viewModalOpen && (
+        <EditOpportunityModal
+          isOpen
+          viewOnly
+          onClose={() => setViewModalOpen(false)}
+          onSubmit={(data) => {}}
+          status={{
+            isLoading: false,
+            isSuccess: false,
+            isError: false,
+            isUninitialized: false,
+            reset: () => {},
+            status: "uninitialized",
+          }}
+          initialData={selectedOpportunity || undefined}
+        />
+      )}
+
+       <DeleteModal
         open={deleteModalOpen}
         onOpenChange={setDeleteModalOpen}
         title="Delete Opportunity"
         itemName={opportunityToDelete?.title}
         onConfirm={confirmDeleteOpportunity}
+        loading={deleteStatus.isLoading}
       />
     </div>
   );

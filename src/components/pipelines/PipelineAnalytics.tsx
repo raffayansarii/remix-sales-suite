@@ -18,12 +18,9 @@ import {
   Area,
   AreaChart
 } from 'recharts';
-import { Opportunity } from '@/types/crm';
-import { IOpportunity } from '@/api/opportunity/opportunityTypes';
+import { PipelineAnalyticsProps } from './types-and-schemas';
 
-interface PipelineAnalyticsProps {
-  opportunities: IOpportunity[];
-}
+
 
 const STAGE_COLORS = {
   'Lead': '#3B82F6',

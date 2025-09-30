@@ -3,13 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { GripVertical, RotateCcw } from 'lucide-react';
-import { ColumnDefinition, UseColumnManagerReturn, ColumnType } from '@/hooks/useColumnManager';
+import { ColumnDefinition, ColumnType } from '@/hooks/useColumnManager';
+import { ColumnManagerModalProps } from './types-and-schemas';
 
-interface ColumnManagerModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  columnManager: UseColumnManagerReturn;
-}
+
 
 const getColumnTypeStyles = (type: ColumnType) => {
   switch (type) {

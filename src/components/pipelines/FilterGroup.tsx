@@ -10,14 +10,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { FilterGroup as FilterGroupType, FILTER_FIELDS, getOperatorsForField } from '@/types/filters';
+import { FilterGroupProps, FILTER_FIELDS, getOperatorsForField  } from './types-and-schemas';
 
-interface FilterGroupProps {
-  group: FilterGroupType;
-  onUpdate: (group: FilterGroupType) => void;
-  onRemove: () => void;
-  canRemove: boolean;
-}
 
 export function FilterGroup({ group, onUpdate, onRemove, canRemove }: FilterGroupProps) {
   const [isExpanded, setIsExpanded] = useState(true);

@@ -5,12 +5,8 @@ import { Opportunity } from "@/types/crm";
 import { toast } from "@/hooks/use-toast";
 import { IOpportunity } from "@/api/opportunity/opportunityTypes";
 import { useMoveOpportunityToStageMutation } from "@/api/kanban/kanbanApi";
+import { KanbanViewProps } from "./types-and-schemas";
 
-interface KanbanViewProps {
-  opportunities: IOpportunity[];
-  onOpportunityUpdate?: (updatedOpportunity: IOpportunity) => void;
-  onOpportunityDelete?: (opportunityId: string) => void;
-}
 
 export function KanbanView({
   opportunities: initialOpportunities,

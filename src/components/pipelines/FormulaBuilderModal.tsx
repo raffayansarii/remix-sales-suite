@@ -9,27 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { AvailableColumn, FormulaBuilderModalProps, NodeData } from './types-and-schemas';
 
-interface AvailableColumn {
-  id: string;
-  name: string;
-  type: 'system' | 'default' | 'custom';
-}
-
-interface NodeData extends Record<string, unknown> {
-  label: string;
-  value: string;
-  nodeType: 'column' | 'operator' | 'number' | 'bracket';
-  columnType?: string;
-  onDelete?: (id: string) => void;
-  onUpdate?: (id: string, value: string) => void;
-}
-
-interface FormulaBuilderModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onCreateColumn: (data: { name: string; formula: string }) => void;
-}
 
 // Only number type columns for formula creation
 const mockColumns: AvailableColumn[] = [
