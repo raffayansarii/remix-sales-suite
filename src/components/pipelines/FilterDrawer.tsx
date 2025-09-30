@@ -177,24 +177,73 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
     return groups
       .map(group => {
         let op = '';
-        let val = group.value;
+        let val: string | string[] = group.value;
+        
         switch (group.operator) {
+          // Text operators
           case 'contains_exactly':
             op = 'ilike';
             val = `%${val}%`;
             break;
+          case 'contains_any_of':
+            // Split by comma and create OR condition with ilike
+            const anyValues = Array.isArray(val) ? val : String(val).split(',').map(v => v.trim());
+            return anyValues.map(v => `${group.field}=ilike.%${v}%`).join('&');
+          case 'contains_all_of':
+            // Split by comma and create AND condition with ilike
+            const allValues = Array.isArray(val) ? val : String(val).split(',').map(v => v.trim());
+            return allValues.map(v => `${group.field}=ilike.%${v}%`).join('&');
+          case 'doesnt_contain_exactly':
+            op = 'not.ilike';
+            val = `%${val}%`;
+            break;
+          case 'ends_with_any_of':
+            const endsValues = Array.isArray(val) ? val : String(val).split(',').map(v => v.trim());
+            return endsValues.map(v => `${group.field}=ilike.%${v}`).join('&');
+          case 'starts_with_any_of':
+            const startsValues = Array.isArray(val) ? val : String(val).split(',').map(v => v.trim());
+            return startsValues.map(v => `${group.field}=ilike.${v}%`).join('&');
+          case 'has_never_contained_exactly':
+            op = 'not.ilike';
+            val = `%${val}%`;
+            break;
+          
+          // Equality operators
           case 'equals':
             op = 'eq';
             break;
           case 'not_equals':
             op = 'neq';
             break;
+          
+          // Comparison operators
           case 'greater_than':
             op = 'gt';
             break;
           case 'less_than':
             op = 'lt';
             break;
+          case 'between':
+            // Expects value as "min,max"
+            const [min, max] = Array.isArray(val) ? val : String(val).split(',').map(v => v.trim());
+            return `${group.field}=gte.${min}&${group.field}=lte.${max}`;
+          
+          // Date operators
+          case 'before_date':
+            op = 'lt';
+            break;
+          case 'after_date':
+            op = 'gt';
+            break;
+          case 'in_last_days':
+            // Calculate date X days ago and use gte
+            const daysAgo = new Date();
+            daysAgo.setDate(daysAgo.getDate() - parseInt(String(val)));
+            op = 'gte';
+            val = daysAgo.toISOString().split('T')[0];
+            break;
+          
+          // Null/Empty operators
           case 'is_empty':
             op = 'is';
             val = 'null';
@@ -203,10 +252,11 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, activeFilters }:
             op = 'not.is';
             val = 'null';
             break;
-          // Add more as needed
+          
           default:
             op = group.operator;
         }
+        
         return `${group.field}=${op}.${val}`;
       })
       .join('&');
