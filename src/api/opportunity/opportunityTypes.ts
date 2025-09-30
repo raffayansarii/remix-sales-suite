@@ -3,15 +3,15 @@ export interface IOpportunity {
   title: string;
   company: string;
   contact: string;
-  value: number;
-  stage: string;
-  award_type: string;
+  value: string;
+  stage: "Lead" | "Qualified" | "Proposal" | "Negotiation" | "Closed Won";
+  award_type: "Contract" | "Grant" | "Cooperative Agreement" | "Purchase Order";
   agency: string;
   solicitation: string;
   probability: number;
   close_date: string;
   description: string;
-  pinned: boolean | {state:boolean; color:string} ;
+  pinned: boolean  ;
   created_at: string;
   updated_at: string;
   created_by: string | null;
@@ -20,12 +20,12 @@ export interface IOpportunity {
   tags: { id: string; name: string; color: string }[];
   created_by_user: { id: string; name: string | null; email: string } | null;
 }
-export interface IOptiionalOpportunity {
+export interface IOptionalOpportunity {
   id?: string;
   title?: string;
   company?: string;
   contact?: string;
-  value?: number;
+  value?: string;
   stage?: string;
   award_type?: string;
   agency?: string;
@@ -44,17 +44,17 @@ export interface IOptiionalOpportunity {
 }
 export interface ICreateOpportunityRequest {
   title?: string;
-  company: string;
-  contact: string;
-  value: string; // keeping as string since your payload shows "75000.00"
-  stage: string;
-  award_type: string;
-  agency: string;
-  solicitation: string;
-  probability: number;
-  close_date: string; // ISO date string "YYYY-MM-DD"
-  description: string;
-  pinned: boolean;
-  tenant_id: string;   // UUID
-  created_by: string;  // UUID
+  company?: string;
+  contact?: string;
+  value?: string; // keeping as string since your payload shows "75000.00"
+  stage?: string;
+  award_type?: string;
+  agency?: string;
+  solicitation?: string;
+  probability?: number;
+  close_date?: string; // ISO date string "YYYY-MM-DD"
+  description?: string;
+  pinned?: boolean;
+  tenant_id?: string;   // UUID
+  created_by?: string;  // UUID
 }

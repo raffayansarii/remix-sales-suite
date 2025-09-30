@@ -1,5 +1,5 @@
 import { baseApi } from "../baseApi";
-import { ICreateOpportunityRequest, IOpportunity, IOptiionalOpportunity } from "./opportunityTypes";
+import { ICreateOpportunityRequest, IOpportunity, IOptionalOpportunity } from "./opportunityTypes";
 
 export interface PaginationMeta {
   totalCount: number;
@@ -29,7 +29,7 @@ const opportunityApi = baseApi.injectEndpoints({
       any
     >({
       query: (params) => ({
-        url: `opportunities?${params}`,
+        url: `opportunities?${params}&order=pinned.desc,created_at.desc`,
         method: "GET",
         headers: {
           Prefer: "count=exact",
@@ -84,7 +84,7 @@ const opportunityApi = baseApi.injectEndpoints({
       query: (body) => ({ url: "opportunities", method: "POST", body }),
       invalidatesTags: ["Opportunity"],
     }),
-    updateOpportunity: build.mutation<any, { id: string; body: IOptiionalOpportunity }>({
+    updateOpportunity: build.mutation<any, { id: string; body: IOptionalOpportunity }>({
       query: ({ id, body }) => ({
         url: `opportunities?id=eq.${id}`,
         method: "PATCH",
