@@ -78,6 +78,6 @@ const customBaseQuery = async (args, api, extraOptions) => {
 export const baseApi = createApi({
   reducerPath: "api",
   baseQuery: customBaseQuery,
-  tagTypes: ["User", "Opportunity", "OpportunityTag", "Tag", "Tenant", "Kanban"],
+  tagTypes: ["User", "Opportunity", "OpportunityTag", "Tag", "Tenant", "Kanban", "Task"],
   endpoints: () => ({}), // Empty endpoints, ready for injection
 });
