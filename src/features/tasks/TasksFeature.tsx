@@ -5,38 +5,55 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { mockTasks } from '@/data/mockData';
-import { Task } from '@/types/crm';
+import { useGetTasksQuery, useUpdateTasksMutation } from '@/api/tasks/tasksApi';
+import { useToast } from '@/hooks/use-toast';
+import { ContentLoader } from '@/components/ui/content-loader';
 
 export function TasksFeature() {
-  // TODO: Replace with API call - GET /api/tasks
-  const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
 
+  // Build query params
+  const queryParams = new URLSearchParams();
+  if (searchTerm) {
+    queryParams.append('title', `ilike.*${searchTerm}*`);
+  }
+  if (filter === 'pending') {
+    queryParams.append('completed', 'eq.false');
+  } else if (filter === 'completed') {
+    queryParams.append('completed', 'eq.true');
+  }
+
+  const { data: tasks = [], isLoading, error } = useGetTasksQuery(queryParams.toString());
+  const [updateTask] = useUpdateTasksMutation();
+
   console.log('✅ [TASKS] TasksFeature initialized with tasks:', tasks.length);
 
-  // TODO: Replace with backend filtering - POST /api/tasks/filter
-  const filteredTasks = tasks.filter(task => {
-    const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filter === 'all' || 
-                         (filter === 'pending' && !task.completed) ||
-                         (filter === 'completed' && task.completed);
-    return matchesSearch && matchesFilter;
-  });
-
-  console.log('🔍 [TASKS] Filtered tasks:', filteredTasks.length, 'of', tasks.length);
-
-  const toggleTaskCompletion = (taskId: string) => {
+  const toggleTaskCompletion = async (taskId: string) => {
     console.log('🔄 [TASKS] Toggling task completion:', taskId);
     
-    // Optimistic update
-    setTasks(tasks.map(task => 
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    ));
-    
-    // TODO: Replace with API call - PATCH /api/tasks/${taskId} { completed: !completed }
-    console.log('🌐 [API] Would call PATCH /api/tasks/' + taskId, { completed: true });
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    try {
+      await updateTask({
+        id: taskId,
+        completed: !task.completed,
+      }).unwrap();
+      
+      toast({
+        title: "Success",
+        description: `Task marked as ${!task.completed ? 'completed' : 'pending'}`,
+      });
+    } catch (err) {
+      console.error('Failed to update task:', err);
+      toast({
+        title: "Error",
+        description: "Failed to update task. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getPriorityIcon = (priority: string) => {
@@ -50,6 +67,22 @@ export function TasksFeature() {
 
   const completedTasks = tasks.filter(task => task.completed).length;
   const pendingTasks = tasks.filter(task => !task.completed).length;
+
+  if (isLoading) {
+    return <ContentLoader />;
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
+          <h3 className="text-lg font-medium mb-2">Failed to load tasks</h3>
+          <p className="text-sm text-muted-foreground">Please try again later.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col h-full bg-muted/30">
@@ -113,7 +146,7 @@ export function TasksFeature() {
       {/* Tasks List */}
       <div className="flex-1 p-6 overflow-auto">
         <div className="space-y-3">
-          {filteredTasks.map((task) => (
+          {tasks.map((task) => (
             <Card key={task.id} className="bg-background hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-start gap-4">
@@ -149,9 +182,9 @@ export function TasksFeature() {
                     </div>
                     
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
-                      {task.assignedTo && <span>Assigned to: {task.assignedTo}</span>}
-                      <span>Created: {new Date(task.createdAt).toLocaleDateString()}</span>
+                      <span>Due: {new Date(task.due_date).toLocaleDateString()}</span>
+                      {task.assigned_to && <span>Assigned to: {task.assigned_to}</span>}
+                      <span>Created: {new Date(task.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
                 </div>
@@ -159,12 +192,12 @@ export function TasksFeature() {
             </Card>
           ))}
           
-          {filteredTasks.length === 0 && (
+          {tasks.length === 0 && (
             <div className="text-center py-12 text-muted-foreground">
               <Clock className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <h3 className="text-lg font-medium mb-2">No tasks found</h3>
               <p className="text-sm">
-                {searchTerm ? 'Try adjusting your search criteria.' : 'Get started by adding your first task.'}
+                {searchTerm || filter !== 'all' ? 'Try adjusting your search or filter criteria.' : 'Get started by adding your first task.'}
               </p>
             </div>
           )}
