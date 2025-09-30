@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/pagination";
 import { TableViewProps } from "./types-and-schemas";
 import { OpportunityDetailModal } from "./OpportunityDetailModal";
+import { EditOpportunityModal } from "./EditOpportunityModal";
 import { useDeleteOpportunityMutation, useUpdateOpportunityMutation } from "@/api/opportunity/opportunityApi";
 import { DeleteModal } from "../ui/delete-modal";
 
@@ -395,30 +396,39 @@ export function TableView({
         onOpenChange={setColumnModalOpen}
         columnManager={columnManager}
       />
-      <OpportunityDetailModal
-        opportunity={selectedOpportunity}
-        open={detailModalOpen || viewModalOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setDetailModalOpen(false);
-            setViewModalOpen(false);
-          }
-        }}
-        onUpdate={(updatedOpportunity) => {
-          updateTrigger({
-            id: updatedOpportunity.id,
-            body: updatedOpportunity,
-          })
-            .unwrap()
-            .then(() => {
-              setDetailModalOpen(false);
+      {viewModalOpen && (
+        <OpportunityDetailModal
+          opportunity={selectedOpportunity}
+          open={viewModalOpen}
+          onOpenChange={setViewModalOpen}
+          onDelete={(opportunityId) => {
+            handleDeleteOpportunity(selectedOpportunity);
+          }}
+        />
+      )}
+
+      {detailModalOpen && (
+        <EditOpportunityModal
+          isOpen={detailModalOpen}
+          onClose={() => setDetailModalOpen(false)}
+          onSubmit={(data) => {
+            updateTrigger({
+              id: selectedOpportunity.id,
+              body: data,
             })
-            .catch(() => {});
-        }}
-        onDelete={(opportunityId) => {
-          handleDeleteOpportunity(selectedOpportunity);
-        }}
-      />
+              .unwrap()
+              .then(() => {
+                setDetailModalOpen(false);
+              })
+              .catch(() => {});
+          }}
+          status={updateStatus}
+          initialData={{
+            ...selectedOpportunity,
+            value: selectedOpportunity.value.toString(),
+          }}
+        />
+      )}
 
        <DeleteModal
         open={deleteModalOpen}
