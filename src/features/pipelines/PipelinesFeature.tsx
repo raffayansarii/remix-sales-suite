@@ -8,10 +8,14 @@ import { KanbanView } from "@/components/pipelines/KanbanView";
 import { TableView } from "@/components/pipelines/TableView";
 import { FilterDrawer } from "@/components/pipelines/FilterDrawer";
 import { PipelineAnalytics } from "@/components/pipelines/PipelineAnalytics";
-import { useGetOpportunitiesQuery } from "@/api/opportunity/opportunityApi";
+import {
+  useCreateOpportunityMutation,
+  useGetOpportunitiesQuery,
+} from "@/api/opportunity/opportunityApi";
 import { IOpportunity } from "@/api/opportunity/opportunityTypes";
 import { CreateOpportunityModal } from "@/components/pipelines/CreateOpportunityModal";
 import { ContentLoader } from "@/components/ui/content-loader";
+import { OpportunityFormData } from "@/components/pipelines/types-and-schemas";
 
 function isPaginatedData(
   data: any
@@ -46,10 +50,12 @@ export function PipelinesFeature() {
   queryParts.push(`offset=${(currentPage - 1) * rowsPerPage}`);
   const queryString = queryParts.join("&");
 
-  const { data, isLoading, isError, error } =
+  // API Calls
+  const { data, isLoading, isFetching, isError, error } =
     useGetOpportunitiesQuery(queryString);
+  
+  const [createHandler , createStatus] = useCreateOpportunityMutation();
 
-  console.log("🔍 [PIPELINES] Component initialized with opportunities:", data);
   useEffect(() => {
     if (data?.data) {
       if (Array.isArray(data?.data)) {
@@ -83,6 +89,19 @@ export function PipelinesFeature() {
     // TODO: Replace with actual API call to backend
     // DELETE /api/opportunities/:id
     console.log("🗑️ [API CALL] DELETE /api/opportunities/" + opportunityId);
+  };
+
+  const onCreateOpportunityHandler = (
+    newOpportunity: OpportunityFormData
+  ) => {
+
+    createHandler(newOpportunity).unwrap().then((res)=>{
+      console.log("✅ [PIPELINES] Opportunity created successfully");
+      setIsCreateModalOpen(false);
+    }).catch((err)=>{
+      console.error("❌ [PIPELINES] Failed to create opportunity", err);
+    });
+
   };
 
   useEffect(() => {
@@ -191,7 +210,7 @@ export function PipelinesFeature() {
             </div>
           </div>
         </div>
-        {isLoading ? (
+        {isLoading || isFetching ? (
           <ContentLoader />
         ) : isError ? (
           <div className="flex flex-1 items-center justify-center h-full min-h-[300px]">
@@ -252,6 +271,8 @@ export function PipelinesFeature() {
         <CreateOpportunityModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
+          onSubmit={onCreateOpportunityHandler}
+          status={createStatus}
         />
       </div>
     </>
