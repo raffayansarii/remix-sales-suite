@@ -76,17 +76,17 @@ export function DeleteModal({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md">
+      <AlertDialogContent className="max-w-md border-amber-700 border-2">
         <AlertDialogHeader className="text-center pb-4">
           <div className="mx-auto mb-4">
             <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${config.iconBg}`}>
               <Icon className={`h-6 w-6 ${config.iconClass}`} />
             </div>
           </div>
-          <AlertDialogTitle className="text-xl font-semibold">
+          <AlertDialogTitle className="text-xl font-semibold text-center">
             {title}
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-muted-foreground mt-2">
+          <AlertDialogDescription className="text-muted-foreground mt-2 text-center">
             {description || defaultDescription}
           </AlertDialogDescription>
         </AlertDialogHeader>
