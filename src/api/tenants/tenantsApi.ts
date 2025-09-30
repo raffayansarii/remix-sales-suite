@@ -1,13 +1,12 @@
 import { baseApi } from "../baseApi";
-import { ITenant, PaginationMeta } from "./tenantsTypes";
+import { ITenant, PaginationMeta, TenantResponse } from "./tenantsTypes";
 
 export const tenantsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    getTenants: build.query<any, any>({
+    getTenants: build.query<TenantResponse, string>({
       query: (params) => ({
-        url: "tenants",
+        url: `tenants?${params}`,
         method: "GET",
-        params,
         headers: {
           Prefer: "count=exact",
         },
@@ -62,6 +61,7 @@ export const tenantsApi = baseApi.injectEndpoints({
 
 export const {
   useGetTenantsQuery,
+  useLazyGetTenantsQuery,
   useGetUserDetailsWithTenantsQuery,
   useGetUserTenantsDetailsQuery,
 } = tenantsApi;

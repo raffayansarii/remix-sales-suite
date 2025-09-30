@@ -42,6 +42,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignup, onSwitch
     loginHandler({email: data.email, password: data.password}).unwrap().then((res) => {
       // Store token and user in localStorage
       localStorage.setItem('token', res.access_token);
+      localStorage.setItem('refresh_token', res.refresh_token);
+      localStorage.setItem("expires_at" , res.expires_at.toString());
       localStorage.setItem('user', JSON.stringify(res.user));
       toast({
         title: "Login Successful",

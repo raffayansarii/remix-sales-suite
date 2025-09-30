@@ -27,3 +27,7 @@ export interface PaginationMeta {
   limit: number;
   offset: number;
 }
+export interface TenantResponse {
+  data: ITenant[];
+  pagination: PaginationMeta;
+}
