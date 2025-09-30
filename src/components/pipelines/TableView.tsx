@@ -43,7 +43,7 @@ import {
   PaginationLink,
 } from "@/components/ui/pagination";
 import { TableViewProps } from "./types-and-schemas";
-import { EditOpportunityModal } from "./EditOpportunityModal";
+import { OpportunityDetailModal } from "./OpportunityDetailModal";
 import { useDeleteOpportunityMutation, useUpdateOpportunityMutation } from "@/api/opportunity/opportunityApi";
 import { DeleteModal } from "../ui/delete-modal";
 
@@ -241,7 +241,7 @@ export function TableView({
                       case "value":
                         return (
                           <span className="text-sm">
-                            ${opportunity.value.toLocaleString()}
+                            ${parseFloat(opportunity.value).toLocaleString()}
                           </span>
                         );
                       case "probability":
@@ -395,45 +395,30 @@ export function TableView({
         onOpenChange={setColumnModalOpen}
         columnManager={columnManager}
       />
-      {detailModalOpen && (
-        <EditOpportunityModal
-          isOpen
-          onClose={() => setDetailModalOpen(false)}
-          onSubmit={(data) => {
-            updateTrigger({
-              id: selectedOpportunity.id,
-              body: data,
+      <OpportunityDetailModal
+        opportunity={selectedOpportunity}
+        open={detailModalOpen || viewModalOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDetailModalOpen(false);
+            setViewModalOpen(false);
+          }
+        }}
+        onUpdate={(updatedOpportunity) => {
+          updateTrigger({
+            id: updatedOpportunity.id,
+            body: updatedOpportunity,
+          })
+            .unwrap()
+            .then(() => {
+              setDetailModalOpen(false);
             })
-              .unwrap()
-              .then(() => {
-                setDetailModalOpen(false);
-              })
-              .catch(() => {});
-          }}
-          status={updateStatus}
-          initialData={{
-            ...selectedOpportunity,
-            value: selectedOpportunity.value.toString(),
-          }}
-        />
-      )}
-      {viewModalOpen && (
-        <EditOpportunityModal
-          isOpen
-          viewOnly
-          onClose={() => setViewModalOpen(false)}
-          onSubmit={(data) => {}}
-          status={{
-            isLoading: false,
-            isSuccess: false,
-            isError: false,
-            isUninitialized: false,
-            reset: () => {},
-            status: "uninitialized",
-          }}
-          initialData={selectedOpportunity || undefined}
-        />
-      )}
+            .catch(() => {});
+        }}
+        onDelete={(opportunityId) => {
+          handleDeleteOpportunity(selectedOpportunity);
+        }}
+      />
 
        <DeleteModal
         open={deleteModalOpen}

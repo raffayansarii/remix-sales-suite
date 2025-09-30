@@ -212,13 +212,13 @@ export function OpportunityDetailModal({
                         id="value"
                         type="number"
                         value={editForm?.value}
-                        onChange={(e) => setEditForm(prev => prev ? {...prev, value: Number(e.target.value)} : null)}
+                        onChange={(e) => setEditForm(prev => prev ? {...prev, value: e.target.value} : null)}
                       />
                     ) : (
                       <div className="flex items-center gap-2 text-green-600">
                         <DollarSign className="w-4 h-4" />
                         <span className="text-sm font-semibold">
-                          ${currentOpportunity.value.toLocaleString()}
+                          ${parseFloat(currentOpportunity.value).toLocaleString()}
                         </span>
                       </div>
                     )}

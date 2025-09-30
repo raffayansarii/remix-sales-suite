@@ -92,9 +92,7 @@ export function usePinnedItems<
   const [updateOpportunityHandler, updateOppotunityStatus] =
     useUpdateOpportunityMutation();
   const togglePin = useCallback((itemId: string, opportunity: IOpportunity) => {
-    const currentPinned = typeof opportunity.pinned === 'boolean' 
-      ? opportunity.pinned 
-      : opportunity.pinned?.state || false;
+    const currentPinned = opportunity.pinned;
     
     // Update the backend pinned status
     updateOpportunityHandler({
@@ -160,8 +158,7 @@ export function usePinnedItems<
       const unpinnedItems: T[] = [];
 
       items.forEach((item) => {
-        const isPinnedItem = pinnedItems.has(item.id) || 
-          (typeof item.pinned === 'boolean' ? item.pinned : item.pinned?.state);
+        const isPinnedItem = pinnedItems.has(item.id) || Boolean(item.pinned);
         
         if (isPinnedItem) {
           pinnedItemsArray.push(item);

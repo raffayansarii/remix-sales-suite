@@ -141,15 +141,10 @@ export function PipelinesFeature() {
               <Button
                 className="gap-2 bg-gradient-primary hover:bg-primary-hover text-xs sm:text-sm"
                 size="sm"
+                onClick={() => setIsCreateModalOpen(true)}
               >
                 <Plus className="w-4 h-4" />
-                <span
-                  className="hidden sm:inline"
-                  onClick={() => setIsCreateModalOpen(true)}
-                >
-                  Add Opportunity
-                </span>
-                {/* TODO: Add onClick handler for creating new opportunity - POST /api/opportunities */}
+                <span className="hidden sm:inline">Add Opportunity</span>
               </Button>
             </div>
           </div>
@@ -231,6 +226,7 @@ export function PipelinesFeature() {
               <Button
                 className="gap-2 bg-gradient-primary hover:bg-primary-hover text-xs sm:text-sm"
                 size="sm"
+                onClick={() => setIsCreateModalOpen(true)}
               >
                 <Plus className="w-4 h-4" />
                 <span className="hidden sm:inline">Add Opportunity</span>

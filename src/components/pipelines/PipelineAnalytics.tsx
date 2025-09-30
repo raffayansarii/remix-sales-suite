@@ -35,7 +35,7 @@ export function PipelineAnalytics({ opportunities }: PipelineAnalyticsProps) {
     // Pipeline by Stage
     const stageData = Object.entries(
       opportunities.reduce((acc, opp) => {
-        acc[opp.stage] = (acc[opp.stage] || 0) + opp.value;
+        acc[opp.stage] = (acc[opp.stage] || 0) + parseFloat(opp.value);
         return acc;
       }, {} as Record<string, number>)
     ).map(([stage, value]) => ({ stage, value, count: opportunities.filter(o => o.stage === stage).length }));
@@ -49,13 +49,13 @@ export function PipelineAnalytics({ opportunities }: PipelineAnalyticsProps) {
     ).map(([agency, count]) => ({ 
       agency: agency.length > 20 ? agency.substring(0, 20) + '...' : agency, 
       count,
-      value: opportunities.filter(o => o.agency === agency).reduce((sum, o) => sum + o.value, 0)
+      value: opportunities.filter(o => o.agency === agency).reduce((sum, o) => sum + parseFloat(o.value), 0)
     })).slice(0, 8);
 
     // Award Type Distribution
     const awardTypeData = Object.entries(
       opportunities.reduce((acc, opp) => {
-        acc[opp.award_type] = (acc[opp.award_type] || 0) + opp.value;
+        acc[opp.award_type] = (acc[opp.award_type] || 0) + parseFloat(opp.value);
         return acc;
       }, {} as Record<string, number>)
     ).map(([type, value]) => ({ type, value, count: opportunities.filter(o => o.award_type === type).length }));
@@ -65,14 +65,14 @@ export function PipelineAnalytics({ opportunities }: PipelineAnalyticsProps) {
       const month = new Date(opp.created_at).toLocaleString('default', { month: 'short' });
       if (!acc[month]) acc[month] = { month, opportunities: 0, value: 0 };
       acc[month].opportunities += 1;
-      acc[month].value += opp.value;
+      acc[month].value += parseFloat(opp.value);
       return acc;
     }, {} as Record<string, any>);
 
     const trendData = Object.values(monthlyData).slice(-6);
 
     // Key Metrics
-    const totalValue = opportunities.reduce((sum, opp) => sum + opp.value, 0);
+    const totalValue = opportunities.reduce((sum, opp) => sum + parseFloat(opp.value), 0);
     const avgDealSize = totalValue / opportunities.length || 0;
     const winRate = opportunities.filter(o => o.stage === 'Closed Won').length / opportunities.length * 100;
     const totalOpportunities = opportunities.length;
