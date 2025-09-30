@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, Kanban, Table, BarChart3, Plus, Filter } from "lucide-react";
+import { Search, Kanban, Table, BarChart3, Plus, Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -164,23 +164,39 @@ export function PipelinesFeature() {
                 />
               </div>
 
-              <Button
-                variant={activeFilters.length > 0 ? "default" : "outline"}
-                size="sm"
-                onClick={() => setIsFilterDrawerOpen(true)}
-                className="gap-2 relative shrink-0"
-              >
-                <Filter className="w-4 h-4" />
-                Filters
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={activeFilters.length > 0 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setIsFilterDrawerOpen(true)}
+                  className="gap-2 relative shrink-0"
+                >
+                  <Filter className="w-4 h-4" />
+                  Filters
+                  {activeFilters.length > 0 && (
+                    <Badge
+                      variant="secondary"
+                      className="ml-1 h-5 w-5 p-0 text-xs flex items-center justify-center"
+                    >
+                      {activeFilters.length}
+                    </Badge>
+                  )}
+                </Button>
                 {activeFilters.length > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="ml-1 h-5 w-5 p-0 text-xs flex items-center justify-center"
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setActiveFilters("");
+                      setCurrentPage(1);
+                    }}
+                    className="gap-1 shrink-0"
                   >
-                    {activeFilters.length}
-                  </Badge>
+                    <X className="w-4 h-4" />
+                    Clear
+                  </Button>
                 )}
-              </Button>
+              </div>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
