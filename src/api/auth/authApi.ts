@@ -10,11 +10,22 @@ const authApi = baseApi.injectEndpoints({
         body: credentials,
       }),
     }),
+    getCurrentUser: build.query<any, void>({
+      query: () => ({
+        url: "https://c2p-crm-auth.jollytree-b86081c8.westus.azurecontainerapps.io/user",
+        method: "GET",
+      }),
+      // No tags needed as user data is usually fetched once on app load
+    }),
+    getAllUsers: build.query<any, void>({
+      query: () => ({
+        url: "https://c2p-crm-auth.jollytree-b86081c8.westus.azurecontainerapps.io/admin/users",
+        method: "GET",
+      }),
+      // No tags needed as user data is usually fetched once on app load
+    }),
   }),
 });
 
-export const { useLoginMutation } = authApi;
-
-// Example usage in a React component:
-// const [login, { data, error, isLoading }] = useLoginMutation();
-// const { data: userProfile, error: profileError } = useFetchUserProfileQuery();
+export const { useLoginMutation, useGetCurrentUserQuery, useGetAllUsersQuery , useLazyGetAllUsersQuery } =
+  authApi;
