@@ -20,6 +20,8 @@ import {
 } from "@/types/filters";
 import { useToast } from "@/hooks/use-toast";
 import { FilterDrawerProps } from "./types-and-schemas";
+import { Textarea } from "../ui/textarea";
+import { CreateUserFilterRequest } from "@/api/opportunity/filters/filtersTypes";
 
 export function FilterDrawer({
   isOpen,
@@ -31,6 +33,7 @@ export function FilterDrawer({
   const [savedConfigs, setSavedConfigs] = useState<FilterConfig[]>([]);
   const [selectedConfig, setSelectedConfig] = useState<string>("");
   const [configName, setConfigName] = useState("");
+  const [configDescription, setConfigDescription] = useState("");
   const [showSaveForm, setShowSaveForm] = useState(false);
   const { toast } = useToast();
 
@@ -106,7 +109,7 @@ export function FilterDrawer({
     );
 
     const filterString = buildPostgresQueryString(validGroups);
-    console.log(filterString , validGroups)
+    console.log(filterString, validGroups);
     onApplyFilters(filterString);
     // toast({
     //   title: "Filters applied",
@@ -142,7 +145,21 @@ export function FilterDrawer({
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-
+    const BEFilter: CreateUserFilterRequest = {
+      p_user_id: "string",
+      p_tenant_id: "string",
+      p_name: "string",
+      p_description: "string",
+      p_filter_groups: [
+        {
+          field: "string",
+          operator: "string",
+          value: "",
+        },
+      ],
+      p_is_shared: true,
+      p_is_default: true,
+    };
     console.log("🌐 [API] Would call POST /api/filter-configs", newConfig);
 
     const existingIndex = savedConfigs.findIndex(
@@ -332,23 +349,31 @@ export function FilterDrawer({
               </div>
 
               {showSaveForm && (
-                <div className="flex gap-2 p-3 border rounded-lg bg-muted/50">
+                <div className="flex flex-col gap-2 p-3 border rounded-lg bg-muted/50 items-center">
                   <Input
                     placeholder="Configuration name"
                     value={configName}
                     onChange={(e) => setConfigName(e.target.value)}
                     className="flex-1"
                   />
-                  <Button size="sm" onClick={saveFilterConfig}>
-                    Save
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setShowSaveForm(false)}
-                  >
-                    Cancel
-                  </Button>
+                  <Textarea
+                    placeholder="Configuration Description (optional)"
+                    value={configDescription}
+                    onChange={(e) => setConfigDescription(e.target.value)}
+                    className="flex-1"
+                  />
+                  <div className="flex gap-2 flex-wrap justify-end w-full">
+                    <Button size="sm" onClick={saveFilterConfig}>
+                      Save
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setShowSaveForm(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
               )}
 
