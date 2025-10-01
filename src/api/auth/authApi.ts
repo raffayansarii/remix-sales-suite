@@ -1,3 +1,4 @@
+import { IUser } from "./authTypes";
 import { LoginResponse } from "@/components/auth/authTypes";
 import { baseApi } from "../baseApi";
 
@@ -17,7 +18,7 @@ const authApi = baseApi.injectEndpoints({
       }),
       // No tags needed as user data is usually fetched once on app load
     }),
-    getAllUsers: build.query<any, void>({
+    getAllUsers: build.query<{ users: IUser[] }, string>({
       query: () => ({
         url: "https://c2p-crm-auth.jollytree-b86081c8.westus.azurecontainerapps.io/admin/users",
         method: "GET",
@@ -27,5 +28,9 @@ const authApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useLoginMutation, useGetCurrentUserQuery, useGetAllUsersQuery , useLazyGetAllUsersQuery } =
-  authApi;
+export const {
+  useLoginMutation,
+  useGetCurrentUserQuery,
+  useGetAllUsersQuery,
+  useLazyGetAllUsersQuery,
+} = authApi;
