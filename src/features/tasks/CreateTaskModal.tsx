@@ -42,6 +42,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AsyncSelect } from "@/components/ui/AsyncSearchDropdown";
 import { IOpportunity } from "@/api/opportunity/opportunityTypes";
 import { useLazyGetAllUsersQuery } from "@/api/auth/authApi";
+import { IUser } from "@/api/auth/authTypes";
 
 const taskSchema = z.object({
   title: z.string().min(1, "Title is required").max(200, "Title too long"),
@@ -227,19 +228,19 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
               )}
             /> */}
             <AsyncSelect
-              getOptionLabel={(user) => user.name}
+              getOptionLabel={(user: IUser) => user.email}
               fetchOptions={async (params) => {
-                console.log("Fetching tenants with params:", params);
+                console.log("Fetching users with params:", params);
                 const res = await triggerUsers(params).unwrap();
-                return res.data; // { data, pagination }
+                return res.users;
               }}
-              renderOption={(user) => <span>{user.name}</span>}
-              onSelect={(user) => {
+              renderOption={(user: IUser) => <span>{user.email}</span>}
+              onSelect={(user: IUser) => {
                 form.setValue("assigned_to", user.id);
               }}
-              placeholder="User ID Or name"
+              placeholder="User ID Or email"
               label="Assigned To"
-              searchKey="name"
+              searchKey="email"
             />
             <AsyncSelect
               getOptionLabel={(tenant: IOpportunity) => tenant.title}
