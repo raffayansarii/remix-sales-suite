@@ -1,53 +1,64 @@
-import { useState } from 'react';
-import { CheckCircle, Clock, AlertCircle, Plus, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useGetTasksQuery, useUpdateTasksMutation } from '@/api/tasks/tasksApi';
-import { useToast } from '@/hooks/use-toast';
-import { ContentLoader } from '@/components/ui/content-loader';
+import { useState } from "react";
+import { CheckCircle, Clock, AlertCircle, Plus, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useGetTasksQuery, useUpdateTasksMutation } from "@/api/tasks/tasksApi";
+import { useToast } from "@/hooks/use-toast";
+import { ContentLoader } from "@/components/ui/content-loader";
 
 export function TasksFeature() {
   const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filter, setFilter] = useState<"all" | "pending" | "completed">("all");
 
   // Build query params
   const queryParams = new URLSearchParams();
   if (searchTerm) {
-    queryParams.append('title', `ilike.*${searchTerm}*`);
+    queryParams.append("title", `ilike.*${searchTerm}*`);
   }
-  if (filter === 'pending') {
-    queryParams.append('completed', 'eq.false');
-  } else if (filter === 'completed') {
-    queryParams.append('completed', 'eq.true');
+  if (filter === "pending") {
+    queryParams.append("completed", "eq.false");
+  } else if (filter === "completed") {
+    queryParams.append("completed", "eq.true");
   }
 
-  const { data: tasks = [], isLoading, error } = useGetTasksQuery(queryParams.toString());
+  const {
+    data: tasks = [],
+    isLoading,
+    error,
+    refetch,
+  } = useGetTasksQuery(queryParams.toString());
   const [updateTask] = useUpdateTasksMutation();
 
-  console.log('✅ [TASKS] TasksFeature initialized with tasks:', tasks.length);
+  console.log("✅ [TASKS] TasksFeature initialized with tasks:", tasks.length);
 
   const toggleTaskCompletion = async (taskId: string) => {
-    console.log('🔄 [TASKS] Toggling task completion:', taskId);
-    
-    const task = tasks.find(t => t.id === taskId);
+    console.log("🔄 [TASKS] Toggling task completion:", taskId);
+
+    const task = tasks.find((t) => t.id === taskId);
     if (!task) return;
 
     try {
       await updateTask({
         id: taskId,
         completed: !task.completed,
-      }).unwrap();
-      
-      toast({
-        title: "Success",
-        description: `Task marked as ${!task.completed ? 'completed' : 'pending'}`,
-      });
+      })
+        .unwrap()
+        .then(() => {
+          refetch();
+
+          toast({
+            title: "Success",
+            description: `Task marked as ${
+              !task.completed ? "completed" : "pending"
+            }`,
+          });
+        });
     } catch (err) {
-      console.error('Failed to update task:', err);
+      console.error("Failed to update task:", err);
       toast({
         title: "Error",
         description: "Failed to update task. Please try again.",
@@ -58,15 +69,19 @@ export function TasksFeature() {
 
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
-      case 'High': return <AlertCircle className="w-4 h-4 text-destructive" />;
-      case 'Medium': return <Clock className="w-4 h-4 text-warning" />;
-      case 'Low': return <CheckCircle className="w-4 h-4 text-success" />;
-      default: return null;
+      case "High":
+        return <AlertCircle className="w-4 h-4 text-destructive" />;
+      case "Medium":
+        return <Clock className="w-4 h-4 text-warning" />;
+      case "Low":
+        return <CheckCircle className="w-4 h-4 text-success" />;
+      default:
+        return null;
     }
   };
 
-  const completedTasks = tasks.filter(task => task.completed).length;
-  const pendingTasks = tasks.filter(task => !task.completed).length;
+  const completedTasks = tasks.filter((task) => task.completed).length;
+  const pendingTasks = tasks.filter((task) => !task.completed).length;
 
   if (isLoading) {
     return <ContentLoader />;
@@ -78,7 +93,9 @@ export function TasksFeature() {
         <div className="text-center">
           <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
           <h3 className="text-lg font-medium mb-2">Failed to load tasks</h3>
-          <p className="text-sm text-muted-foreground">Please try again later.</p>
+          <p className="text-sm text-muted-foreground">
+            Please try again later.
+          </p>
         </div>
       </div>
     );
@@ -91,9 +108,11 @@ export function TasksFeature() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Tasks</h1>
-            <p className="text-muted-foreground mt-1">Manage and track your activities</p>
+            <p className="text-muted-foreground mt-1">
+              Manage and track your activities
+            </p>
           </div>
-          
+
           <Button className="gap-2 bg-gradient-primary hover:bg-primary-hover">
             <Plus className="w-4 h-4" />
             Add Task
@@ -109,7 +128,7 @@ export function TasksFeature() {
               placeholder="Search tasks..."
               value={searchTerm}
               onChange={(e) => {
-                console.log('🔍 [TASKS] Search term changed:', e.target.value);
+                console.log("🔍 [TASKS] Search term changed:", e.target.value);
                 setSearchTerm(e.target.value);
                 // TODO: Debounce search and call backend API
               }}
@@ -119,23 +138,23 @@ export function TasksFeature() {
 
           <div className="flex items-center gap-2">
             <Button
-              variant={filter === 'all' ? 'default' : 'outline'}
+              variant={filter === "all" ? "default" : "outline"}
               size="sm"
-              onClick={() => setFilter('all')}
+              onClick={() => setFilter("all")}
             >
               All ({tasks.length})
             </Button>
             <Button
-              variant={filter === 'pending' ? 'default' : 'outline'}
+              variant={filter === "pending" ? "default" : "outline"}
               size="sm"
-              onClick={() => setFilter('pending')}
+              onClick={() => setFilter("pending")}
             >
               Pending ({pendingTasks})
             </Button>
             <Button
-              variant={filter === 'completed' ? 'default' : 'outline'}
+              variant={filter === "completed" ? "default" : "outline"}
               size="sm"
-              onClick={() => setFilter('completed')}
+              onClick={() => setFilter("completed")}
             >
               Completed ({completedTasks})
             </Button>
@@ -147,7 +166,10 @@ export function TasksFeature() {
       <div className="flex-1 p-6 overflow-auto">
         <div className="space-y-3">
           {tasks.map((task) => (
-            <Card key={task.id} className="bg-background hover:shadow-md transition-shadow">
+            <Card
+              key={task.id}
+              className="bg-background hover:shadow-md transition-shadow"
+            >
               <CardContent className="p-4">
                 <div className="flex items-start gap-4">
                   <Checkbox
@@ -155,11 +177,17 @@ export function TasksFeature() {
                     onCheckedChange={() => toggleTaskCompletion(task.id)}
                     className="mt-1"
                   />
-                  
+
                   <div className="flex-1 space-y-2">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h3 className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
+                        <h3
+                          className={`font-medium ${
+                            task.completed
+                              ? "line-through text-muted-foreground"
+                              : ""
+                          }`}
+                        >
                           {task.title}
                         </h3>
                         {task.description && (
@@ -168,36 +196,50 @@ export function TasksFeature() {
                           </p>
                         )}
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         {getPriorityIcon(task.priority)}
-                        <Badge 
-                          variant={task.priority === 'High' ? 'destructive' : 
-                                  task.priority === 'Medium' ? 'default' : 'secondary'}
+                        <Badge
+                          variant={
+                            task.priority === "High"
+                              ? "destructive"
+                              : task.priority === "Medium"
+                              ? "default"
+                              : "secondary"
+                          }
                           className="text-xs"
                         >
                           {task.priority}
                         </Badge>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>Due: {new Date(task.due_date).toLocaleDateString()}</span>
-                      {task.assigned_to && <span>Assigned to: {task.assigned_to}</span>}
-                      <span>Created: {new Date(task.created_at).toLocaleDateString()}</span>
+                      <span>
+                        Due: {new Date(task.due_date).toLocaleDateString()}
+                      </span>
+                      {task.assigned_to && (
+                        <span>Assigned to: {task.assigned_to}</span>
+                      )}
+                      <span>
+                        Created:{" "}
+                        {new Date(task.created_at).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           ))}
-          
+
           {tasks.length === 0 && (
             <div className="text-center py-12 text-muted-foreground">
               <Clock className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <h3 className="text-lg font-medium mb-2">No tasks found</h3>
               <p className="text-sm">
-                {searchTerm || filter !== 'all' ? 'Try adjusting your search or filter criteria.' : 'Get started by adding your first task.'}
+                {searchTerm || filter !== "all"
+                  ? "Try adjusting your search or filter criteria."
+                  : "Get started by adding your first task."}
               </p>
             </div>
           )}
