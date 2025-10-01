@@ -3,6 +3,7 @@ import {
   Target,
   CheckSquare,
   Users,
+  UserCog,
   Settings,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
@@ -43,6 +44,12 @@ const menuItems = [
     url: "/contacts",
     icon: Users,
     description: "Customer database",
+  },
+  {
+    title: "Users",
+    url: "/users",
+    icon: UserCog,
+    description: "Team management",
   },
   {
     title: "Admin",

@@ -8,6 +8,7 @@ import Pipelines from "./pages/Pipelines";
 import Tasks from "./pages/Tasks";
 import Contacts from "./pages/Contacts";
 import Admin from "./pages/Admin";
+import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/auth/Login";
 import Auth from "./pages/Auth";
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/pipelines" element={<Pipelines />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/contacts" element={<Contacts />} />
+            <Route path="/users" element={<Users />} />
             <Route path="/admin" element={<Admin />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
