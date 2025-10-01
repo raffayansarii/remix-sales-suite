@@ -8,11 +8,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useGetTasksQuery, useUpdateTasksMutation } from "@/api/tasks/tasksApi";
 import { useToast } from "@/hooks/use-toast";
 import { ContentLoader } from "@/components/ui/content-loader";
+import { CreateTaskModal } from "./CreateTaskModal";
 
 export function TasksFeature() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState<"all" | "pending" | "completed">("all");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Build query params
   const queryParams = new URLSearchParams();
@@ -113,10 +115,12 @@ export function TasksFeature() {
             </p>
           </div>
 
-          <Button className="gap-2 bg-gradient-primary hover:bg-primary-hover">
+          <Button 
+            className="gap-2 bg-gradient-primary hover:bg-primary-hover"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
             <Plus className="w-4 h-4" />
             Add Task
-            {/* TODO: Add onClick handler for creating new task - POST /api/tasks */}
           </Button>
         </div>
 
@@ -245,6 +249,11 @@ export function TasksFeature() {
           )}
         </div>
       </div>
+
+      <CreateTaskModal 
+        open={isCreateModalOpen} 
+        onOpenChange={setIsCreateModalOpen} 
+      />
     </div>
   );
 }

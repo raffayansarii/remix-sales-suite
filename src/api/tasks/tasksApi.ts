@@ -11,6 +11,18 @@ export const tasksApi = baseApi.injectEndpoints({
           Prefer: "count=exact",
         },
       }),
+      providesTags: ["Task"],
+    }),
+    createTask: build.mutation<Task, Partial<Task>>({
+      query: (body) => ({
+        url: "tasks",
+        method: "POST",
+        body,
+        headers: {
+          Prefer: "return=representation",
+        },
+      }),
+      invalidatesTags: ["Task"],
     }),
     updateTasks: build.mutation<any, any>({
       query: ({ id, ...patch }) => ({
@@ -18,8 +30,9 @@ export const tasksApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: patch,
       }),
+      invalidatesTags: ["Task"],
     }),
   }),
 });
 
-export const { useGetTasksQuery, useUpdateTasksMutation } = tasksApi;
+export const { useGetTasksQuery, useCreateTaskMutation, useUpdateTasksMutation } = tasksApi;
