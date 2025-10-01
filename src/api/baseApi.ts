@@ -1,7 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const AUTH_URL = "https://c2p-crm-auth.jollytree-b86081c8.westus.azurecontainerapps.io/token";
-const API_URL = "https://c2p-crm-pgr.jollytree-b86081c8.westus.azurecontainerapps.io/";
+const AUTH_URL =
+  "https://c2p-crm-auth.jollytree-b86081c8.westus.azurecontainerapps.io/token?grant_type=refresh_token";
+const API_URL =
+  "https://c2p-crm-pgr.jollytree-b86081c8.westus.azurecontainerapps.io/";
 
 // helper: refresh token flow
 const refreshAccessToken = async () => {
@@ -11,9 +13,8 @@ const refreshAccessToken = async () => {
   try {
     const res = await fetch(AUTH_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        grant_type: "refresh_token",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         refresh_token: refreshToken,
       }),
     });
@@ -78,6 +79,14 @@ const customBaseQuery = async (args, api, extraOptions) => {
 export const baseApi = createApi({
   reducerPath: "api",
   baseQuery: customBaseQuery,
-  tagTypes: ["User", "Opportunity", "OpportunityTag", "Tag", "Tenant", "Kanban", "Task"],
+  tagTypes: [
+    "User",
+    "Opportunity",
+    "OpportunityTag",
+    "Tag",
+    "Tenant",
+    "Kanban",
+    "Task",
+  ],
   endpoints: () => ({}), // Empty endpoints, ready for injection
 });
