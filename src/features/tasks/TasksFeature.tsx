@@ -146,21 +146,21 @@ export function TasksFeature() {
               size="sm"
               onClick={() => setFilter("all")}
             >
-              All ({tasks.length})
+              All
             </Button>
             <Button
               variant={filter === "pending" ? "default" : "outline"}
               size="sm"
               onClick={() => setFilter("pending")}
             >
-              Pending ({pendingTasks})
+              Pending
             </Button>
             <Button
               variant={filter === "completed" ? "default" : "outline"}
               size="sm"
               onClick={() => setFilter("completed")}
             >
-              Completed ({completedTasks})
+              Completed
             </Button>
           </div>
         </div>
