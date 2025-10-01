@@ -222,19 +222,22 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="opportunity_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Opportunity ID</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Link to opportunity" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+             <AsyncSelect
+                getOptionLabel={(tenant: ITenant) => tenant.name}
+                fetchOptions={async (params) => {
+                  console.log("Fetching tenants with params:", params);
+                  const res = await trigger(params).unwrap();
+                  return res.data; // { data, pagination }
+                }}
+                renderOption={(tenant) => <span>{tenant.name}</span>}
+                onSelect={(tenant) => {
+                  setTenant(tenant.id);
+                  form.setValue("tenant_id", tenant.id);
+                }}
+                placeholder="Search tenants..."
+                label="Tenant ID"
+                searchKey="name"
+              />
 
             <div className="flex justify-end gap-2 pt-4">
               <Button

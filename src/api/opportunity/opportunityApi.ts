@@ -103,6 +103,7 @@ export const {
   useOpportunityTagsQuery,
   useOpportunityTagsByIdQuery,
   useGetOpportunitiesQuery,
+  useLazyGetOpportunitiesQuery,
   useGetOpportunityByIdQuery,
   useCreateOpportunityMutation,
   useUpdateOpportunityMutation,
