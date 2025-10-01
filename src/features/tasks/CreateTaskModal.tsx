@@ -37,7 +37,10 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useCreateTaskMutation } from "@/api/tasks/tasksApi";
+import { useLazyGetOpportunitiesQuery } from "@/api/opportunity/opportunityApi";
 import { useToast } from "@/hooks/use-toast";
+import { AsyncSelect } from "@/components/ui/AsyncSearchDropdown";
+import { IOpportunity } from "@/api/opportunity/opportunityTypes";
 
 const taskSchema = z.object({
   title: z.string().min(1, "Title is required").max(200, "Title too long"),
@@ -58,7 +61,7 @@ interface CreateTaskModalProps {
 export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
   const { toast } = useToast();
   const [createTask, { isLoading }] = useCreateTaskMutation();
-
+  const [triggerOpps, oppStatus] = useLazyGetOpportunitiesQuery();
   const form = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
@@ -221,24 +224,21 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
                 </FormItem>
               )}
             />
-
-             <AsyncSelect
-                getOptionLabel={(tenant: ITenant) => tenant.name}
-                fetchOptions={async (params) => {
-                  console.log("Fetching tenants with params:", params);
-                  const res = await trigger(params).unwrap();
-                  return res.data; // { data, pagination }
-                }}
-                renderOption={(tenant) => <span>{tenant.name}</span>}
-                onSelect={(tenant) => {
-                  setTenant(tenant.id);
-                  form.setValue("tenant_id", tenant.id);
-                }}
-                placeholder="Search tenants..."
-                label="Tenant ID"
-                searchKey="name"
-              />
-
+            <AsyncSelect
+              getOptionLabel={(tenant: IOpportunity) => tenant.title}
+              fetchOptions={async (params) => {
+                console.log("Fetching tenants with params:", params);
+                const res = await triggerOpps(params).unwrap();
+                return res.data; // { data, pagination }
+              }}
+              renderOption={(tenant) => <span>{tenant.title}</span>}
+              onSelect={(opp) => {
+                form.setValue("opportunity_id", opp.id);
+              }}
+              placeholder="Link to opportunity"
+              label="Opportunity"
+              searchKey="title"
+            />
             <div className="flex justify-end gap-2 pt-4">
               <Button
                 type="button"
