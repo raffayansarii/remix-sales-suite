@@ -41,6 +41,7 @@ import { useLazyGetOpportunitiesQuery } from "@/api/opportunity/opportunityApi";
 import { useToast } from "@/hooks/use-toast";
 import { AsyncSelect } from "@/components/ui/AsyncSearchDropdown";
 import { IOpportunity } from "@/api/opportunity/opportunityTypes";
+import { useLazyGetAllUsersQuery } from "@/api/auth/authApi";
 
 const taskSchema = z.object({
   title: z.string().min(1, "Title is required").max(200, "Title too long"),
@@ -62,6 +63,7 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
   const { toast } = useToast();
   const [createTask, { isLoading }] = useCreateTaskMutation();
   const [triggerOpps, oppStatus] = useLazyGetOpportunitiesQuery();
+  const [triggerUsers, userStatus] = useLazyGetAllUsersQuery();
   const form = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
@@ -174,7 +176,7 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
                 name="due_date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel className="mb-1">Due Date</FormLabel>
+                    <FormLabel className="mb-2">Due Date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -211,7 +213,7 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
               />
             </div>
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name="assigned_to"
               render={({ field }) => (
@@ -223,6 +225,21 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
                   <FormMessage />
                 </FormItem>
               )}
+            /> */}
+            <AsyncSelect
+              getOptionLabel={(user) => user.name}
+              fetchOptions={async (params) => {
+                console.log("Fetching tenants with params:", params);
+                const res = await triggerUsers(params).unwrap();
+                return res.data; // { data, pagination }
+              }}
+              renderOption={(user) => <span>{user.name}</span>}
+              onSelect={(user) => {
+                form.setValue("assigned_to", user.id);
+              }}
+              placeholder="User ID Or name"
+              label="Assigned To"
+              searchKey="name"
             />
             <AsyncSelect
               getOptionLabel={(tenant: IOpportunity) => tenant.title}
