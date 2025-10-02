@@ -17,7 +17,7 @@ interface KanbanColumnProps {
 }
 
 export function KanbanColumn({ stage, opportunities, onOpportunityClick }: KanbanColumnProps) {
-  const stageValue = opportunities.reduce((sum, opp) => sum + parseFloat(opp.value), 0);
+  const stageValue = opportunities.reduce((sum, opp) => sum + opp.value, 0);
 
   return (
     <div className="flex-shrink-0 w-80">

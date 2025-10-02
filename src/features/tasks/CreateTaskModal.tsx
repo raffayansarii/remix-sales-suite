@@ -213,34 +213,21 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
                 )}
               />
             </div>
-
-            {/* <FormField
-              control={form.control}
-              name="assigned_to"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Assigned To</FormLabel>
-                  <FormControl>
-                    <Input placeholder="User ID or name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            /> */}
+            
             <AsyncSelect
-              getOptionLabel={(user: IUser) => user.email}
+              getOptionLabel={(user:IUser) => user.email}
               fetchOptions={async (params) => {
-                console.log("Fetching users with params:", params);
+                console.log("Fetching tenants with params:", params);
                 const res = await triggerUsers(params).unwrap();
-                return res.users;
+                return res.users; // { data, pagination }
               }}
-              renderOption={(user: IUser) => <span>{user.email}</span>}
-              onSelect={(user: IUser) => {
+              renderOption={(user) => <span>{user.email}</span>}
+              onSelect={(user) => {
                 form.setValue("assigned_to", user.id);
               }}
-              placeholder="User ID Or email"
+              placeholder="User ID Or name"
               label="Assigned To"
-              searchKey="email"
+              searchKey="name"
             />
             <AsyncSelect
               getOptionLabel={(tenant: IOpportunity) => tenant.title}
