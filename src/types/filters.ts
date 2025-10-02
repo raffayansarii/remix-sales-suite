@@ -49,27 +49,3 @@ export const FILTER_FIELDS = [
   { value: 'tags', label: 'Tags', type: 'text' }
 ];
 
-export const getOperatorsForField = (fieldType: string) => {
-  switch (fieldType) {
-    case 'text':
-      return FILTER_OPERATORS.filter(op => 
-        ['contains_exactly', 'contains_any_of', 'contains_all_of', 'doesnt_contain_exactly', 
-         'ends_with_any_of', 'starts_with_any_of', 'has_never_contained_exactly', 
-         'equals', 'not_equals', 'is_empty', 'is_not_empty'].includes(op.value)
-      );
-    case 'select':
-      return FILTER_OPERATORS.filter(op => 
-        ['equals', 'not_equals', 'contains_any_of', 'contains_all_of'].includes(op.value)
-      );
-    case 'number':
-      return FILTER_OPERATORS.filter(op => 
-        ['equals', 'not_equals', 'greater_than', 'less_than', 'between', 'is_empty', 'is_not_empty'].includes(op.value)
-      );
-    case 'date':
-      return FILTER_OPERATORS.filter(op => 
-        ['equals', 'not_equals', 'before_date', 'after_date', 'between', 'in_last_days', 'is_empty', 'is_not_empty'].includes(op.value)
-      );
-    default:
-      return FILTER_OPERATORS;
-  }
-};

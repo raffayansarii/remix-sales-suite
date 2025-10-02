@@ -21,7 +21,11 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { FilterDrawerProps } from "./types-and-schemas";
 import { Textarea } from "../ui/textarea";
-import { CreateUserFilterRequest } from "@/api/opportunity/filters/filtersTypes";
+import {
+  CreateUserFilterRequest,
+  GetUserFiltersRequest,
+  DeleteUserFilterRequest,
+} from "@/api/opportunity/filters/filtersTypes";
 
 export function FilterDrawer({
   isOpen,
@@ -118,6 +122,7 @@ export function FilterDrawer({
   };
 
   const saveFilterConfig = () => {
+     handleSaveCurrent();
     if (!configName.trim()) {
       toast({
         title: "Error",
@@ -145,22 +150,6 @@ export function FilterDrawer({
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    const BEFilter: CreateUserFilterRequest = {
-      p_user_id: "string",
-      p_tenant_id: "string",
-      p_name: "string",
-      p_description: "string",
-      p_filter_groups: [
-        {
-          field: "string",
-          operator: "string",
-          value: "",
-        },
-      ],
-      p_is_shared: true,
-      p_is_default: true,
-    };
-    console.log("🌐 [API] Would call POST /api/filter-configs", newConfig);
 
     const existingIndex = savedConfigs.findIndex(
       (config) => config.name === configName
@@ -216,6 +205,48 @@ export function FilterDrawer({
         title: "Configuration deleted",
         description: `Deleted "${config.name}" filter configuration`,
       });
+    }
+  };
+
+  // Save Current (logs CreateUserFilterRequest)
+  const handleSaveCurrent = () => {
+    const req: CreateUserFilterRequest = {
+      p_user_id: 'demo-user-id', // replace with actual user id
+      p_tenant_id: 'demo-tenant-id', // replace with actual tenant id
+      p_name: configName,
+      p_description: '',
+      p_filter_groups: filterGroups as any, // Cast to UserFilterCondition[] for demo/logging
+      p_is_shared: false,
+      p_is_default: false,
+    };
+    console.log('[FILTERS] Save Current request:', req);
+  };
+
+  // Get Filters (logs GetUserFiltersRequest)
+  const handleGetFilters = () => {
+    const req: GetUserFiltersRequest = {
+      p_user_id: "demo-user-id", // replace with actual user id
+      p_tenant_id: "demo-tenant-id", // replace with actual tenant id
+    };
+    console.log("[FILTERS] Get Filters request:", req);
+  };
+
+  // Delete Filter (logs DeleteUserFilterRequest)
+  const handleDeleteFilter = (filterId: string) => {
+    const req: DeleteUserFilterRequest = {
+      p_user_id: "demo-user-id", // replace with actual user id
+      p_filter_id: filterId,
+    };
+    console.log("[FILTERS] Delete Filter request:", req);
+    deleteFilterConfig(filterId);
+  };
+
+  // Apply (Unpack) Filter (logs config)
+  const handleApplyFilterConfig = (configId: string) => {
+    const config = savedConfigs.find((c) => c.id === configId);
+    if (config) {
+      console.log("[FILTERS] Apply (Unpack) Filter config:", config);
+      loadFilterConfig(configId);
     }
   };
 
@@ -340,7 +371,7 @@ export function FilterDrawer({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setShowSaveForm(!showSaveForm)}
+                  onClick={() => { setShowSaveForm(!showSaveForm); }}
                   className="text-xs"
                 >
                   <Save className="w-3 h-3 mr-1" />
@@ -402,7 +433,7 @@ export function FilterDrawer({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => deleteFilterConfig(config.id)}
+                        onClick={() => handleDeleteFilter(config.id)}
                         className="text-destructive hover:text-destructive-foreground hover:bg-destructive"
                       >
                         <Trash2 className="w-3 h-3" />

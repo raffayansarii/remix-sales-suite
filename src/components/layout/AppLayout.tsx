@@ -1,9 +1,12 @@
+"use client";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { ReactNode, useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Outlet } from "react-router-dom";
+import { useGetCurrentUserQuery } from "@/api/auth/authApi";
+import { IUser } from "@/api/auth/authTypes";
 
 interface AppLayoutProps {
   children?: ReactNode;
@@ -11,7 +14,11 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+const {data} = useGetCurrentUserQuery(null)
+const userDataRaw = localStorage.getItem('user')
+const userData:IUser = userDataRaw ? JSON.parse(userDataRaw) : null;
 
+console.log({local:userData?.user_metadata?.full_name ,api:data?.user_metadata?.full_name })
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -64,10 +71,12 @@ export function AppLayout({ children }: AppLayoutProps) {
                   {/* <TenantSwitcher /> */}
 
                   <div className="text-sm text-muted-foreground">
-                    Welcome back, John Doe
+                    Welcome back, {userData?.user_metadata?.first_name || data?.user_metadata?.first_name || "-"}
                   </div>
                   <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">JD</span>
+                    <span className="text-white text-sm font-medium">
+                      {userData?.user_metadata?.first_name?.charAt(0).toUpperCase() || data?.user_metadata?.first_name?.charAt(0).toUpperCase() || "U"}
+                    </span>
                   </div>
                 </div>
               </div>

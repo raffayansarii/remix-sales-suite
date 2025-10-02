@@ -72,7 +72,7 @@ export const PIN_COLORS: PinColor[] = [
   },
 ];
 
-interface PinnedItemsHook<T extends { id: string; pinned?: boolean | {state:boolean; color:string} }> {
+interface PinnedItemsHook<T extends { id: string; pinned?: boolean }> {
   pinnedItems: Set<string>;
   itemColors: Map<string, PinColor>;
   togglePin: (itemId: string, opportunity: IOpportunity) => void;
@@ -83,7 +83,7 @@ interface PinnedItemsHook<T extends { id: string; pinned?: boolean | {state:bool
 }
 
 export function usePinnedItems<
-  T extends { id: string; pinned?: boolean | {state:boolean; color:string} }
+  T extends { id: string; pinned?: boolean }
 >(): PinnedItemsHook<T> {
   const [pinnedItems, setPinnedItems] = useState<Set<string>>(new Set());
   const [itemColors, setItemColors] = useState<Map<string, PinColor>>(
@@ -92,12 +92,11 @@ export function usePinnedItems<
   const [updateOpportunityHandler, updateOppotunityStatus] =
     useUpdateOpportunityMutation();
   const togglePin = useCallback((itemId: string, opportunity: IOpportunity) => {
-    const currentPinned = opportunity.pinned;
-    
+    console.log("id for pin", opportunity);
     // Update the backend pinned status
     updateOpportunityHandler({
       id: itemId,
-      body: { pinned: !currentPinned },
+      body: { pinned: !opportunity.pinned },
     })
       .unwrap()
       .then(() => {
@@ -158,10 +157,8 @@ export function usePinnedItems<
       const unpinnedItems: T[] = [];
 
       items.forEach((item) => {
-        const isPinnedItem = pinnedItems.has(item.id) || Boolean(item.pinned);
-        
-        if (isPinnedItem) {
-          pinnedItemsArray.push(item);
+        if (pinnedItems.has(item.id) || item.pinned) {
+          pinnedItemsArray.push({ ...item, pinned: true });
         } else {
           unpinnedItems.push(item);
         }

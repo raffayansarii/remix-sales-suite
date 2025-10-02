@@ -15,7 +15,7 @@ export function ContactsFeature() {
 
   console.log('👥 [CONTACTS] ContactsFeature initialized with contacts:', contacts.length);
 
-  const {data} = useGetTenantsQuery("")
+  const {data} = useGetTenantsQuery({})
   console.log(data)
   // TODO: Replace with backend search - POST /api/contacts/search  
   const filteredContacts = contacts.filter(contact => 
