@@ -84,9 +84,6 @@ export function UsersFeature() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Users</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your team members and their access
-          </p>
         </div>
         <Button onClick={() => setIsCreateModalOpen(true)}>
           <UserPlus className="mr-2 h-4 w-4" />
