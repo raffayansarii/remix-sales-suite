@@ -43,7 +43,6 @@ export function AdminFeature() {
       <div className="bg-background border-b p-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground">System Administration</h1>
-          <p className="text-muted-foreground mt-1">Manage system settings and configurations</p>
         </div>
       </div>
 
