@@ -38,6 +38,7 @@ export function PipelinesFeature() {
   const [opportunities, setOpportunities] = useState<IOpportunity[]>(null);
   const [totalCount, setTotalCount] = useState(0);
   const [activeFilters, setActiveFilters] = useState("");
+  const [activeFilterCount, setActiveFilterCount] = useState(0);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -163,28 +164,29 @@ export function PipelinesFeature() {
 
               <div className="flex items-center gap-2">
                 <Button
-                  variant={activeFilters.length > 0 ? "default" : "outline"}
+                  variant={activeFilterCount > 0 ? "default" : "outline"}
                   size="sm"
                   onClick={() => setIsFilterDrawerOpen(true)}
                   className="gap-2 relative shrink-0"
                 >
                   <Filter className="w-4 h-4" />
                   Filters
-                  {activeFilters.length > 0 && (
+                  {activeFilterCount > 0 && (
                     <Badge
                       variant="secondary"
                       className="ml-1 h-5 w-5 p-0 text-xs flex items-center justify-center"
                     >
-                      {activeFilters.length}
+                      {activeFilterCount}
                     </Badge>
                   )}
                 </Button>
-                {activeFilters.length > 0 && (
+                {activeFilterCount > 0 && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => {
                       setActiveFilters("");
+                      setActiveFilterCount(0);
                       setCurrentPage(1);
                     }}
                     className="gap-1 shrink-0"
@@ -274,7 +276,10 @@ export function PipelinesFeature() {
         <FilterDrawer
           isOpen={isFilterDrawerOpen}
           onClose={() => setIsFilterDrawerOpen(false)}
-          onApplyFilters={setActiveFilters}
+          onApplyFilters={(filterString: string, count: number) => {
+            setActiveFilters(filterString);
+            setActiveFilterCount(count);
+          }}
           activeFilters={""}
         />
         <CreateOpportunityModal

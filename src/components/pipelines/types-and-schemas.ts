@@ -258,7 +258,7 @@ export interface FilterGroupProps {
 export interface FilterDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onApplyFilters: (queryString: string) => void;
+  onApplyFilters: (queryString: string, count: number) => void;
   activeFilters: string;
 }
 
