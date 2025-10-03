@@ -13,6 +13,8 @@ export interface IUser {
   user_metadata: {
     email_verified: boolean;
     full_name: string;
+    first_name: string;
+    last_name: string;
     role: string;
   };
   identities: any; // or null, or a more specific type if known
