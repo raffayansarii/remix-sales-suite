@@ -10,15 +10,15 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
-import { useEffect } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const menuItems = [
   {
@@ -59,15 +59,9 @@ const menuItems = [
   },
 ];
 
-export function AppSidebar({
-  isSidebarCollapsed,
-}: {
-  isSidebarCollapsed?: (state: boolean) => void;
-}) {
-  const { state } = useSidebar();
+export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
-  const isCollapsed = state === "collapsed";
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -75,84 +69,49 @@ export function AppSidebar({
     }
     return currentPath.startsWith(path);
   };
-  useEffect(() => {
-    if (!isSidebarCollapsed) return;
-    isSidebarCollapsed(isCollapsed);
-  }, [isCollapsed]);
 
   return (
-    <Sidebar
-      className={`${
-        isCollapsed ? "w-16" : "w-64"
-      } transition-all duration-300 border-r bg-background z-50`}
-    >
-      <SidebarContent className="bg-background">
-        <div className="p-6 border-b">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <Target className="w-4 h-4 text-white" />
-            </div>
-            {!isCollapsed && (
-              <div>
-                <h2 className="text-lg font-bold text-foreground">CRM Pro</h2>
-                <p className="text-xs text-muted-foreground">
-                  Pipeline Management
-                </p>
-              </div>
-            )}
+    <Sidebar className="w-16 border-r-0 bg-[#333] z-50" collapsible="none">
+      <SidebarContent className="bg-[#333]">
+        {/* Logo */}
+        <div className="h-16 flex items-center justify-center border-b border-white/10">
+          <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+            <Target className="w-4 h-4 text-white" />
           </div>
         </div>
 
-        <SidebarGroup className="px-3 py-4">
-          <SidebarGroupLabel
-            className={`${
-              isCollapsed ? "sr-only" : ""
-            } text-muted-foreground text-xs font-medium uppercase tracking-wider mb-2`}
-          >
-            Main Navigation
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    className={`
-                      w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
-                      ${
-                        isActive(item.url)
-                          ? "bg-primary text-primary-foreground shadow-md"
-                          : "hover:bg-muted text-muted-foreground hover:text-foreground"
-                      }
-                      ${isCollapsed ? "justify-center" : "justify-start"}
-                    `}
-                  >
+        {/* Navigation Menu */}
+        <TooltipProvider delayDuration={0}>
+          <SidebarMenu className="px-2 py-4 space-y-2">
+            {menuItems.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
                     <NavLink
                       to={item.url}
-                      className="flex items-center gap-3 w-full"
+                      className={`
+                        flex items-center justify-center w-full h-12 rounded-lg transition-all duration-200
+                        ${
+                          isActive(item.url)
+                            ? "bg-primary text-white shadow-lg"
+                            : "text-white/70 hover:text-white hover:bg-white/10"
+                        }
+                      `}
                     >
-                      <item.icon
-                        className={`${
-                          isCollapsed ? "w-5 h-5" : "w-4 h-4"
-                        } flex-shrink-0`}
-                      />
-                      {!isCollapsed && (
-                        <div className="flex-1 text-left">
-                          <div className="font-medium text-sm">
-                            {item.title}
-                          </div>
-                          <div className="text-xs opacity-75">
-                            {item.description}
-                          </div>
-                        </div>
-                      )}
+                      <item.icon className="w-5 h-5" />
                     </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="bg-popover border z-[100]">
+                    <div className="font-medium">{item.title}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {item.description}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </TooltipProvider>
       </SidebarContent>
     </Sidebar>
   );

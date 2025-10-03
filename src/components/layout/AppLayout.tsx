@@ -1,5 +1,5 @@
 "use client";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { ReactNode, useEffect, useState, createContext, useContext } from "react";
 import { Search, Moon, Sun } from "lucide-react";
@@ -22,7 +22,6 @@ function useTheme() {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(
     typeof window !== 'undefined' && window.localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'
   );
@@ -40,14 +39,13 @@ export function AppLayout({ children }: AppLayoutProps) {
   console.log({local:userData?.user_metadata?.full_name ,api:data?.user_metadata?.full_name })
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={false}>
         <div className={`min-h-screen flex w-full bg-background${theme === 'dark' ? ' dark' : ''}`}>
-          <AppSidebar isSidebarCollapsed={setIsSidebarCollapsed} />
+          <AppSidebar />
 
           <div className="flex-1 flex flex-col">
-            <header className="h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
+            <header className="h-16 border-b bg-[#333] sticky top-0 z-40">
               <div className="flex h-full items-center gap-4 px-6">
-                <SidebarTrigger className="hover:bg-muted rounded-md p-2 transition-colors" />
 
                 <div className="flex-1 flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -59,10 +57,10 @@ export function AppLayout({ children }: AppLayoutProps) {
                         - Features: keyboard shortcuts, search history, filters
                     */}
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 z-10" />
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4 z-10" />
                       <Input
                         placeholder="Global Search... (Ctrl+K)"
-                        className="pl-10 pr-4 w-72 bg-background border-2 border-primary/30 focus:border-primary shadow-sm"
+                        className="pl-10 pr-4 w-72 bg-white/10 border-2 border-white/20 focus:border-white/40 shadow-sm text-white placeholder:text-white/60"
                         onFocus={() =>
                           console.log(
                             "[GLOBAL_SEARCH] Search focused - ready for backend integration"
@@ -86,7 +84,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                     {/* Theme Toggle Button */}
                     <button
                       aria-label="Toggle theme"
-                      className="p-2 rounded hover:bg-muted border"
+                      className="p-2 rounded hover:bg-white/10 border border-white/20 text-white"
                       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                     >
                       {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -95,7 +93,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                     {/* TODO: Replace with real tenant switcher connected to backend */}
                     {/* <TenantSwitcher /> */}
 
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-white/90">
                       Welcome back, {userData?.user_metadata?.full_name?.split(' ')[0] || data?.user_metadata?.full_name?.split(' ')[0] || "-"}
                     </div>
                     <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
@@ -108,11 +106,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               </div>
             </header>
 
-            <main
-              className={`overflow-hidden h-full transition-all ${
-                !isSidebarCollapsed ? "w-[calc(100vw-255px)]" : "w-full"
-              }`}
-            >
+            <main className="overflow-hidden h-full flex-1">
               <div className="h-full w-full overflow-auto">
                 <Outlet />
               </div>
