@@ -96,11 +96,11 @@ export function AppLayout({ children }: AppLayoutProps) {
                     {/* <TenantSwitcher /> */}
 
                     <div className="text-sm text-muted-foreground">
-                      Welcome back, {userData?.user_metadata?.first_name || data?.user_metadata?.first_name || "-"}
+                      Welcome back, {userData?.user_metadata?.full_name?.split(' ')[0] || data?.user_metadata?.full_name?.split(' ')[0] || "-"}
                     </div>
                     <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
                       <span className="text-white text-sm font-medium">
-                        {userData?.user_metadata?.first_name?.charAt(0).toUpperCase() || data?.user_metadata?.first_name?.charAt(0).toUpperCase() || "U"}
+                        {userData?.user_metadata?.full_name?.charAt(0).toUpperCase() || data?.user_metadata?.full_name?.charAt(0).toUpperCase() || "U"}
                       </span>
                     </div>
                   </div>
