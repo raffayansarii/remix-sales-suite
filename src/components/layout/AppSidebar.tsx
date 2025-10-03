@@ -5,8 +5,11 @@ import {
   Users,
   UserCog,
   Settings,
+  Building2,
+  ChevronRight,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
+import { useState } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -14,61 +17,96 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import brandLogo from "@/assets/brand-logo.png";
 
-const menuItems = [
+interface MenuItem {
+  title: string;
+  url: string;
+  icon: any;
+  description: string;
+}
+
+interface MenuGroup {
+  title: string;
+  icon: any;
+  items: MenuItem[];
+}
+
+const menuGroups: MenuGroup[] = [
   {
     title: "Dashboard",
-    url: "/",
     icon: LayoutDashboard,
-    description: "Overview and analytics",
+    items: [
+      {
+        title: "Overview",
+        url: "/",
+        icon: LayoutDashboard,
+        description: "Main dashboard",
+      },
+    ],
   },
   {
-    title: "Opportunity Pipelines",
-    url: "/pipelines",
-    icon: Target,
-    description: "Manage sales pipeline",
-  },
-  {
-    title: "Tasks",
-    url: "/tasks",
-    icon: CheckSquare,
-    description: "Track activities",
-  },
-  {
-    title: "Contacts",
-    url: "/contacts",
-    icon: Users,
-    description: "Customer database",
-  },
-  {
-    title: "Users",
-    url: "/users",
-    icon: UserCog,
-    description: "Team management",
+    title: "CRM",
+    icon: Building2,
+    items: [
+      {
+        title: "Contacts",
+        url: "/contacts",
+        icon: Users,
+        description: "Customer database",
+      },
+      {
+        title: "Opportunity Pipelines",
+        url: "/pipelines",
+        icon: Target,
+        description: "Manage sales pipeline",
+      },
+      {
+        title: "Tasks",
+        url: "/tasks",
+        icon: CheckSquare,
+        description: "Track activities",
+      },
+    ],
   },
   {
     title: "Admin",
-    url: "/admin",
     icon: Settings,
-    description: "System administration",
+    items: [
+      {
+        title: "Users",
+        url: "/users",
+        icon: UserCog,
+        description: "Team management",
+      },
+      {
+        title: "Settings",
+        url: "/admin",
+        icon: Settings,
+        description: "System administration",
+      },
+    ],
   },
 ];
 
 export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
+  const [openPopover, setOpenPopover] = useState<string | null>(null);
 
   const isActive = (path: string) => {
     if (path === "/") {
       return currentPath === path;
     }
     return currentPath.startsWith(path);
+  };
+
+  const isGroupActive = (items: MenuItem[]) => {
+    return items.some((item) => isActive(item.url));
   };
 
   return (
@@ -80,37 +118,76 @@ export function AppSidebar() {
         </div>
 
         {/* Navigation Menu */}
-        <TooltipProvider delayDuration={0}>
-          <SidebarMenu className="px-2 py-4 space-y-2">
-            {menuItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <NavLink
-                      to={item.url}
-                      className={`
-                        flex items-center justify-center w-full h-12 rounded-lg transition-all duration-200
-                        ${
-                          isActive(item.url)
-                            ? "bg-primary text-white shadow-lg"
-                            : "text-white/70 hover:text-white hover:bg-white/10"
-                        }
-                      `}
-                    >
-                      <item.icon className="w-5 h-5" />
-                    </NavLink>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="bg-popover border z-[100]">
-                    <div className="font-medium">{item.title}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {item.description}
+        <SidebarMenu className="px-2 py-4 space-y-2">
+          {menuGroups.map((group) => (
+            <SidebarMenuItem key={group.title}>
+              <Popover
+                open={openPopover === group.title}
+                onOpenChange={(open) =>
+                  setOpenPopover(open ? group.title : null)
+                }
+              >
+                <PopoverTrigger asChild>
+                  <button
+                    className={`
+                      flex items-center justify-center w-full h-12 rounded-lg transition-all duration-200
+                      ${
+                        isGroupActive(group.items)
+                          ? "bg-primary text-white shadow-lg"
+                          : "text-white/70 hover:text-white hover:bg-white/10"
+                      }
+                    `}
+                    onMouseEnter={() => setOpenPopover(group.title)}
+                    onMouseLeave={() => setOpenPopover(null)}
+                  >
+                    <group.icon className="w-5 h-5" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  side="right"
+                  align="start"
+                  className="w-64 p-0 bg-[#333] border-white/20 z-[100] ml-2"
+                  onMouseEnter={() => setOpenPopover(group.title)}
+                  onMouseLeave={() => setOpenPopover(null)}
+                >
+                  <div className="p-2">
+                    <div className="px-3 py-2 text-xs font-semibold text-white/50 uppercase tracking-wider">
+                      {group.title}
                     </div>
-                  </TooltipContent>
-                </Tooltip>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </TooltipProvider>
+                    <div className="space-y-1">
+                      {group.items.map((item) => (
+                        <NavLink
+                          key={item.url}
+                          to={item.url}
+                          className={`
+                            flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group
+                            ${
+                              isActive(item.url)
+                                ? "bg-primary text-white"
+                                : "text-white/80 hover:text-white hover:bg-white/10"
+                            }
+                          `}
+                          onClick={() => setOpenPopover(null)}
+                        >
+                          <item.icon className="w-4 h-4 flex-shrink-0" />
+                          <div className="flex-1">
+                            <div className="font-medium text-sm">
+                              {item.title}
+                            </div>
+                            <div className="text-xs opacity-75">
+                              {item.description}
+                            </div>
+                          </div>
+                          <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </NavLink>
+                      ))}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
       </SidebarContent>
     </Sidebar>
   );
