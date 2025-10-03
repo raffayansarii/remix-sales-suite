@@ -19,6 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import brandLogo from "@/assets/brand-logo.png";
 
 const menuItems = [
   {
@@ -75,9 +76,7 @@ export function AppSidebar() {
       <SidebarContent className="bg-[#333]">
         {/* Logo */}
         <div className="h-16 flex items-center justify-center border-b border-white/10">
-          <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-            <Target className="w-4 h-4 text-white" />
-          </div>
+          <img src={brandLogo} alt="Brand Logo" className="w-10 h-10" />
         </div>
 
         {/* Navigation Menu */}
