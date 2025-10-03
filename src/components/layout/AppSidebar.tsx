@@ -33,7 +33,6 @@ interface MenuItem {
   title: string;
   url: string;
   icon: any;
-  description: string;
 }
 
 interface MenuGroup {
@@ -51,7 +50,6 @@ const menuGroups: MenuGroup[] = [
         title: "Overview",
         url: "/",
         icon: LayoutDashboard,
-        description: "Main dashboard",
       },
     ],
   },
@@ -63,19 +61,16 @@ const menuGroups: MenuGroup[] = [
         title: "Contacts",
         url: "/contacts",
         icon: Users,
-        description: "Customer database",
       },
       {
         title: "Opportunity Pipelines",
         url: "/pipelines",
         icon: Target,
-        description: "Manage sales pipeline",
       },
       {
         title: "Tasks",
         url: "/tasks",
         icon: CheckSquare,
-        description: "Track activities",
       },
     ],
   },
@@ -87,13 +82,11 @@ const menuGroups: MenuGroup[] = [
         title: "Users",
         url: "/users",
         icon: UserCog,
-        description: "Team management",
       },
       {
         title: "Settings",
         url: "/admin",
         icon: Settings,
-        description: "System administration",
       },
     ],
   },
