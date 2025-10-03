@@ -1,7 +1,13 @@
 "use client";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { ReactNode, useEffect, useState, createContext, useContext } from "react";
+import {
+  ReactNode,
+  useEffect,
+  useState,
+  createContext,
+  useContext,
+} from "react";
 import { Search, Moon, Sun } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Outlet } from "react-router-dom";
@@ -22,30 +28,36 @@ function useTheme() {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const [theme, setTheme] = useState<'light' | 'dark'>(
-    typeof window !== 'undefined' && window.localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'
+  const [theme, setTheme] = useState<"light" | "dark">(
+    typeof window !== "undefined" &&
+      window.localStorage.getItem("theme") === "dark"
+      ? "dark"
+      : "light"
   );
-  const {data} = useGetCurrentUserQuery(null)
-  const userDataRaw = localStorage.getItem('user')
-  const userData:IUser = userDataRaw ? JSON.parse(userDataRaw) : null;
+  const { data } = useGetCurrentUserQuery(null);
+  const userDataRaw = localStorage.getItem("user");
+  const userData: IUser = userDataRaw ? JSON.parse(userDataRaw) : null;
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      document.documentElement.classList.toggle('dark', theme === 'dark');
-      window.localStorage.setItem('theme', theme);
+    if (typeof window !== "undefined") {
+      document.documentElement.classList.toggle("dark", theme === "dark");
+      window.localStorage.setItem("theme", theme);
     }
   }, [theme]);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
       <SidebarProvider defaultOpen={false}>
-        <div className={`min-h-screen flex w-full bg-background${theme === 'dark' ? ' dark' : ''}`}>
+        <div
+          className={`min-h-screen flex w-full bg-background${
+            theme === "dark" ? " dark" : ""
+          }`}
+        >
           <AppSidebar />
 
           <div className="flex-1 flex flex-col">
             <header className="h-16 border-b bg-[#333] sticky top-0 z-40">
               <div className="flex h-full items-center gap-4 px-6">
-
                 <div className="flex-1 flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     {/* TODO: Global Search Integration - Backend Integration Needed:
@@ -84,20 +96,35 @@ export function AppLayout({ children }: AppLayoutProps) {
                     <button
                       aria-label="Toggle theme"
                       className="p-2 rounded hover:bg-white/10 border border-white/20 text-white"
-                      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                      onClick={() =>
+                        setTheme(theme === "dark" ? "light" : "dark")
+                      }
                     >
-                      {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                      {theme === "dark" ? (
+                        <Sun className="w-5 h-5" />
+                      ) : (
+                        <Moon className="w-5 h-5" />
+                      )}
                     </button>
 
                     {/* TODO: Replace with real tenant switcher connected to backend */}
                     {/* <TenantSwitcher /> */}
 
                     <div className="text-sm text-white/90">
-                      Welcome back, {userData?.user_metadata?.last_name?.split(' ')[0] || data?.user_metadata?.last_name?.split(' ')[0] || "-"}
+                      Welcome back,{" "}
+                      {userData?.user_metadata?.last_name?.split(" ")[0] ||
+                        data?.user_metadata?.last_name?.split(" ")[0] ||
+                        "-"}
                     </div>
                     <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
                       <span className="text-white text-sm font-medium">
-                        {userData?.user_metadata?.last_name?.charAt(0).toUpperCase() || data?.user_metadata?.last_name?.charAt(0).toUpperCase() || "U"}
+                        {userData?.user_metadata?.last_name
+                          ?.charAt(0)
+                          .toUpperCase() ||
+                          data?.user_metadata?.last_name
+                            ?.charAt(0)
+                            .toUpperCase() ||
+                          "U"}
                       </span>
                     </div>
                   </div>
@@ -106,7 +133,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             </header>
 
             <main className="overflow-hidden h-full flex-1">
-              <div className="h-full w-full overflow-auto">
+              <div className="w-[calc(100vw-64px)] h-[calc(100vh-64px)] overflow-auto ">
                 <Outlet />
               </div>
             </main>
