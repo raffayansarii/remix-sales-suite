@@ -38,7 +38,6 @@ export function ContactsFeature() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Contacts</h1>
-            <p className="text-muted-foreground mt-1">Manage your customer database</p>
           </div>
           
           <Button className="gap-2 bg-gradient-primary hover:bg-primary-hover">
