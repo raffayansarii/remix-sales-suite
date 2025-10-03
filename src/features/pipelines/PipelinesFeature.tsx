@@ -121,7 +121,7 @@ export function PipelinesFeature() {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4 sm:mb-6">
             <div className="min-w-0">
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground truncate">
-                Opportunity Pipelines
+                Pipeline
               </h1>
             </div>
 

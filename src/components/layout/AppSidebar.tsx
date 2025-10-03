@@ -66,7 +66,7 @@ const menuGroups: MenuGroup[] = [
         description: "Customer database",
       },
       {
-        title: "Opportunity Pipelines",
+        title: "Pipeline",
         url: "/pipelines",
         icon: Target,
         description: "Manage sales pipeline",
@@ -196,7 +196,6 @@ export function AppSidebar() {
                   <item.icon className="w-4 h-4 flex-shrink-0" />
                   <div className="flex-1">
                     <div className="font-medium text-sm">{item.title}</div>
-                    <div className="text-xs opacity-75">{item.description}</div>
                   </div>
                   <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </NavLink>
