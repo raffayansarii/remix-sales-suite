@@ -1,9 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { API_CONFIG } from "@/config/api.config";
 
-const AUTH_URL =
-  "https://c2p-crm-auth.jollytree-b86081c8.westus.azurecontainerapps.io/token?grant_type=refresh_token";
-const API_URL =
-  "https://c2p-crm-pgr.jollytree-b86081c8.westus.azurecontainerapps.io/";
+const AUTH_URL = API_CONFIG.AUTH_URL;
+const API_URL = API_CONFIG.BASE_URL;
 
 // helper: refresh token flow
 const refreshAccessToken = async () => {
