@@ -82,7 +82,7 @@ export function KanbanView({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-auto">
+    <div className="flex-1 flex flex-col h-full ">
       <KanbanBoard
         opportunities={opportunities}
         onOpportunityMove={handleOpportunityMove}
