@@ -66,7 +66,7 @@ const menuGroups: MenuGroup[] = [
         description: "Customer database",
       },
       {
-        title: "Pipeline",
+        title: "Opportunity Pipelines",
         url: "/pipelines",
         icon: Target,
         description: "Manage sales pipeline",
