@@ -123,9 +123,6 @@ export function PipelinesFeature() {
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground truncate">
                 Opportunity Pipelines
               </h1>
-              <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-                Manage and track your sales opportunities
-              </p>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
