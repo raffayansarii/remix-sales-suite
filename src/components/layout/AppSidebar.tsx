@@ -201,7 +201,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="w-16 border-r-0 bg-[#333] z-50" collapsible="none">
+    <Sidebar className="w-16 min-w-16 max-w-16 flex-shrink-0 border-r-0 bg-[#333] z-50" collapsible="none">
       <SidebarContent className="bg-[#333]">
         {/* Logo */}
         <div className="h-16 flex items-center justify-center border-b border-white/10">
