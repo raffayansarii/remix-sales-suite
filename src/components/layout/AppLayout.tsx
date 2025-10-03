@@ -36,7 +36,6 @@ export function AppLayout({ children }: AppLayoutProps) {
     }
   }, [theme]);
 
-  console.log({local:userData?.user_metadata?.full_name ,api:data?.user_metadata?.full_name })
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
       <SidebarProvider defaultOpen={false}>
@@ -94,11 +93,11 @@ export function AppLayout({ children }: AppLayoutProps) {
                     {/* <TenantSwitcher /> */}
 
                     <div className="text-sm text-white/90">
-                      Welcome back, {userData?.user_metadata?.full_name?.split(' ')[0] || data?.user_metadata?.full_name?.split(' ')[0] || "-"}
+                      Welcome back, {userData?.user_metadata?.last_name?.split(' ')[0] || data?.user_metadata?.last_name?.split(' ')[0] || "-"}
                     </div>
                     <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
                       <span className="text-white text-sm font-medium">
-                        {userData?.user_metadata?.full_name?.charAt(0).toUpperCase() || data?.user_metadata?.full_name?.charAt(0).toUpperCase() || "U"}
+                        {userData?.user_metadata?.last_name?.charAt(0).toUpperCase() || data?.user_metadata?.last_name?.charAt(0).toUpperCase() || "U"}
                       </span>
                     </div>
                   </div>
