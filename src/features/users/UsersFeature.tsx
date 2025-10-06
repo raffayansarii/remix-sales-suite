@@ -3,17 +3,7 @@ import { useGetUsersQuery, useDeleteUserMutation } from "@/api/users/usersApi";
 import { User } from "@/api/users/usersTypes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Search, UserPlus, Pencil, Trash2 } from "lucide-react";
-import { ContentLoader } from "@/components/ui/content-loader";
+import { Search, UserPlus } from "lucide-react";
 import { CreateUserModal } from "./CreateUserModal";
 import { EditUserModal } from "./EditUserModal";
 import { toast } from "sonner";
@@ -27,7 +17,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { format } from "date-fns";
+import { DataTable } from "@/components/ui/data-table";
+import { createUserColumns } from "./columns";
 
 export function UsersFeature() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,16 +48,10 @@ export function UsersFeature() {
     }
   };
 
-  const getRoleBadgeVariant = (role: string) => {
-    switch (role.toLowerCase()) {
-      case "admin":
-        return "destructive";
-      case "manager":
-        return "default";
-      default:
-        return "secondary";
-    }
-  };
+  const columns = createUserColumns(
+    (user) => setEditingUser(user),
+    (userId) => setDeletingUserId(userId)
+  );
 
   if (error) {
     return (
@@ -105,79 +90,12 @@ export function UsersFeature() {
       </div>
 
       {/* Users Table */}
-      {isLoading ? (
-        <ContentLoader type="table" rows={5} />
-      ) : (
-        <div className="border rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Last Login</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No users found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">
-                      {user.first_name} {user.last_name}
-                    </TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Badge variant={getRoleBadgeVariant(user.role)}>
-                        {user.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={user.is_active ? "default" : "secondary"}>
-                        {user.is_active ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {user.last_login
-                        ? format(new Date(user.last_login), "MMM d, yyyy")
-                        : "Never"}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {format(new Date(user.created_at), "MMM d, yyyy")}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setEditingUser(user)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setDeletingUserId(user.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+      <DataTable
+        data={users}
+        columns={columns}
+        isLoading={isLoading}
+        emptyMessage="No users found"
+      />
 
       {/* Modals */}
       <CreateUserModal
