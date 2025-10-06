@@ -5,6 +5,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautif
 import { GripVertical, RotateCcw } from 'lucide-react';
 import { ColumnDefinition, ColumnType } from '@/hooks/useColumnManager';
 import { ColumnManagerModalProps } from './types-and-schemas';
+import { createPortal } from 'react-dom';
 
 
 
@@ -54,46 +55,57 @@ function ColumnItem({ column, index, isDragDisabled = false }: ColumnItemProps) 
       index={index}
       isDragDisabled={isDragDisabled}
     >
-      {(provided, snapshot) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          style={{
-            ...provided.draggableProps.style,
-          }}
-          className={`
-            p-4 rounded-lg border-2 transition-all duration-200 bg-card hover:shadow-md
-            ${getColumnTypeStyles(column.type)}
-            ${snapshot.isDragging ? 'shadow-xl z-[9999] bg-background border-primary' : 'shadow-sm'}
-            ${isDragDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:border-primary/40'}
-          `}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              {...provided.dragHandleProps}
-              className="p-1 rounded cursor-grab active:cursor-grabbing hover:bg-muted/80"
-            >
-              <GripVertical className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="font-semibold text-sm truncate">{column.label}</span>
-                {getColumnTypeBadge(column.type)}
-                {column.required && (
-                  <Badge variant="outline" className="text-xs border-red-200 text-red-700 bg-red-50">
-                    Required
-                  </Badge>
+      {(provided, snapshot) => {
+        const child = (
+          <div
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            style={{
+              ...provided.draggableProps.style,
+              ...(snapshot.isDragging && {
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                maxWidth: '450px',
+              }),
+            }}
+            className={`
+              p-4 rounded-lg border-2 transition-all duration-200 bg-card hover:shadow-md
+              ${getColumnTypeStyles(column.type)}
+              ${snapshot.isDragging ? 'shadow-xl z-[9999] bg-background border-primary' : 'shadow-sm'}
+              ${isDragDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:border-primary/40'}
+            `}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                {...provided.dragHandleProps}
+                className="p-1 rounded cursor-grab active:cursor-grabbing hover:bg-muted/80"
+              >
+                <GripVertical className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-semibold text-sm truncate">{column.label}</span>
+                  {getColumnTypeBadge(column.type)}
+                  {column.required && (
+                    <Badge variant="outline" className="text-xs border-red-200 text-red-700 bg-red-50">
+                      Required
+                    </Badge>
+                  )}
+                </div>
+                {column.field && (
+                  <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                    {column.field}
+                  </span>
                 )}
               </div>
-              {column.field && (
-                <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                  {column.field}
-                </span>
-              )}
             </div>
           </div>
-        </div>
-      )}
+        );
+
+        return snapshot.isDragging ? createPortal(child, document.body) : child;
+      }}
     </Draggable>
   );
 }
@@ -116,6 +128,10 @@ export function ColumnManagerModal({ open, onOpenChange, columnManager }: Column
     reorderColumns(source.index, destination.index, sourceList, destinationList);
   };
 
+  const handleReset = () => {
+    resetToDefault();
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[85vh] overflow-hidden flex flex-col">
@@ -130,7 +146,7 @@ export function ColumnManagerModal({ open, onOpenChange, columnManager }: Column
             <Button
               variant="outline"
               size="sm"
-              onClick={resetToDefault}
+              onClick={handleReset}
               className="gap-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
             >
               <RotateCcw className="h-4 w-4" />
