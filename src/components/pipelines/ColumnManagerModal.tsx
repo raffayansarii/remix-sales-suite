@@ -62,13 +62,6 @@ function ColumnItem({ column, index, isDragDisabled = false }: ColumnItemProps) 
             {...provided.draggableProps}
             style={{
               ...provided.draggableProps.style,
-              ...(snapshot.isDragging && {
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                maxWidth: '450px',
-              }),
             }}
             className={`
               p-4 rounded-lg border-2 transition-all duration-200 bg-card hover:shadow-md
