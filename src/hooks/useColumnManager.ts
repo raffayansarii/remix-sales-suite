@@ -124,7 +124,7 @@ export interface UseColumnManagerReturn {
 }
 
 export function useColumnManager(): UseColumnManagerReturn {
-  const [columns, setColumns] = useState<ColumnDefinition[]>(DEFAULT_COLUMNS);
+  const [columns, setColumns] = useState<ColumnDefinition[]>(() => DEFAULT_COLUMNS.map((c) => ({ ...c })));
 
   const visibleColumns = columns.filter((col) => col.visible);
   const hiddenColumns = columns.filter((col) => !col.visible);
@@ -162,11 +162,11 @@ export function useColumnManager(): UseColumnManagerReturn {
         // Allow moving all columns, but system required ones will show a warning in UI
         // Business logic can be handled at the API level
 
-        // Update visibility
-        movedColumn.visible = destinationList === "visible";
+        // Update visibility immutably
+        const updatedMovedColumn = { ...movedColumn, visible: destinationList === "visible" };
 
         // Add to destination
-        destinationArray.splice(destinationIndex, 0, movedColumn);
+        destinationArray.splice(destinationIndex, 0, updatedMovedColumn);
 
         // Rebuild the full array maintaining order
         const result = [...visibleCols, ...hiddenCols];
@@ -196,7 +196,7 @@ export function useColumnManager(): UseColumnManagerReturn {
   }, []);
 
   const resetToDefault = useCallback(() => {
-    setColumns(DEFAULT_COLUMNS);
+    setColumns(DEFAULT_COLUMNS.map((c) => ({ ...c })));
   }, []);
 
   return {
