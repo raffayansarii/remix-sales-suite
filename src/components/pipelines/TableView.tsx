@@ -28,12 +28,16 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { usePinnedItems, PIN_COLORS, PinColor } from "@/hooks/usePinnedItems";
 import { useColumnManager } from "@/hooks/useColumnManager";
 import { ColumnManagerModal } from "./ColumnManagerModal";
 import { CreateColumnButton } from "./CreateColumnButton";
 import { IOpportunity } from "@/api/opportunity/opportunityTypes";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Check, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import {
   Pagination,
   PaginationContent,
@@ -43,7 +47,6 @@ import {
   PaginationLink,
 } from "@/components/ui/pagination";
 import { TableViewProps } from "./types-and-schemas";
-import { EditOpportunityModal } from "./EditOpportunityModal";
 import { useDeleteOpportunityMutation, useUpdateOpportunityMutation } from "@/api/opportunity/opportunityApi";
 import { DeleteModal } from "../ui/delete-modal";
 import { OpportunityDetailModal } from "./OpportunityDetailModal";
@@ -59,22 +62,65 @@ export function TableView({
   const [columnModalOpen, setColumnModalOpen] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] =
     useState<IOpportunity | null>(null);
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [opportunityToDelete, setOpportunityToDelete] =
     useState<IOpportunity | null>(null);
+  const [editingCell, setEditingCell] = useState<{
+    opportunityId: string;
+    field: string;
+  } | null>(null);
+  const [editValue, setEditValue] = useState<string>("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  const { toast } = useToast();
 
   const columnManager = useColumnManager();
   const { togglePin, isPinned } = usePinnedItems<IOpportunity>();
 
-  const handleViewOpportunity = (
-    opportunity: IOpportunity,
-    mode: "view" | "edit"
-  ) => {
+  const handleViewOpportunity = (opportunity: IOpportunity) => {
     setSelectedOpportunity(opportunity);
-    mode === "view" ? setViewModalOpen(true) : setDetailModalOpen(true);
+    setViewModalOpen(true);
   };
+
+  const startEditing = (opportunityId: string, field: string, currentValue: any) => {
+    setEditingCell({ opportunityId, field });
+    setEditValue(currentValue?.toString() || "");
+  };
+
+  const cancelEditing = () => {
+    setEditingCell(null);
+    setEditValue("");
+  };
+
+  const saveEdit = async (opportunity: IOpportunity, field: string, value: any) => {
+    try {
+      await updateTrigger({
+        id: opportunity.id,
+        body: { [field]: value },
+      }).unwrap();
+      
+      toast({
+        title: "Success",
+        description: "Opportunity updated successfully",
+      });
+      
+      setEditingCell(null);
+      setEditValue("");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update opportunity",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (editingCell && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [editingCell]);
 
   const handleDeleteOpportunity = (opportunity: IOpportunity) => {
     setOpportunityToDelete(opportunity);
@@ -167,96 +213,413 @@ export function TableView({
                   const renderCellContent = () => {
                     switch (column.id) {
                       case "title":
+                        const isEditingTitle = editingCell?.opportunityId === opportunity.id && editingCell?.field === "title";
                         return (
                           <div>
-                            <div className="font-medium text-sm">
-                              {opportunity.title}
-                            </div>
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {opportunity.company}
-                            </div>
-                            {opportunity?.tags?.length > 0 && (
-                              <div className="flex gap-1 mt-1">
-                                {opportunity?.tags?.slice(0, 2).map((tag) => (
-                                  <Badge
-                                    key={tag.id}
-                                    variant="secondary"
-                                    className="text-xs shadow"
-                                    style={{ color: `${tag.color}` }}
-                                  >
-                                    {tag.name}
-                                  </Badge>
-                                ))}
-                                {opportunity.tags.length > 2 && (
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-                                    +{opportunity.tags.length - 2}
-                                  </Badge>
+                            {isEditingTitle ? (
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  ref={inputRef}
+                                  value={editValue}
+                                  onChange={(e) => setEditValue(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      saveEdit(opportunity, "title", editValue);
+                                    } else if (e.key === "Escape") {
+                                      cancelEditing();
+                                    }
+                                  }}
+                                  className="h-8"
+                                />
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-6 w-6"
+                                  onClick={() => saveEdit(opportunity, "title", editValue)}
+                                >
+                                  <Check className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-6 w-6"
+                                  onClick={cancelEditing}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <div
+                                className="cursor-pointer hover:bg-muted/50 p-1 rounded"
+                                onDoubleClick={() => startEditing(opportunity.id, "title", opportunity.title)}
+                              >
+                                <div className="font-medium text-sm">
+                                  {opportunity.title}
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {opportunity.company}
+                                </div>
+                                {opportunity?.tags?.length > 0 && (
+                                  <div className="flex gap-1 mt-1">
+                                    {opportunity?.tags?.slice(0, 2).map((tag) => (
+                                      <Badge
+                                        key={tag.id}
+                                        variant="secondary"
+                                        className="text-xs shadow"
+                                        style={{ color: `${tag.color}` }}
+                                      >
+                                        {tag.name}
+                                      </Badge>
+                                    ))}
+                                    {opportunity.tags.length > 2 && (
+                                      <Badge
+                                        variant="secondary"
+                                        className="text-xs"
+                                      >
+                                        +{opportunity.tags.length - 2}
+                                      </Badge>
+                                    )}
+                                  </div>
                                 )}
                               </div>
                             )}
                           </div>
                         );
                       case "stage":
-                        return (
+                        const isEditingStage = editingCell?.opportunityId === opportunity.id && editingCell?.field === "stage";
+                        return isEditingStage ? (
+                          <div className="flex items-center gap-2">
+                            <Select
+                              value={editValue}
+                              onValueChange={(value) => {
+                                setEditValue(value);
+                                saveEdit(opportunity, "stage", value);
+                              }}
+                            >
+                              <SelectTrigger className="h-8 w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Lead">Lead</SelectItem>
+                                <SelectItem value="Qualified">Qualified</SelectItem>
+                                <SelectItem value="Proposal">Proposal</SelectItem>
+                                <SelectItem value="Negotiation">Negotiation</SelectItem>
+                                <SelectItem value="Closed Won">Closed Won</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={cancelEditing}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
                           <Badge
-                            className={`${getStageColor(
-                              opportunity.stage
-                            )} border-0`}
+                            className={`${getStageColor(opportunity.stage)} border-0 cursor-pointer`}
+                            onClick={() => startEditing(opportunity.id, "stage", opportunity.stage)}
                           >
                             {opportunity.stage}
                           </Badge>
                         );
                       case "awardType":
-                        return (
+                        const isEditingAwardType = editingCell?.opportunityId === opportunity.id && editingCell?.field === "award_type";
+                        return isEditingAwardType ? (
+                          <div className="flex items-center gap-2">
+                            <Select
+                              value={editValue}
+                              onValueChange={(value) => {
+                                setEditValue(value);
+                                saveEdit(opportunity, "award_type", value);
+                              }}
+                            >
+                              <SelectTrigger className="h-8 w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Contract">Contract</SelectItem>
+                                <SelectItem value="Grant">Grant</SelectItem>
+                                <SelectItem value="Cooperative Agreement">Cooperative Agreement</SelectItem>
+                                <SelectItem value="Purchase Order">Purchase Order</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={cancelEditing}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
                           <Badge
-                            className={`${getAwardTypeColor(
-                              opportunity.award_type
-                            )} border-0 text-xs`}
+                            className={`${getAwardTypeColor(opportunity.award_type)} border-0 text-xs cursor-pointer`}
+                            onClick={() => startEditing(opportunity.id, "award_type", opportunity.award_type)}
                           >
                             {opportunity.award_type}
                           </Badge>
                         );
                       case "agency":
-                        return (
-                          <span className="text-sm">{opportunity.agency}</span>
+                        const isEditingAgency = editingCell?.opportunityId === opportunity.id && editingCell?.field === "agency";
+                        return isEditingAgency ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              ref={inputRef}
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  saveEdit(opportunity, "agency", editValue);
+                                } else if (e.key === "Escape") {
+                                  cancelEditing();
+                                }
+                              }}
+                              className="h-8"
+                            />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={() => saveEdit(opportunity, "agency", editValue)}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={cancelEditing}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <span
+                            className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
+                            onDoubleClick={() => startEditing(opportunity.id, "agency", opportunity.agency)}
+                          >
+                            {opportunity.agency}
+                          </span>
                         );
                       case "solicitation":
-                        return (
-                          <Button
-                            variant="link"
-                            className="h-auto p-0 text-primary hover:text-primary-hover text-sm underline"
-                            onClick={() => {
-                              /* Handle edit */
-                            }}
+                        const isEditingSolicitation = editingCell?.opportunityId === opportunity.id && editingCell?.field === "solicitation";
+                        return isEditingSolicitation ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              ref={inputRef}
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  saveEdit(opportunity, "solicitation", editValue);
+                                } else if (e.key === "Escape") {
+                                  cancelEditing();
+                                }
+                              }}
+                              className="h-8"
+                            />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={() => saveEdit(opportunity, "solicitation", editValue)}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={cancelEditing}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <span
+                            className="text-sm text-primary underline cursor-pointer hover:text-primary/80"
+                            onDoubleClick={() => startEditing(opportunity.id, "solicitation", opportunity.solicitation)}
                           >
                             {opportunity.solicitation}
-                          </Button>
+                          </span>
                         );
                       case "company":
-                        return (
-                          <span className="text-sm">{opportunity.company}</span>
+                        const isEditingCompany = editingCell?.opportunityId === opportunity.id && editingCell?.field === "company";
+                        return isEditingCompany ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              ref={inputRef}
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  saveEdit(opportunity, "company", editValue);
+                                } else if (e.key === "Escape") {
+                                  cancelEditing();
+                                }
+                              }}
+                              className="h-8"
+                            />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={() => saveEdit(opportunity, "company", editValue)}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={cancelEditing}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <span
+                            className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
+                            onDoubleClick={() => startEditing(opportunity.id, "company", opportunity.company)}
+                          >
+                            {opportunity.company}
+                          </span>
                         );
                       case "value":
-                        return (
-                          <span className="text-sm">
+                        const isEditingValue = editingCell?.opportunityId === opportunity.id && editingCell?.field === "value";
+                        return isEditingValue ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              ref={inputRef}
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  saveEdit(opportunity, "value", editValue);
+                                } else if (e.key === "Escape") {
+                                  cancelEditing();
+                                }
+                              }}
+                              className="h-8"
+                            />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={() => saveEdit(opportunity, "value", editValue)}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={cancelEditing}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <span
+                            className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
+                            onDoubleClick={() => startEditing(opportunity.id, "value", opportunity.value)}
+                          >
                             ${opportunity.value.toLocaleString()}
                           </span>
                         );
                       case "probability":
-                        return (
-                          <span className="text-sm">
+                        const isEditingProbability = editingCell?.opportunityId === opportunity.id && editingCell?.field === "probability";
+                        return isEditingProbability ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              ref={inputRef}
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  saveEdit(opportunity, "probability", parseInt(editValue));
+                                } else if (e.key === "Escape") {
+                                  cancelEditing();
+                                }
+                              }}
+                              className="h-8"
+                            />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={() => saveEdit(opportunity, "probability", parseInt(editValue))}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={cancelEditing}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <span
+                            className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
+                            onDoubleClick={() => startEditing(opportunity.id, "probability", opportunity.probability)}
+                          >
                             {opportunity.probability}%
                           </span>
                         );
                       case "closeDate":
-                        return (
-                          <span className="text-sm">
-                            {new Date(
-                              opportunity.close_date
-                            ).toLocaleDateString()}
+                        const isEditingCloseDate = editingCell?.opportunityId === opportunity.id && editingCell?.field === "close_date";
+                        return isEditingCloseDate ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              ref={inputRef}
+                              type="date"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  saveEdit(opportunity, "close_date", editValue);
+                                } else if (e.key === "Escape") {
+                                  cancelEditing();
+                                }
+                              }}
+                              className="h-8"
+                            />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={() => saveEdit(opportunity, "close_date", editValue)}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={cancelEditing}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <span
+                            className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
+                            onDoubleClick={() => {
+                              const date = new Date(opportunity.close_date);
+                              const formattedDate = date.toISOString().split('T')[0];
+                              startEditing(opportunity.id, "close_date", formattedDate);
+                            }}
+                          >
+                            {new Date(opportunity.close_date).toLocaleDateString()}
                           </span>
                         );
                       case "createdAt":
@@ -304,25 +667,15 @@ export function TableView({
                                 )}
                               </DropdownMenuItem>
 
-                              <DropdownMenuItem
+                               <DropdownMenuItem
                                 className="cursor-pointer"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleViewOpportunity(opportunity, "view");
+                                  handleViewOpportunity(opportunity);
                                 }}
                               >
                                 <Eye className="mr-2 h-4 w-4" />
-                                View
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="cursor-pointer"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleViewOpportunity(opportunity, "edit");
-                                }}
-                              >
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
+                                View Details
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="cursor-pointer text-destructive focus:text-destructive"
@@ -396,28 +749,6 @@ export function TableView({
         onOpenChange={setColumnModalOpen}
         columnManager={columnManager}
       />
-      {detailModalOpen && (
-        <EditOpportunityModal
-          isOpen
-          onClose={() => setDetailModalOpen(false)}
-          onSubmit={(data) => {
-            updateTrigger({
-              id: selectedOpportunity.id,
-              body: data,
-            })
-              .unwrap()
-              .then(() => {
-                setDetailModalOpen(false);
-              })
-              .catch(() => {});
-          }}
-          status={updateStatus}
-          initialData={{
-            ...selectedOpportunity,
-            value: selectedOpportunity.value.toString(),
-          }}
-        />
-      )}
      {viewModalOpen && (
         <OpportunityDetailModal
           opportunity={selectedOpportunity}
