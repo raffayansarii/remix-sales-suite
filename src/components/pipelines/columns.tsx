@@ -48,9 +48,7 @@ export interface OpportunityColumnsContext {
   visibleColumns: Array<{ id: string; label: string; field?: string }>;
 }
 
-export const createOpportunityColumns = (
-  context: OpportunityColumnsContext
-): ColumnDef<IOpportunity>[] => {
+export const createOpportunityColumns = (context: OpportunityColumnsContext): ColumnDef<IOpportunity>[] => {
   const {
     editingCell,
     editValue,
@@ -88,7 +86,12 @@ export const createOpportunityColumns = (
                   }}
                   className="h-8"
                 />
-                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => saveEdit(row, "title", editValue)}>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-6 w-6"
+                  onClick={() => saveEdit(row, "title", editValue)}
+                >
                   <Check className="h-4 w-4" />
                 </Button>
                 <Button size="icon" variant="ghost" className="h-6 w-6" onClick={cancelEditing}>
@@ -96,7 +99,10 @@ export const createOpportunityColumns = (
                 </Button>
               </div>
             ) : (
-              <div className="cursor-pointer hover:bg-muted/50 p-1 rounded" onDoubleClick={() => startEditing(row.id, "title", row.title)}>
+              <div
+                className="cursor-pointer hover:bg-muted/50 p-1 rounded"
+                onDoubleClick={() => startEditing(row.id, "title", row.title)}
+              >
                 <div className="font-medium text-sm">{row.title}</div>
                 <div className="text-xs text-muted-foreground mt-1">{row.company}</div>
                 {row?.tags?.length > 0 && (
@@ -106,7 +112,11 @@ export const createOpportunityColumns = (
                         {tag.name}
                       </Badge>
                     ))}
-                    {row.tags.length > 2 && <Badge variant="secondary" className="text-xs">+{row.tags.length - 2}</Badge>}
+                    {row.tags.length > 2 && (
+                      <Badge variant="secondary" className="text-xs">
+                        +{row.tags.length - 2}
+                      </Badge>
+                    )}
                   </div>
                 )}
               </div>
@@ -124,8 +134,16 @@ export const createOpportunityColumns = (
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "stage";
         return isEditing ? (
           <div className="flex items-center gap-2">
-            <Select value={editValue} onValueChange={(value) => { setEditValue(value); saveEdit(row, "stage", value); }}>
-              <SelectTrigger className="h-8 w-full"><SelectValue /></SelectTrigger>
+            <Select
+              value={editValue}
+              onValueChange={(value) => {
+                setEditValue(value);
+                saveEdit(row, "stage", value);
+              }}
+            >
+              <SelectTrigger className="h-8 w-full">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Lead">Lead</SelectItem>
                 <SelectItem value="Qualified">Qualified</SelectItem>
@@ -139,7 +157,10 @@ export const createOpportunityColumns = (
             </Button>
           </div>
         ) : (
-          <Badge className={`${getStageColor(row.stage)} border-0 cursor-pointer`} onClick={() => startEditing(row.id, "stage", row.stage)}>
+          <Badge
+            className={`${getStageColor(row.stage)} border-0 cursor-pointer`}
+            onClick={() => startEditing(row.id, "stage", row.stage)}
+          >
             {row.stage}
           </Badge>
         );
@@ -154,8 +175,16 @@ export const createOpportunityColumns = (
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "award_type";
         return isEditing ? (
           <div className="flex items-center gap-2">
-            <Select value={editValue} onValueChange={(value) => { setEditValue(value); saveEdit(row, "award_type", value); }}>
-              <SelectTrigger className="h-8 w-full"><SelectValue /></SelectTrigger>
+            <Select
+              value={editValue}
+              onValueChange={(value) => {
+                setEditValue(value);
+                saveEdit(row, "award_type", value);
+              }}
+            >
+              <SelectTrigger className="h-8 w-full">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Contract">Contract</SelectItem>
                 <SelectItem value="Grant">Grant</SelectItem>
@@ -168,7 +197,10 @@ export const createOpportunityColumns = (
             </Button>
           </div>
         ) : (
-          <Badge className={`${getAwardTypeColor(row.award_type)} border-0 text-xs cursor-pointer`} onClick={() => startEditing(row.id, "award_type", row.award_type)}>
+          <Badge
+            className={`${getAwardTypeColor(row.award_type)} border-0 text-xs cursor-pointer`}
+            onClick={() => startEditing(row.id, "award_type", row.award_type)}
+          >
             {row.award_type}
           </Badge>
         );
@@ -183,10 +215,16 @@ export const createOpportunityColumns = (
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "agency";
         return isEditing ? (
           <div className="flex items-center gap-2">
-            <Input ref={inputRef} value={editValue} onChange={(e) => setEditValue(e.target.value)} onKeyDown={(e) => {
-              if (e.key === "Enter") saveEdit(row, "agency", editValue);
-              else if (e.key === "Escape") cancelEditing();
-            }} className="h-8" />
+            <Input
+              ref={inputRef}
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveEdit(row, "agency", editValue);
+                else if (e.key === "Escape") cancelEditing();
+              }}
+              className="h-8"
+            />
             <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => saveEdit(row, "agency", editValue)}>
               <Check className="h-4 w-4" />
             </Button>
@@ -195,7 +233,10 @@ export const createOpportunityColumns = (
             </Button>
           </div>
         ) : (
-          <span className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block" onDoubleClick={() => startEditing(row.id, "agency", row.agency)}>
+          <span
+            className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
+            onDoubleClick={() => startEditing(row.id, "agency", row.agency)}
+          >
             {row.agency}
           </span>
         );
@@ -210,11 +251,22 @@ export const createOpportunityColumns = (
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "solicitation";
         return isEditing ? (
           <div className="flex items-center gap-2">
-            <Input ref={inputRef} value={editValue} onChange={(e) => setEditValue(e.target.value)} onKeyDown={(e) => {
-              if (e.key === "Enter") saveEdit(row, "solicitation", editValue);
-              else if (e.key === "Escape") cancelEditing();
-            }} className="h-8" />
-            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => saveEdit(row, "solicitation", editValue)}>
+            <Input
+              ref={inputRef}
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveEdit(row, "solicitation", editValue);
+                else if (e.key === "Escape") cancelEditing();
+              }}
+              className="h-8"
+            />
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-6 w-6"
+              onClick={() => saveEdit(row, "solicitation", editValue)}
+            >
               <Check className="h-4 w-4" />
             </Button>
             <Button size="icon" variant="ghost" className="h-6 w-6" onClick={cancelEditing}>
@@ -222,7 +274,10 @@ export const createOpportunityColumns = (
             </Button>
           </div>
         ) : (
-          <span className="text-sm text-primary underline cursor-pointer hover:text-primary/80" onDoubleClick={() => startEditing(row.id, "solicitation", row.solicitation)}>
+          <span
+            className="text-sm text-primary underline cursor-pointer hover:text-primary/80"
+            onDoubleClick={() => startEditing(row.id, "solicitation", row.solicitation)}
+          >
             {row.solicitation}
           </span>
         );
@@ -237,10 +292,16 @@ export const createOpportunityColumns = (
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "company";
         return isEditing ? (
           <div className="flex items-center gap-2">
-            <Input ref={inputRef} value={editValue} onChange={(e) => setEditValue(e.target.value)} onKeyDown={(e) => {
-              if (e.key === "Enter") saveEdit(row, "company", editValue);
-              else if (e.key === "Escape") cancelEditing();
-            }} className="h-8" />
+            <Input
+              ref={inputRef}
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveEdit(row, "company", editValue);
+                else if (e.key === "Escape") cancelEditing();
+              }}
+              className="h-8"
+            />
             <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => saveEdit(row, "company", editValue)}>
               <Check className="h-4 w-4" />
             </Button>
@@ -249,7 +310,10 @@ export const createOpportunityColumns = (
             </Button>
           </div>
         ) : (
-          <span className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block" onDoubleClick={() => startEditing(row.id, "company", row.company)}>
+          <span
+            className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
+            onDoubleClick={() => startEditing(row.id, "company", row.company)}
+          >
             {row.company}
           </span>
         );
@@ -264,10 +328,16 @@ export const createOpportunityColumns = (
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "value";
         return isEditing ? (
           <div className="flex items-center gap-2">
-            <Input ref={inputRef} value={editValue} onChange={(e) => setEditValue(e.target.value)} onKeyDown={(e) => {
-              if (e.key === "Enter") saveEdit(row, "value", editValue);
-              else if (e.key === "Escape") cancelEditing();
-            }} className="h-8" />
+            <Input
+              ref={inputRef}
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveEdit(row, "value", editValue);
+                else if (e.key === "Escape") cancelEditing();
+              }}
+              className="h-8"
+            />
             <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => saveEdit(row, "value", editValue)}>
               <Check className="h-4 w-4" />
             </Button>
@@ -276,7 +346,10 @@ export const createOpportunityColumns = (
             </Button>
           </div>
         ) : (
-          <span className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block" onDoubleClick={() => startEditing(row.id, "value", row.value)}>
+          <span
+            className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
+            onDoubleClick={() => startEditing(row.id, "value", row.value)}
+          >
             ${parseFloat(row.value).toLocaleString()}
           </span>
         );
@@ -291,11 +364,25 @@ export const createOpportunityColumns = (
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "probability";
         return isEditing ? (
           <div className="flex items-center gap-2">
-            <Input ref={inputRef} type="number" min="0" max="100" value={editValue} onChange={(e) => setEditValue(e.target.value)} onKeyDown={(e) => {
-              if (e.key === "Enter") saveEdit(row, "probability", parseInt(editValue));
-              else if (e.key === "Escape") cancelEditing();
-            }} className="h-8" />
-            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => saveEdit(row, "probability", parseInt(editValue))}>
+            <Input
+              ref={inputRef}
+              type="number"
+              min="0"
+              max="100"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveEdit(row, "probability", parseInt(editValue));
+                else if (e.key === "Escape") cancelEditing();
+              }}
+              className="h-8"
+            />
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-6 w-6"
+              onClick={() => saveEdit(row, "probability", parseInt(editValue))}
+            >
               <Check className="h-4 w-4" />
             </Button>
             <Button size="icon" variant="ghost" className="h-6 w-6" onClick={cancelEditing}>
@@ -303,7 +390,10 @@ export const createOpportunityColumns = (
             </Button>
           </div>
         ) : (
-          <span className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block" onDoubleClick={() => startEditing(row.id, "probability", row.probability)}>
+          <span
+            className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
+            onDoubleClick={() => startEditing(row.id, "probability", row.probability)}
+          >
             {row.probability}%
           </span>
         );
@@ -318,11 +408,23 @@ export const createOpportunityColumns = (
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "close_date";
         return isEditing ? (
           <div className="flex items-center gap-2">
-            <Input ref={inputRef} type="date" value={editValue} onChange={(e) => setEditValue(e.target.value)} onKeyDown={(e) => {
-              if (e.key === "Enter") saveEdit(row, "close_date", editValue);
-              else if (e.key === "Escape") cancelEditing();
-            }} className="h-8" />
-            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => saveEdit(row, "close_date", editValue)}>
+            <Input
+              ref={inputRef}
+              type="date"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveEdit(row, "close_date", editValue);
+                else if (e.key === "Escape") cancelEditing();
+              }}
+              className="h-8"
+            />
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-6 w-6"
+              onClick={() => saveEdit(row, "close_date", editValue)}
+            >
               <Check className="h-4 w-4" />
             </Button>
             <Button size="icon" variant="ghost" className="h-6 w-6" onClick={cancelEditing}>
@@ -330,11 +432,14 @@ export const createOpportunityColumns = (
             </Button>
           </div>
         ) : (
-          <span className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block" onDoubleClick={() => {
-            const date = new Date(row.close_date);
-            const formattedDate = date.toISOString().split('T')[0];
-            startEditing(row.id, "close_date", formattedDate);
-          }}>
+          <span
+            className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
+            onDoubleClick={() => {
+              const date = new Date(row.close_date);
+              const formattedDate = date.toISOString().split("T")[0];
+              startEditing(row.id, "close_date", formattedDate);
+            }}
+          >
             {new Date(row.close_date).toLocaleDateString()}
           </span>
         );
@@ -352,6 +457,7 @@ export const createOpportunityColumns = (
       header: "Actions",
       grow: 0,
       width: "100px",
+      right: true,
       cell: (row) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -360,18 +466,44 @@ export const createOpportunityColumns = (
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
-            <DropdownMenuItem className="cursor-pointer" onClick={(e) => { e.stopPropagation(); togglePin(row.id, row); }}>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePin(row.id, row);
+              }}
+            >
               {isPinned(row.id) || row.pinned ? (
-                <><PinOff className="mr-2 h-4 w-4" />Unpin</>
+                <>
+                  <PinOff className="mr-2 h-4 w-4" />
+                  Unpin
+                </>
               ) : (
-                <><Pin className="mr-2 h-4 w-4" />Pin to top</>
+                <>
+                  <Pin className="mr-2 h-4 w-4" />
+                  Pin to top
+                </>
               )}
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer" onClick={(e) => { e.stopPropagation(); handleViewOpportunity(row); }}>
-              <Eye className="mr-2 h-4 w-4" />View Details
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewOpportunity(row);
+              }}
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              View Details
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive" onClick={(e) => { e.stopPropagation(); handleDeleteOpportunity(row); }}>
-              <Trash2 className="mr-2 h-4 w-4" />Delete
+            <DropdownMenuItem
+              className="cursor-pointer text-destructive focus:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteOpportunity(row);
+              }}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
