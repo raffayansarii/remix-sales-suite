@@ -7,17 +7,14 @@ import { IOpportunity } from "@/api/opportunity/opportunityTypes";
 import { useMoveOpportunityToStageMutation } from "@/api/kanban/kanbanApi";
 import { KanbanViewProps } from "./types-and-schemas";
 
-
 export function KanbanView({
   opportunities: initialOpportunities,
   onOpportunityUpdate,
   onOpportunityDelete,
 }: KanbanViewProps) {
   // TODO: This will be replaced by real-time opportunity data from backend
-  const [opportunities, setOpportunities] =
-    useState<IOpportunity[]>(initialOpportunities);
-  const [selectedOpportunity, setSelectedOpportunity] =
-    useState<IOpportunity | null>(null);
+  const [opportunities, setOpportunities] = useState<IOpportunity[]>(initialOpportunities);
+  const [selectedOpportunity, setSelectedOpportunity] = useState<IOpportunity | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   const [moveCardHandler, moveCardStatus] = useMoveOpportunityToStageMutation();
@@ -32,25 +29,15 @@ export function KanbanView({
     setDetailModalOpen(true);
   };
 
-  const handleOpportunityMove = async (
-    opportunityId: string,
-    newStage: string,
-    movedOpportunity: IOpportunity
-  ) => {
-    console.log(
-      "🔄 [KANBAN] Moving opportunity:",
-      opportunityId,
-      "to stager:",
-      newStage,
-      movedOpportunity
-    );
+  const handleOpportunityMove = async (opportunityId: string, newStage: string, movedOpportunity: IOpportunity) => {
+    console.log("🔄 [KANBAN] Moving opportunity:", opportunityId, "to stager:", newStage, movedOpportunity);
     // Call the mutation to update the backend
-    const body={
+    const body = {
       p_opportunity_id: opportunityId,
       p_new_stage: newStage,
       p_tenant_id: movedOpportunity?.tenant_id,
       p_user_id: userData?.id,
-    }
+    };
     // Optimistic update
     const updatedOpportunities = opportunities.map((opp) =>
       opp.id === opportunityId
@@ -59,15 +46,17 @@ export function KanbanView({
             stage: newStage as Opportunity["stage"],
             updatedAt: new Date().toISOString(),
           }
-        : opp
+        : opp,
     );
     try {
-      moveCardHandler(body).unwrap().then(()=>{
-         toast({
-        title: "Opportunity moved",
-        description: `Opportunity moved to ${newStage}`,
-      });
-      });
+      moveCardHandler(body)
+        .unwrap()
+        .then(() => {
+          toast({
+            title: "Opportunity moved",
+            description: `Opportunity moved to ${newStage}`,
+          });
+        });
     } catch (error) {
       console.error("❌ [KANBAN] Failed to move opportunity:", error);
       // Revert on error
@@ -82,7 +71,7 @@ export function KanbanView({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full ">
+    <div className="flex-1 flex overflow-hidden max-h-[560px]">
       <KanbanBoard
         opportunities={opportunities}
         onOpportunityMove={handleOpportunityMove}
