@@ -245,7 +245,13 @@ export function PipelinesFeature() {
                 onOpportunityDelete={handleOpportunityDelete}
               />
             ) : (
-              <TableView opportunities={opportunities || []} />
+              <TableView 
+                opportunities={opportunities || []} 
+                currentPage={currentPage}
+                rowsPerPage={rowsPerPage}
+                totalCount={totalCount}
+                onPageChange={setCurrentPage}
+              />
             )}
             {totalPages > 1 && (
               <div className="flex justify-end w-full border-blue-600 py-4">
