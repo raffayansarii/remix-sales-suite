@@ -8,24 +8,22 @@ import { KanbanView } from "@/components/pipelines/KanbanView";
 import { TableView } from "@/components/pipelines/TableView";
 import { FilterDrawer } from "@/components/pipelines/FilterDrawer";
 import { PipelineAnalytics } from "@/components/pipelines/PipelineAnalytics";
-import {
-  useCreateOpportunityMutation,
-  useGetOpportunitiesQuery,
-} from "@/api/opportunity/opportunityApi";
+import { useCreateOpportunityMutation, useGetOpportunitiesQuery } from "@/api/opportunity/opportunityApi";
 import { IOpportunity } from "@/api/opportunity/opportunityTypes";
 import { CreateOpportunityModal } from "@/components/pipelines/CreateOpportunityModal";
 import { ContentLoader } from "@/components/ui/content-loader";
 import { OpportunityFormData } from "@/components/pipelines/types-and-schemas";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationLink,
+} from "@/components/ui/pagination";
 
-function isPaginatedData(
-  data: any
-): data is { items: IOpportunity[]; totalCount: number } {
-  return (
-    data &&
-    typeof data === "object" &&
-    Array.isArray(data.items) &&
-    typeof data.totalCount === "number"
-  );
+function isPaginatedData(data: any): data is { items: IOpportunity[]; totalCount: number } {
+  return data && typeof data === "object" && Array.isArray(data.items) && typeof data.totalCount === "number";
 }
 
 export function PipelinesFeature() {
@@ -33,7 +31,7 @@ export function PipelinesFeature() {
   const [rawSearchTerm, setRawSearchTerm] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 10;
+  const rowsPerPage = 5;
   // TODO: Replace with API call - GET /api/opportunities with real-time updates
   const [opportunities, setOpportunities] = useState<IOpportunity[]>(null);
   const [totalCount, setTotalCount] = useState(0);
@@ -52,10 +50,9 @@ export function PipelinesFeature() {
   const queryString = queryParts.join("&");
 
   // API Calls
-  const { data, isLoading, isFetching, isError, error } =
-    useGetOpportunitiesQuery(queryString);
-  
-  const [createHandler , createStatus] = useCreateOpportunityMutation();
+  const { data, isLoading, isFetching, isError, error } = useGetOpportunitiesQuery(queryString);
+
+  const [createHandler, createStatus] = useCreateOpportunityMutation();
 
   useEffect(() => {
     if (data?.data) {
@@ -63,12 +60,8 @@ export function PipelinesFeature() {
         setOpportunities(data?.data);
         setTotalCount(data?.pagination.totalCount);
       } else if (isPaginatedData(data)) {
-        setOpportunities(
-          (data as { items: IOpportunity[]; totalCount: number }).items
-        );
-        setTotalCount(
-          (data as { items: IOpportunity[]; totalCount: number }).totalCount
-        );
+        setOpportunities((data as { items: IOpportunity[]; totalCount: number }).items);
+        setTotalCount((data as { items: IOpportunity[]; totalCount: number }).totalCount);
       } else {
         setOpportunities([]);
         setTotalCount(0);
@@ -76,13 +69,12 @@ export function PipelinesFeature() {
     }
   }, [data]);
 
+  const totalPages = Math.ceil(totalCount / rowsPerPage);
+
   const handleOpportunityUpdate = (updatedOpportunity: IOpportunity) => {
     // TODO: Replace with actual API call to backend
     // PUT /api/opportunities/:id
-    console.log(
-      "🔄 [API CALL] PUT /api/opportunities/" + updatedOpportunity.id,
-      updatedOpportunity
-    );
+    console.log("🔄 [API CALL] PUT /api/opportunities/" + updatedOpportunity.id, updatedOpportunity);
     console.log("✅ [PIPELINES] Opportunity updated successfully");
   };
 
@@ -92,17 +84,16 @@ export function PipelinesFeature() {
     console.log("🗑️ [API CALL] DELETE /api/opportunities/" + opportunityId);
   };
 
-  const onCreateOpportunityHandler = (
-    newOpportunity: OpportunityFormData
-  ) => {
-
-    createHandler(newOpportunity).unwrap().then((res)=>{
-      console.log("✅ [PIPELINES] Opportunity created successfully");
-      setIsCreateModalOpen(false);
-    }).catch((err)=>{
-      console.error("❌ [PIPELINES] Failed to create opportunity", err);
-    });
-
+  const onCreateOpportunityHandler = (newOpportunity: OpportunityFormData) => {
+    createHandler(newOpportunity)
+      .unwrap()
+      .then((res) => {
+        console.log("✅ [PIPELINES] Opportunity created successfully");
+        setIsCreateModalOpen(false);
+      })
+      .catch((err) => {
+        console.error("❌ [PIPELINES] Failed to create opportunity", err);
+      });
   };
 
   useEffect(() => {
@@ -121,9 +112,7 @@ export function PipelinesFeature() {
         <div className="bg-background border-b p-4 sm:p-6 shrink-0">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4 sm:mb-6">
             <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground truncate">
-                 Pipeline
-              </h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground truncate">Pipeline</h1>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
@@ -172,10 +161,7 @@ export function PipelinesFeature() {
                   <Filter className="w-4 h-4" />
                   Filters
                   {activeFilterCount > 0 && (
-                    <Badge
-                      variant="secondary"
-                      className="ml-1 h-5 w-5 p-0 text-xs flex items-center justify-center"
-                    >
+                    <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 text-xs flex items-center justify-center">
                       {activeFilterCount}
                     </Badge>
                   )}
@@ -225,19 +211,14 @@ export function PipelinesFeature() {
         ) : isError ? (
           <div className="flex flex-1 items-center justify-center h-full min-h-[300px]">
             <span className="text-destructive text-base">
-              Failed to load opportunities.{" "}
-              {error && (error as any).message ? (error as any).message : ""}
+              Failed to load opportunities. {error && (error as any).message ? (error as any).message : ""}
             </span>
           </div>
         ) : !data?.data?.length ? (
           <div className="flex flex-1 items-center justify-center h-full min-h-[300px]">
             <div className="text-center">
-              <h2 className="text-lg font-semibold mb-2">
-                No opportunities found
-              </h2>
-              <p className="text-muted-foreground mb-4">
-                Try adjusting your search or filters.
-              </p>
+              <h2 className="text-lg font-semibold mb-2">No opportunities found</h2>
+              <p className="text-muted-foreground mb-4">Try adjusting your search or filters.</p>
               <Button
                 className="gap-2 bg-gradient-primary hover:bg-primary-hover text-xs sm:text-sm"
                 size="sm"
@@ -250,11 +231,13 @@ export function PipelinesFeature() {
           </div>
         ) : (
           // Main Content Area
-          <div className="flex-1 pe-5 ">
-            {showAnalytics ? (
-              <PipelineAnalytics
-                opportunities={opportunities as IOpportunity[]}
-              />
+          <div className="flex-1 max-h-[550px]">
+            {totalCount === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No opportunities found matching your search criteria.</p>
+              </div>
+            ) : showAnalytics ? (
+              <PipelineAnalytics opportunities={opportunities as IOpportunity[]} />
             ) : viewType === "kanban" ? (
               <KanbanView
                 opportunities={opportunities as IOpportunity[]}
@@ -262,13 +245,34 @@ export function PipelinesFeature() {
                 onOpportunityDelete={handleOpportunityDelete}
               />
             ) : (
-              <TableView
-                opportunities={opportunities || []}
-                currentPage={currentPage}
-                rowsPerPage={rowsPerPage}
-                totalCount={totalCount}
-                onPageChange={setCurrentPage}
-              />
+              <TableView opportunities={opportunities || []} />
+            )}
+            {totalPages > 1 && (
+              <div className="flex justify-end w-full border-blue-600 py-4">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        aria-disabled={currentPage === 1}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <PaginationItem key={i}>
+                        <PaginationLink isActive={currentPage === i + 1} onClick={() => setCurrentPage(i + 1)}>
+                          {i + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                        aria-disabled={currentPage === totalPages}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
             )}
           </div>
         )}
