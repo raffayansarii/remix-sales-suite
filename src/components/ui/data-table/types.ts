@@ -7,6 +7,7 @@ export interface ColumnDef<TData = any> {
   cell?: (row: TData, value: any) => ReactNode;
   sortable?: boolean;
   className?: string;
+  width?: string;
 }
 
 export interface DataTableProps<TData = any> {
