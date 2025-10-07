@@ -24,6 +24,8 @@ export function DataTable<TData extends Record<string, any>>({
       : undefined,
     sortable: column.sortable,
     right: column.className?.includes("text-right"),
+    grow: column.grow,
+    width: column.width,
   }));
 
   const customStyles = {

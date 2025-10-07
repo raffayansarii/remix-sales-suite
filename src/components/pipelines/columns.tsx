@@ -71,7 +71,7 @@ export const createOpportunityColumns = (
       id: "title",
       header: "Title",
       accessorKey: "title",
-      width: "300px",
+      grow: 2,
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "title";
         return (
@@ -119,7 +119,7 @@ export const createOpportunityColumns = (
       id: "stage",
       header: "Stage",
       accessorKey: "stage",
-      width: "150px",
+      grow: 1,
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "stage";
         return isEditing ? (
@@ -149,7 +149,7 @@ export const createOpportunityColumns = (
       id: "awardType",
       header: "Award Type",
       accessorKey: "award_type",
-      width: "150px",
+      grow: 1,
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "award_type";
         return isEditing ? (
@@ -178,7 +178,7 @@ export const createOpportunityColumns = (
       id: "agency",
       header: "Agency",
       accessorKey: "agency",
-      width: "150px",
+      grow: 1,
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "agency";
         return isEditing ? (
@@ -205,7 +205,7 @@ export const createOpportunityColumns = (
       id: "solicitation",
       header: "Solicitation",
       accessorKey: "solicitation",
-      width: "150px",
+      grow: 1,
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "solicitation";
         return isEditing ? (
@@ -232,7 +232,7 @@ export const createOpportunityColumns = (
       id: "company",
       header: "Company",
       accessorKey: "company",
-      width: "150px",
+      grow: 1,
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "company";
         return isEditing ? (
@@ -259,7 +259,7 @@ export const createOpportunityColumns = (
       id: "value",
       header: "Value",
       accessorKey: "value",
-      width: "150px",
+      grow: 1,
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "value";
         return isEditing ? (
@@ -286,7 +286,7 @@ export const createOpportunityColumns = (
       id: "probability",
       header: "Probability",
       accessorKey: "probability",
-      width: "150px",
+      grow: 1,
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "probability";
         return isEditing ? (
@@ -313,7 +313,7 @@ export const createOpportunityColumns = (
       id: "closeDate",
       header: "Close Date",
       accessorKey: "close_date",
-      width: "150px",
+      grow: 1,
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "close_date";
         return isEditing ? (
@@ -344,12 +344,13 @@ export const createOpportunityColumns = (
       id: "createdAt",
       header: "Created At",
       accessorKey: "created_at",
-      width: "150px",
+      grow: 1,
       cell: (row) => <span className="text-sm">{new Date(row.created_at).toLocaleDateString()}</span>,
     },
     actions: {
       id: "actions",
       header: "Actions",
+      grow: 0,
       width: "100px",
       cell: (row) => (
         <DropdownMenu>

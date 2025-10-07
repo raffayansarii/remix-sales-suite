@@ -8,6 +8,7 @@ export interface ColumnDef<TData = any> {
   sortable?: boolean;
   className?: string;
   width?: string;
+  grow?: number;
 }
 
 export interface DataTableProps<TData = any> {
