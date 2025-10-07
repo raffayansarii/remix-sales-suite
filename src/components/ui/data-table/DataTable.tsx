@@ -11,22 +11,48 @@ export function DataTable<TData extends Record<string, any>>({
   getRowClassName,
 }: DataTableProps<TData>) {
   // Convert our column format to react-data-table-component format
-  const reactTableColumns = columns.map((column) => ({
-    name: typeof column.header === "function" ? column.header(data) : column.header,
-    selector: column.accessorKey 
-      ? (row: TData) => row[column.accessorKey!]
-      : undefined,
-    cell: column.cell 
-      ? (row: TData) => {
-          const value = column.accessorKey ? row[column.accessorKey] : null;
-          return column.cell!(row, value);
-        }
-      : undefined,
-    sortable: column.sortable,
-    right: column.className?.includes("text-right"),
-    grow: column.grow,
-    width: column.width,
-  }));
+  const reactTableColumns = columns.map((column) => {
+    const reactColumn: any = {
+      name: typeof column.header === "function" ? column.header(data) : column.header,
+      selector: column.accessorKey 
+        ? (row: TData) => row[column.accessorKey!]
+        : undefined,
+      cell: column.cell 
+        ? (row: TData) => {
+            const value = column.accessorKey ? row[column.accessorKey] : null;
+            return column.cell!(row, value);
+          }
+        : undefined,
+      format: column.format,
+      sortable: column.sortable,
+      sortFunction: column.sortFunction,
+      width: column.width,
+      minWidth: column.minWidth,
+      maxWidth: column.maxWidth,
+      grow: column.grow,
+      right: column.right || column.className?.includes("text-right"),
+      center: column.center,
+      compact: column.compact,
+      wrap: column.wrap,
+      allowOverflow: column.allowOverflow,
+      button: column.button,
+      ignoreRowClick: column.ignoreRowClick,
+      hide: column.hide,
+      omit: column.omit,
+    };
+
+    // Add style if provided
+    if (column.style) {
+      reactColumn.style = column.style;
+    }
+
+    // Add conditionalCellStyles if provided
+    if (column.conditionalCellStyles) {
+      reactColumn.conditionalCellStyles = column.conditionalCellStyles;
+    }
+
+    return reactColumn;
+  });
 
   const customStyles = {
     headRow: {
