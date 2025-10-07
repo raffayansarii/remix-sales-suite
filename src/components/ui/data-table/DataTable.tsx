@@ -29,7 +29,7 @@ export function DataTable<TData extends Record<string, any>>({
   const customStyles = {
     headRow: {
       style: {
-        borderTopStyle: 'solid',
+        borderTopStyle: 'solid' as const,
         borderTopWidth: '1px',
         borderTopColor: 'hsl(var(--border))',
         backgroundColor: 'hsl(var(--muted) / 0.5)',
@@ -49,7 +49,7 @@ export function DataTable<TData extends Record<string, any>>({
         fontSize: '0.875rem',
         color: 'hsl(var(--foreground))',
         backgroundColor: 'hsl(var(--background))',
-        borderBottomStyle: 'solid',
+        borderBottomStyle: 'solid' as const,
         borderBottomWidth: '1px',
         borderBottomColor: 'hsl(var(--border))',
         '&:hover': {
