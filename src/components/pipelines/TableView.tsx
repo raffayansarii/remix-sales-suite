@@ -43,6 +43,10 @@ export function TableView({
   } | null>(null);
   const [editValue, setEditValue] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const [lastTabTime, setLastTabTime] = useState<number>(0);
+  
+  // Define editable columns in order for Tab navigation
+  const editableColumns = ['title', 'stage', 'award_type', 'agency', 'solicitation', 'company', 'value', 'probability', 'close_date'];
   
   const { toast } = useToast();
 
@@ -87,6 +91,39 @@ export function TableView({
     }
   };
 
+  const handleTabNavigation = (currentOpportunity: IOpportunity, currentField: string, currentValue: any) => {
+    const currentTime = Date.now();
+    const isDoubleTap = currentTime - lastTabTime < 300; // 300ms threshold for double-tap
+    setLastTabTime(currentTime);
+    
+    // Save current cell
+    saveEdit(currentOpportunity, currentField, currentValue);
+    
+    if (isDoubleTap) {
+      // Double-tab: Move to next row, same column
+      const currentIndex = opportunities.findIndex(opp => opp.id === currentOpportunity.id);
+      if (currentIndex < opportunities.length - 1) {
+        const nextOpportunity = opportunities[currentIndex + 1];
+        const fieldValue = nextOpportunity[currentField as keyof IOpportunity];
+        startEditing(nextOpportunity.id, currentField, fieldValue);
+      } else {
+        // Last row, exit editing
+        cancelEditing();
+      }
+    } else {
+      // Single tab: Move to next cell in same row
+      const currentFieldIndex = editableColumns.indexOf(currentField);
+      if (currentFieldIndex < editableColumns.length - 1) {
+        const nextField = editableColumns[currentFieldIndex + 1];
+        const fieldValue = currentOpportunity[nextField as keyof IOpportunity];
+        startEditing(currentOpportunity.id, nextField, fieldValue);
+      } else {
+        // Last cell in row, exit editing
+        cancelEditing();
+      }
+    }
+  };
+
   useEffect(() => {
     if (editingCell && inputRef.current) {
       inputRef.current.focus();
@@ -125,6 +162,7 @@ export function TableView({
     startEditing,
     cancelEditing,
     saveEdit,
+    handleTabNavigation,
     handleViewOpportunity,
     handleDeleteOpportunity,
     togglePin,

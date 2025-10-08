@@ -40,6 +40,7 @@ export interface OpportunityColumnsContext {
   startEditing: (opportunityId: string, field: string, currentValue: any) => void;
   cancelEditing: () => void;
   saveEdit: (opportunity: IOpportunity, field: string, value: any) => void;
+  handleTabNavigation: (opportunity: IOpportunity, field: string, value: any) => void;
   handleViewOpportunity: (opportunity: IOpportunity) => void;
   handleDeleteOpportunity: (opportunity: IOpportunity) => void;
   togglePin: (id: string, opportunity: IOpportunity) => void;
@@ -56,6 +57,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
     startEditing,
     cancelEditing,
     saveEdit,
+    handleTabNavigation,
     handleViewOpportunity,
     handleDeleteOpportunity,
     togglePin,
@@ -83,6 +85,10 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
                   onKeyDown={(e) => {
                     if (e.key === "Enter") saveEdit(row, "title", editValue);
                     else if (e.key === "Escape") cancelEditing();
+                    else if (e.key === "Tab") {
+                      e.preventDefault();
+                      handleTabNavigation(row, "title", editValue);
+                    }
                   }}
                   className="h-8"
                 />
@@ -101,7 +107,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
             ) : (
               <div
                 className="cursor-pointer hover:bg-muted/50 p-1 rounded"
-                onDoubleClick={() => startEditing(row.id, "title", row.title)}
+                onClick={() => startEditing(row.id, "title", row.title)}
               >
                 <div className="font-medium text-sm">{row.title}</div>
                 <div className="text-xs text-muted-foreground mt-1">{row.company}</div>
@@ -222,6 +228,10 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
               onKeyDown={(e) => {
                 if (e.key === "Enter") saveEdit(row, "agency", editValue);
                 else if (e.key === "Escape") cancelEditing();
+                else if (e.key === "Tab") {
+                  e.preventDefault();
+                  handleTabNavigation(row, "agency", editValue);
+                }
               }}
               className="h-8"
             />
@@ -235,7 +245,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
         ) : (
           <span
             className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
-            onDoubleClick={() => startEditing(row.id, "agency", row.agency)}
+            onClick={() => startEditing(row.id, "agency", row.agency)}
           >
             {row.agency}
           </span>
@@ -258,6 +268,10 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
               onKeyDown={(e) => {
                 if (e.key === "Enter") saveEdit(row, "solicitation", editValue);
                 else if (e.key === "Escape") cancelEditing();
+                else if (e.key === "Tab") {
+                  e.preventDefault();
+                  handleTabNavigation(row, "solicitation", editValue);
+                }
               }}
               className="h-8"
             />
@@ -276,7 +290,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
         ) : (
           <span
             className="text-sm text-primary underline cursor-pointer hover:text-primary/80"
-            onDoubleClick={() => startEditing(row.id, "solicitation", row.solicitation)}
+            onClick={() => startEditing(row.id, "solicitation", row.solicitation)}
           >
             {row.solicitation}
           </span>
@@ -299,6 +313,10 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
               onKeyDown={(e) => {
                 if (e.key === "Enter") saveEdit(row, "company", editValue);
                 else if (e.key === "Escape") cancelEditing();
+                else if (e.key === "Tab") {
+                  e.preventDefault();
+                  handleTabNavigation(row, "company", editValue);
+                }
               }}
               className="h-8"
             />
@@ -312,7 +330,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
         ) : (
           <span
             className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
-            onDoubleClick={() => startEditing(row.id, "company", row.company)}
+            onClick={() => startEditing(row.id, "company", row.company)}
           >
             {row.company}
           </span>
@@ -335,6 +353,10 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
               onKeyDown={(e) => {
                 if (e.key === "Enter") saveEdit(row, "value", editValue);
                 else if (e.key === "Escape") cancelEditing();
+                else if (e.key === "Tab") {
+                  e.preventDefault();
+                  handleTabNavigation(row, "value", editValue);
+                }
               }}
               className="h-8"
             />
@@ -348,7 +370,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
         ) : (
           <span
             className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
-            onDoubleClick={() => startEditing(row.id, "value", row.value)}
+            onClick={() => startEditing(row.id, "value", row.value)}
           >
             ${parseFloat(row.value).toLocaleString()}
           </span>
@@ -374,6 +396,10 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
               onKeyDown={(e) => {
                 if (e.key === "Enter") saveEdit(row, "probability", parseInt(editValue));
                 else if (e.key === "Escape") cancelEditing();
+                else if (e.key === "Tab") {
+                  e.preventDefault();
+                  handleTabNavigation(row, "probability", parseInt(editValue));
+                }
               }}
               className="h-8"
             />
@@ -392,7 +418,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
         ) : (
           <span
             className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
-            onDoubleClick={() => startEditing(row.id, "probability", row.probability)}
+            onClick={() => startEditing(row.id, "probability", row.probability)}
           >
             {row.probability}%
           </span>
@@ -416,6 +442,10 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
               onKeyDown={(e) => {
                 if (e.key === "Enter") saveEdit(row, "close_date", editValue);
                 else if (e.key === "Escape") cancelEditing();
+                else if (e.key === "Tab") {
+                  e.preventDefault();
+                  handleTabNavigation(row, "close_date", editValue);
+                }
               }}
               className="h-8"
             />
@@ -434,7 +464,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
         ) : (
           <span
             className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
-            onDoubleClick={() => {
+            onClick={() => {
               const date = new Date(row.close_date);
               const formattedDate = date.toISOString().split("T")[0];
               startEditing(row.id, "close_date", formattedDate);
