@@ -106,7 +106,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
               </div>
             ) : (
               <div
-                className="cursor-pointer hover:bg-muted/50 p-1 rounded"
+                className="cursor-pointer hover:bg-accent/50 hover:border hover:border-accent p-1 rounded transition-colors"
                 onClick={() => startEditing(row.id, "title", row.title)}
               >
                 <div className="font-medium text-sm">{row.title}</div>
@@ -164,7 +164,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
           </div>
         ) : (
           <Badge
-            className={`${getStageColor(row.stage)} border-0 cursor-pointer`}
+            className={`${getStageColor(row.stage)} border-0 cursor-pointer hover:opacity-80 transition-opacity`}
             onClick={() => startEditing(row.id, "stage", row.stage)}
           >
             {row.stage}
@@ -204,7 +204,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
           </div>
         ) : (
           <Badge
-            className={`${getAwardTypeColor(row.award_type)} border-0 text-xs cursor-pointer`}
+            className={`${getAwardTypeColor(row.award_type)} border-0 text-xs cursor-pointer hover:opacity-80 transition-opacity`}
             onClick={() => startEditing(row.id, "award_type", row.award_type)}
           >
             {row.award_type}
@@ -244,7 +244,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
           </div>
         ) : (
           <span
-            className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
+            className="text-sm cursor-pointer hover:bg-accent/50 hover:border hover:border-accent p-1 rounded block transition-colors"
             onClick={() => startEditing(row.id, "agency", row.agency)}
           >
             {row.agency}
@@ -289,7 +289,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
           </div>
         ) : (
           <span
-            className="text-sm text-primary underline cursor-pointer hover:text-primary/80"
+            className="text-sm text-primary underline cursor-pointer hover:text-primary/80 hover:bg-accent/30 p-1 rounded transition-colors"
             onClick={() => startEditing(row.id, "solicitation", row.solicitation)}
           >
             {row.solicitation}
@@ -329,7 +329,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
           </div>
         ) : (
           <span
-            className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
+            className="text-sm cursor-pointer hover:bg-accent/50 hover:border hover:border-accent p-1 rounded block transition-colors"
             onClick={() => startEditing(row.id, "company", row.company)}
           >
             {row.company}
@@ -369,7 +369,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
           </div>
         ) : (
           <span
-            className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
+            className="text-sm cursor-pointer hover:bg-accent/50 hover:border hover:border-accent p-1 rounded block transition-colors"
             onClick={() => startEditing(row.id, "value", row.value)}
           >
             ${parseFloat(row.value).toLocaleString()}
@@ -417,7 +417,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
           </div>
         ) : (
           <span
-            className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
+            className="text-sm cursor-pointer hover:bg-accent/50 hover:border hover:border-accent p-1 rounded block transition-colors"
             onClick={() => startEditing(row.id, "probability", row.probability)}
           >
             {row.probability}%
@@ -463,7 +463,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
           </div>
         ) : (
           <span
-            className="text-sm cursor-pointer hover:bg-muted/50 p-1 rounded block"
+            className="text-sm cursor-pointer hover:bg-accent/50 hover:border hover:border-accent p-1 rounded block transition-colors"
             onClick={() => {
               const date = new Date(row.close_date);
               const formattedDate = date.toISOString().split("T")[0];
