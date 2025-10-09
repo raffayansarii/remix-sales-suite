@@ -127,6 +127,13 @@ export function TableView({
     const isDoubleTap = currentTime - lastTabTime < 300;
     setLastTabTime(currentTime);
     
+    // Get only editable columns that are currently visible
+    const visibleEditableColumns = editableColumns.filter(col => 
+      columnManager.visibleColumns.some(visCol => 
+        visCol.id === col || visCol.field === col
+      )
+    );
+    
     if (isDoubleTap) {
       // Double-tab: Save and move to next row, same column
       savePendingChanges();
@@ -137,10 +144,10 @@ export function TableView({
         startEditing(nextOpportunity.id, currentField, fieldValue);
       }
     } else {
-      // Single tab: Move to next cell in same row
-      const currentFieldIndex = editableColumns.indexOf(currentField);
-      if (currentFieldIndex < editableColumns.length - 1) {
-        const nextField = editableColumns[currentFieldIndex + 1];
+      // Single tab: Move to next visible editable cell in same row
+      const currentFieldIndex = visibleEditableColumns.indexOf(currentField);
+      if (currentFieldIndex < visibleEditableColumns.length - 1) {
+        const nextField = visibleEditableColumns[currentFieldIndex + 1];
         const fieldValue = currentOpportunity[nextField as keyof IOpportunity];
         startEditing(currentOpportunity.id, nextField, fieldValue);
       }
