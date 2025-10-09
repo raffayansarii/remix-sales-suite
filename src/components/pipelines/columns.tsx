@@ -1,3 +1,10 @@
+/**
+ * Opportunity Table Columns
+ * 
+ * This file defines the column configurations for the opportunities table.
+ * Uses the EditableDataTable component for inline editing functionality.
+ */
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,70 +15,61 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Eye, Pin, PinOff, Trash2, Check, X } from "lucide-react";
+import { MoreHorizontal, Eye, Pin, PinOff, Trash2 } from "lucide-react";
 import { IOpportunity } from "@/api/opportunity/opportunityTypes";
-import { ColumnDef } from "@/components/ui/data-table";
+import { EditableColumnDef, EditingContext } from "@/components/ui/editable-data-table";
+import { ColumnDefinition } from "@/hooks/useColumnManager";
 
-
-export interface OpportunityColumnsContext {
-  editingCell: { opportunityId: string; field: string } | null;
-  editValue: string;
-  updateOptimisticData: (opportunityId: string, field: string, value: any) => void;
-  startEditing: (opportunityId: string, field: string, currentValue: any) => void;
-  cancelEditing: () => void;
-  savePendingChanges: () => void;
-  handleTabNavigation: (opportunity: IOpportunity, field: string) => void;
+/**
+ * Additional context for opportunity-specific actions
+ * (These are not part of the editing context but specific to this table)
+ */
+export interface OpportunityActionsContext {
   handleViewOpportunity: (opportunity: IOpportunity) => void;
   handleDeleteOpportunity: (opportunity: IOpportunity) => void;
   togglePin: (id: string, opportunity: IOpportunity) => void;
   isPinned: (id: string) => boolean;
-  inputRef: React.RefObject<HTMLInputElement>;
-  editingContainerRef: React.RefObject<HTMLDivElement>;
-  visibleColumns: Array<{ id: string; label: string; field?: string }>;
-  hasPendingChanges: boolean;
+  visibleColumns: ColumnDefinition[];
 }
 
-export const createOpportunityColumns = (context: OpportunityColumnsContext): ColumnDef<IOpportunity>[] => {
+/**
+ * Creates column definitions for the opportunities table
+ * 
+ * @param actionsContext - Context containing action handlers (view, delete, pin)
+ * @returns Array of column definitions ordered by: editable -> non-editable -> actions
+ */
+export const createOpportunityColumns = (actionsContext: OpportunityActionsContext): EditableColumnDef<IOpportunity>[] => {
   const {
-    editingCell,
-    editValue,
-    updateOptimisticData,
-    startEditing,
-    cancelEditing,
-    savePendingChanges,
-    handleTabNavigation,
     handleViewOpportunity,
     handleDeleteOpportunity,
     togglePin,
     isPinned,
-    inputRef,
-    editingContainerRef,
     visibleColumns,
-    hasPendingChanges,
-  } = context;
+  } = actionsContext;
 
-  const columnMap: Record<string, ColumnDef<IOpportunity>> = {
+  // All available columns with their configurations
+  const columnMap: Record<string, EditableColumnDef<IOpportunity>> = {
     title: {
       id: "title",
       header: "Title",
       accessorKey: "title",
       grow: 2,
-      cell: (row) => {
-        const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "title";
+      cell: (row, context: EditingContext<IOpportunity>) => {
+        const isEditing = context.editingCell?.rowId === row.id && context.editingCell?.field === "title";
         return (
           <div>
             {isEditing ? (
-              <div ref={editingContainerRef} className="flex items-center gap-2">
+              <div ref={context.editingContainerRef} className="flex items-center gap-2">
                 <Input
-                  ref={inputRef}
-                  value={editValue}
-                  onChange={(e) => updateOptimisticData(row.id, "title", e.target.value)}
+                  ref={context.inputRef}
+                  value={context.editValue}
+                  onChange={(e) => context.updateOptimisticData(row.id, "title", e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") savePendingChanges();
-                    else if (e.key === "Escape") cancelEditing();
+                    if (e.key === "Enter") context.savePendingChanges();
+                    else if (e.key === "Escape") context.cancelEditing();
                     else if (e.key === "Tab") {
                       e.preventDefault();
-                      handleTabNavigation(row, "title");
+                      context.handleTabNavigation(row, "title");
                     }
                   }}
                   className="h-8"
@@ -80,7 +78,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
             ) : (
               <div
                 className="cursor-pointer p-1 rounded"
-                onClick={() => startEditing(row.id, "title", row.title)}
+                onClick={() => context.startEditing(row.id, "title", row.title)}
               >
                 <div className="font-medium text-sm">{row.title}</div>
                 <div className="text-xs text-muted-foreground mt-1">{row.company}</div>
@@ -109,13 +107,13 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       header: "Stage",
       accessorKey: "stage",
       grow: 1,
-      cell: (row) => {
-        const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "stage";
+      cell: (row, context: EditingContext<IOpportunity>) => {
+        const isEditing = context.editingCell?.rowId === row.id && context.editingCell?.field === "stage";
         return isEditing ? (
-          <div ref={editingContainerRef} className="flex items-center gap-2">
+          <div ref={context.editingContainerRef} className="flex items-center gap-2">
             <Select
-              value={editValue}
-              onValueChange={(value) => updateOptimisticData(row.id, "stage", value)}
+              value={context.editValue}
+              onValueChange={(value) => context.updateOptimisticData(row.id, "stage", value)}
             >
               <SelectTrigger className="h-8 w-full">
                 <SelectValue />
@@ -133,7 +131,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
           <Badge
             variant="secondary"
             className="cursor-pointer"
-            onClick={() => startEditing(row.id, "stage", row.stage)}
+            onClick={() => context.startEditing(row.id, "stage", row.stage)}
           >
             {row.stage}
           </Badge>
@@ -145,13 +143,13 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       header: "Award Type",
       accessorKey: "award_type",
       grow: 1,
-      cell: (row) => {
-        const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "award_type";
+      cell: (row, context: EditingContext<IOpportunity>) => {
+        const isEditing = context.editingCell?.rowId === row.id && context.editingCell?.field === "award_type";
         return isEditing ? (
-          <div ref={editingContainerRef} className="flex items-center gap-2">
+          <div ref={context.editingContainerRef} className="flex items-center gap-2">
             <Select
-              value={editValue}
-              onValueChange={(value) => updateOptimisticData(row.id, "award_type", value)}
+              value={context.editValue}
+              onValueChange={(value) => context.updateOptimisticData(row.id, "award_type", value)}
             >
               <SelectTrigger className="h-8 w-full">
                 <SelectValue />
@@ -168,7 +166,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
           <Badge
             variant="outline"
             className="cursor-pointer text-xs"
-            onClick={() => startEditing(row.id, "award_type", row.award_type)}
+            onClick={() => context.startEditing(row.id, "award_type", row.award_type)}
           >
             {row.award_type}
           </Badge>
@@ -180,20 +178,20 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       header: "Agency",
       accessorKey: "agency",
       grow: 1,
-      cell: (row) => {
-        const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "agency";
+      cell: (row, context: EditingContext<IOpportunity>) => {
+        const isEditing = context.editingCell?.rowId === row.id && context.editingCell?.field === "agency";
         return isEditing ? (
-          <div ref={editingContainerRef} className="flex items-center gap-2">
+          <div ref={context.editingContainerRef} className="flex items-center gap-2">
             <Input
-              ref={inputRef}
-              value={editValue}
-              onChange={(e) => updateOptimisticData(row.id, "agency", e.target.value)}
+              ref={context.inputRef}
+              value={context.editValue}
+              onChange={(e) => context.updateOptimisticData(row.id, "agency", e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") savePendingChanges();
-                else if (e.key === "Escape") cancelEditing();
+                if (e.key === "Enter") context.savePendingChanges();
+                else if (e.key === "Escape") context.cancelEditing();
                 else if (e.key === "Tab") {
                   e.preventDefault();
-                  handleTabNavigation(row, "agency");
+                  context.handleTabNavigation(row, "agency");
                 }
               }}
               className="h-8"
@@ -202,7 +200,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
         ) : (
           <span
             className="text-sm cursor-pointer p-1 rounded block"
-            onClick={() => startEditing(row.id, "agency", row.agency)}
+            onClick={() => context.startEditing(row.id, "agency", row.agency)}
           >
             {row.agency}
           </span>
@@ -214,20 +212,20 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       header: "Solicitation",
       accessorKey: "solicitation",
       grow: 1,
-      cell: (row) => {
-        const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "solicitation";
+      cell: (row, context: EditingContext<IOpportunity>) => {
+        const isEditing = context.editingCell?.rowId === row.id && context.editingCell?.field === "solicitation";
         return isEditing ? (
-          <div ref={editingContainerRef} className="flex items-center gap-2">
+          <div ref={context.editingContainerRef} className="flex items-center gap-2">
             <Input
-              ref={inputRef}
-              value={editValue}
-              onChange={(e) => updateOptimisticData(row.id, "solicitation", e.target.value)}
+              ref={context.inputRef}
+              value={context.editValue}
+              onChange={(e) => context.updateOptimisticData(row.id, "solicitation", e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") savePendingChanges();
-                else if (e.key === "Escape") cancelEditing();
+                if (e.key === "Enter") context.savePendingChanges();
+                else if (e.key === "Escape") context.cancelEditing();
                 else if (e.key === "Tab") {
                   e.preventDefault();
-                  handleTabNavigation(row, "solicitation");
+                  context.handleTabNavigation(row, "solicitation");
                 }
               }}
               className="h-8"
@@ -236,7 +234,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
         ) : (
           <span
             className="text-sm text-primary underline cursor-pointer p-1 rounded"
-            onClick={() => startEditing(row.id, "solicitation", row.solicitation)}
+            onClick={() => context.startEditing(row.id, "solicitation", row.solicitation)}
           >
             {row.solicitation}
           </span>
@@ -248,20 +246,20 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       header: "Company",
       accessorKey: "company",
       grow: 1,
-      cell: (row) => {
-        const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "company";
+      cell: (row, context: EditingContext<IOpportunity>) => {
+        const isEditing = context.editingCell?.rowId === row.id && context.editingCell?.field === "company";
         return isEditing ? (
-          <div ref={editingContainerRef} className="flex items-center gap-2">
+          <div ref={context.editingContainerRef} className="flex items-center gap-2">
             <Input
-              ref={inputRef}
-              value={editValue}
-              onChange={(e) => updateOptimisticData(row.id, "company", e.target.value)}
+              ref={context.inputRef}
+              value={context.editValue}
+              onChange={(e) => context.updateOptimisticData(row.id, "company", e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") savePendingChanges();
-                else if (e.key === "Escape") cancelEditing();
+                if (e.key === "Enter") context.savePendingChanges();
+                else if (e.key === "Escape") context.cancelEditing();
                 else if (e.key === "Tab") {
                   e.preventDefault();
-                  handleTabNavigation(row, "company");
+                  context.handleTabNavigation(row, "company");
                 }
               }}
               className="h-8"
@@ -270,7 +268,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
         ) : (
           <span
             className="text-sm cursor-pointer p-1 rounded block"
-            onClick={() => startEditing(row.id, "company", row.company)}
+            onClick={() => context.startEditing(row.id, "company", row.company)}
           >
             {row.company}
           </span>
@@ -282,20 +280,20 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       header: "Value",
       accessorKey: "value",
       grow: 1,
-      cell: (row) => {
-        const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "value";
+      cell: (row, context: EditingContext<IOpportunity>) => {
+        const isEditing = context.editingCell?.rowId === row.id && context.editingCell?.field === "value";
         return isEditing ? (
-          <div ref={editingContainerRef} className="flex items-center gap-2">
+          <div ref={context.editingContainerRef} className="flex items-center gap-2">
             <Input
-              ref={inputRef}
-              value={editValue}
-              onChange={(e) => updateOptimisticData(row.id, "value", e.target.value)}
+              ref={context.inputRef}
+              value={context.editValue}
+              onChange={(e) => context.updateOptimisticData(row.id, "value", e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") savePendingChanges();
-                else if (e.key === "Escape") cancelEditing();
+                if (e.key === "Enter") context.savePendingChanges();
+                else if (e.key === "Escape") context.cancelEditing();
                 else if (e.key === "Tab") {
                   e.preventDefault();
-                  handleTabNavigation(row, "value");
+                  context.handleTabNavigation(row, "value");
                 }
               }}
               className="h-8"
@@ -304,7 +302,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
         ) : (
           <span
             className="text-sm cursor-pointer p-1 rounded block"
-            onClick={() => startEditing(row.id, "value", row.value)}
+            onClick={() => context.startEditing(row.id, "value", row.value)}
           >
             ${parseFloat(row.value).toLocaleString()}
           </span>
@@ -316,23 +314,23 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       header: "Probability",
       accessorKey: "probability",
       grow: 1,
-      cell: (row) => {
-        const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "probability";
+      cell: (row, context: EditingContext<IOpportunity>) => {
+        const isEditing = context.editingCell?.rowId === row.id && context.editingCell?.field === "probability";
         return isEditing ? (
-          <div ref={editingContainerRef} className="flex items-center gap-2">
+          <div ref={context.editingContainerRef} className="flex items-center gap-2">
             <Input
-              ref={inputRef}
+              ref={context.inputRef}
               type="number"
               min="0"
               max="100"
-              value={editValue}
-              onChange={(e) => updateOptimisticData(row.id, "probability", parseInt(e.target.value))}
+              value={context.editValue}
+              onChange={(e) => context.updateOptimisticData(row.id, "probability", parseInt(e.target.value))}
               onKeyDown={(e) => {
-                if (e.key === "Enter") savePendingChanges();
-                else if (e.key === "Escape") cancelEditing();
+                if (e.key === "Enter") context.savePendingChanges();
+                else if (e.key === "Escape") context.cancelEditing();
                 else if (e.key === "Tab") {
                   e.preventDefault();
-                  handleTabNavigation(row, "probability");
+                  context.handleTabNavigation(row, "probability");
                 }
               }}
               className="h-8"
@@ -341,7 +339,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
         ) : (
           <span
             className="text-sm cursor-pointer p-1 rounded block"
-            onClick={() => startEditing(row.id, "probability", row.probability)}
+            onClick={() => context.startEditing(row.id, "probability", row.probability)}
           >
             {row.probability}%
           </span>
@@ -353,21 +351,21 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       header: "Close Date",
       accessorKey: "close_date",
       grow: 1,
-      cell: (row) => {
-        const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "close_date";
+      cell: (row, context: EditingContext<IOpportunity>) => {
+        const isEditing = context.editingCell?.rowId === row.id && context.editingCell?.field === "close_date";
         return isEditing ? (
-          <div ref={editingContainerRef} className="flex items-center gap-2">
+          <div ref={context.editingContainerRef} className="flex items-center gap-2">
             <Input
-              ref={inputRef}
+              ref={context.inputRef}
               type="date"
-              value={editValue}
-              onChange={(e) => updateOptimisticData(row.id, "close_date", e.target.value)}
+              value={context.editValue}
+              onChange={(e) => context.updateOptimisticData(row.id, "close_date", e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") savePendingChanges();
-                else if (e.key === "Escape") cancelEditing();
+                if (e.key === "Enter") context.savePendingChanges();
+                else if (e.key === "Escape") context.cancelEditing();
                 else if (e.key === "Tab") {
                   e.preventDefault();
-                  handleTabNavigation(row, "close_date");
+                  context.handleTabNavigation(row, "close_date");
                 }
               }}
               className="h-8"
@@ -379,7 +377,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
             onClick={() => {
               const date = new Date(row.close_date);
               const formattedDate = date.toISOString().split("T")[0];
-              startEditing(row.id, "close_date", formattedDate);
+              context.startEditing(row.id, "close_date", formattedDate);
             }}
           >
             {new Date(row.close_date).toLocaleDateString()}
@@ -400,13 +398,13 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       grow: 0,
       width: "100px",
       right: true,
-      cell: (row) => (
+      cell: (row, context: EditingContext<IOpportunity>) => (
         <div className="flex items-center gap-2">
-          {editingCell?.opportunityId === row.id && hasPendingChanges && (
+          {context.editingCell?.rowId === row.id && context.hasPendingChanges && (
             <Button
               size="sm"
               variant="default"
-              onClick={savePendingChanges}
+              onClick={() => context.savePendingChanges()}
               className="h-7"
             >
               Save
