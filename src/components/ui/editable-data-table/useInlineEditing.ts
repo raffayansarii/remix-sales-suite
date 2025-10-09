@@ -50,7 +50,7 @@ export function useInlineEditing<TData = any>({
   const [editValue, setEditValue] = useState<string>("");
   const [pendingChanges, setPendingChanges] = useState<Record<string, any>>({});
   const [optimisticData, setOptimisticData] = useState<TData[]>(data);
-  const [lastTabTime, setLastTabTime] = useState<number>(0);
+  const lastTabTimeRef = useRef<number>(0);
   
   const inputRef = useRef<HTMLInputElement>(null);
   const editingContainerRef = useRef<HTMLDivElement>(null);
@@ -131,8 +131,8 @@ export function useInlineEditing<TData = any>({
    */
   const handleTabNavigation = useCallback((currentRow: TData, currentField: string) => {
     const currentTime = Date.now();
-    const isDoubleTap = enableDoubleTab && (currentTime - lastTabTime < 300);
-    setLastTabTime(currentTime);
+    const isDoubleTap = enableDoubleTab && (currentTime - lastTabTimeRef.current < 300);
+    lastTabTimeRef.current = currentTime;
     
     if (isDoubleTap) {
       // Double-tab: Save and move to next row, same column
@@ -154,7 +154,7 @@ export function useInlineEditing<TData = any>({
         startEditing(String(currentRow[rowIdKey]), nextField, fieldValue);
       }
     }
-  }, [enableDoubleTab, lastTabTime, optimisticData, rowIdKey, visibleEditableFields, startEditing, savePendingChanges]);
+  }, [enableDoubleTab, optimisticData, rowIdKey, visibleEditableFields, startEditing, savePendingChanges]);
 
   // Sync optimistic data with source data when not editing
   useEffect(() => {
