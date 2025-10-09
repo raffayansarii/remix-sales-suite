@@ -46,6 +46,7 @@ export interface OpportunityColumnsContext {
   togglePin: (id: string, opportunity: IOpportunity) => void;
   isPinned: (id: string) => boolean;
   inputRef: React.RefObject<HTMLInputElement>;
+  editingContainerRef: React.RefObject<HTMLDivElement>;
   visibleColumns: Array<{ id: string; label: string; field?: string }>;
   hasPendingChanges: boolean;
 }
@@ -64,6 +65,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
     togglePin,
     isPinned,
     inputRef,
+    editingContainerRef,
     visibleColumns,
     hasPendingChanges,
   } = context;
@@ -79,7 +81,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
         return (
           <div>
             {isEditing ? (
-              <div className="flex items-center gap-2">
+              <div ref={editingContainerRef} className="flex items-center gap-2">
                 <Input
                   ref={inputRef}
                   value={editValue}
@@ -130,7 +132,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "stage";
         return isEditing ? (
-          <div className="flex items-center gap-2">
+          <div ref={editingContainerRef} className="flex items-center gap-2">
             <Select
               value={editValue}
               onValueChange={(value) => updateOptimisticData(row.id, "stage", value)}
@@ -165,7 +167,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "award_type";
         return isEditing ? (
-          <div className="flex items-center gap-2">
+          <div ref={editingContainerRef} className="flex items-center gap-2">
             <Select
               value={editValue}
               onValueChange={(value) => updateOptimisticData(row.id, "award_type", value)}
@@ -199,7 +201,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "agency";
         return isEditing ? (
-          <div className="flex items-center gap-2">
+          <div ref={editingContainerRef} className="flex items-center gap-2">
             <Input
               ref={inputRef}
               value={editValue}
@@ -233,7 +235,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "solicitation";
         return isEditing ? (
-          <div className="flex items-center gap-2">
+          <div ref={editingContainerRef} className="flex items-center gap-2">
             <Input
               ref={inputRef}
               value={editValue}
@@ -267,7 +269,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "company";
         return isEditing ? (
-          <div className="flex items-center gap-2">
+          <div ref={editingContainerRef} className="flex items-center gap-2">
             <Input
               ref={inputRef}
               value={editValue}
@@ -301,7 +303,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "value";
         return isEditing ? (
-          <div className="flex items-center gap-2">
+          <div ref={editingContainerRef} className="flex items-center gap-2">
             <Input
               ref={inputRef}
               value={editValue}
@@ -335,7 +337,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "probability";
         return isEditing ? (
-          <div className="flex items-center gap-2">
+          <div ref={editingContainerRef} className="flex items-center gap-2">
             <Input
               ref={inputRef}
               type="number"
@@ -372,7 +374,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       cell: (row) => {
         const isEditing = editingCell?.opportunityId === row.id && editingCell?.field === "close_date";
         return isEditing ? (
-          <div className="flex items-center gap-2">
+          <div ref={editingContainerRef} className="flex items-center gap-2">
             <Input
               ref={inputRef}
               type="date"

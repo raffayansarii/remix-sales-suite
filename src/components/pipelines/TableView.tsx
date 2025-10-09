@@ -45,6 +45,7 @@ export function TableView({
   const [pendingChanges, setPendingChanges] = useState<Record<string, any>>({});
   const [optimisticData, setOptimisticData] = useState<IOpportunity[]>(opportunities);
   const inputRef = useRef<HTMLInputElement>(null);
+  const editingContainerRef = useRef<HTMLDivElement>(null);
   const [lastTabTime, setLastTabTime] = useState<number>(0);
   
   // Define editable columns in order for Tab navigation
@@ -159,6 +160,26 @@ export function TableView({
     }
   }, [editingCell]);
 
+  // Handle click outside to cancel editing
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (editingCell && editingContainerRef.current && !editingContainerRef.current.contains(event.target as Node)) {
+        cancelEditing();
+      }
+    };
+
+    if (editingCell) {
+      // Add a small delay to avoid immediate cancellation
+      setTimeout(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+      }, 0);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [editingCell]);
+
   const handleDeleteOpportunity = (opportunity: IOpportunity) => {
     setOpportunityToDelete(opportunity);
     setDeleteModalOpen(true);
@@ -197,6 +218,7 @@ export function TableView({
     togglePin,
     isPinned,
     inputRef,
+    editingContainerRef,
     visibleColumns: columnManager.visibleColumns,
     hasPendingChanges: Object.keys(pendingChanges).length > 0,
   });
