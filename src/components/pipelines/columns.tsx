@@ -36,27 +36,28 @@ const getAwardTypeColor = (awardType: string) => {
 export interface OpportunityColumnsContext {
   editingCell: { opportunityId: string; field: string } | null;
   editValue: string;
-  setEditValue: (value: string) => void;
+  updateOptimisticData: (opportunityId: string, field: string, value: any) => void;
   startEditing: (opportunityId: string, field: string, currentValue: any) => void;
   cancelEditing: () => void;
-  saveEdit: (opportunity: IOpportunity, field: string, value: any) => void;
-  handleTabNavigation: (opportunity: IOpportunity, field: string, value: any) => void;
+  savePendingChanges: () => void;
+  handleTabNavigation: (opportunity: IOpportunity, field: string) => void;
   handleViewOpportunity: (opportunity: IOpportunity) => void;
   handleDeleteOpportunity: (opportunity: IOpportunity) => void;
   togglePin: (id: string, opportunity: IOpportunity) => void;
   isPinned: (id: string) => boolean;
   inputRef: React.RefObject<HTMLInputElement>;
   visibleColumns: Array<{ id: string; label: string; field?: string }>;
+  hasPendingChanges: boolean;
 }
 
 export const createOpportunityColumns = (context: OpportunityColumnsContext): ColumnDef<IOpportunity>[] => {
   const {
     editingCell,
     editValue,
-    setEditValue,
+    updateOptimisticData,
     startEditing,
     cancelEditing,
-    saveEdit,
+    savePendingChanges,
     handleTabNavigation,
     handleViewOpportunity,
     handleDeleteOpportunity,
@@ -64,6 +65,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
     isPinned,
     inputRef,
     visibleColumns,
+    hasPendingChanges,
   } = context;
 
   const columnMap: Record<string, ColumnDef<IOpportunity>> = {
@@ -81,32 +83,21 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
                 <Input
                   ref={inputRef}
                   value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
+                  onChange={(e) => updateOptimisticData(row.id, "title", e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") saveEdit(row, "title", editValue);
+                    if (e.key === "Enter") savePendingChanges();
                     else if (e.key === "Escape") cancelEditing();
                     else if (e.key === "Tab") {
                       e.preventDefault();
-                      handleTabNavigation(row, "title", editValue);
+                      handleTabNavigation(row, "title");
                     }
                   }}
                   className="h-8"
                 />
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-6 w-6"
-                  onClick={() => saveEdit(row, "title", editValue)}
-                >
-                  <Check className="h-4 w-4" />
-                </Button>
-                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={cancelEditing}>
-                  <X className="h-4 w-4" />
-                </Button>
               </div>
             ) : (
               <div
-                className="cursor-pointer hover:bg-accent/50 hover:border hover:border-accent p-1 rounded transition-colors"
+                className="cursor-pointer p-1 rounded"
                 onClick={() => startEditing(row.id, "title", row.title)}
               >
                 <div className="font-medium text-sm">{row.title}</div>
@@ -142,10 +133,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
           <div className="flex items-center gap-2">
             <Select
               value={editValue}
-              onValueChange={(value) => {
-                setEditValue(value);
-                saveEdit(row, "stage", value);
-              }}
+              onValueChange={(value) => updateOptimisticData(row.id, "stage", value)}
             >
               <SelectTrigger className="h-8 w-full">
                 <SelectValue />
@@ -158,13 +146,10 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
                 <SelectItem value="Closed Won">Closed Won</SelectItem>
               </SelectContent>
             </Select>
-            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={cancelEditing}>
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         ) : (
           <Badge
-            className={`${getStageColor(row.stage)} border-0 cursor-pointer hover:opacity-80 transition-opacity`}
+            className={`${getStageColor(row.stage)} border-0 cursor-pointer`}
             onClick={() => startEditing(row.id, "stage", row.stage)}
           >
             {row.stage}
@@ -183,10 +168,7 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
           <div className="flex items-center gap-2">
             <Select
               value={editValue}
-              onValueChange={(value) => {
-                setEditValue(value);
-                saveEdit(row, "award_type", value);
-              }}
+              onValueChange={(value) => updateOptimisticData(row.id, "award_type", value)}
             >
               <SelectTrigger className="h-8 w-full">
                 <SelectValue />
@@ -198,13 +180,10 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
                 <SelectItem value="Purchase Order">Purchase Order</SelectItem>
               </SelectContent>
             </Select>
-            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={cancelEditing}>
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         ) : (
           <Badge
-            className={`${getAwardTypeColor(row.award_type)} border-0 text-xs cursor-pointer hover:opacity-80 transition-opacity`}
+            className={`${getAwardTypeColor(row.award_type)} border-0 text-xs cursor-pointer`}
             onClick={() => startEditing(row.id, "award_type", row.award_type)}
           >
             {row.award_type}
@@ -224,27 +203,21 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
             <Input
               ref={inputRef}
               value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
+              onChange={(e) => updateOptimisticData(row.id, "agency", e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") saveEdit(row, "agency", editValue);
+                if (e.key === "Enter") savePendingChanges();
                 else if (e.key === "Escape") cancelEditing();
                 else if (e.key === "Tab") {
                   e.preventDefault();
-                  handleTabNavigation(row, "agency", editValue);
+                  handleTabNavigation(row, "agency");
                 }
               }}
               className="h-8"
             />
-            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => saveEdit(row, "agency", editValue)}>
-              <Check className="h-4 w-4" />
-            </Button>
-            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={cancelEditing}>
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         ) : (
           <span
-            className="text-sm cursor-pointer hover:bg-accent/50 hover:border hover:border-accent p-1 rounded block transition-colors"
+            className="text-sm cursor-pointer p-1 rounded block"
             onClick={() => startEditing(row.id, "agency", row.agency)}
           >
             {row.agency}
@@ -264,32 +237,21 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
             <Input
               ref={inputRef}
               value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
+              onChange={(e) => updateOptimisticData(row.id, "solicitation", e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") saveEdit(row, "solicitation", editValue);
+                if (e.key === "Enter") savePendingChanges();
                 else if (e.key === "Escape") cancelEditing();
                 else if (e.key === "Tab") {
                   e.preventDefault();
-                  handleTabNavigation(row, "solicitation", editValue);
+                  handleTabNavigation(row, "solicitation");
                 }
               }}
               className="h-8"
             />
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-6 w-6"
-              onClick={() => saveEdit(row, "solicitation", editValue)}
-            >
-              <Check className="h-4 w-4" />
-            </Button>
-            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={cancelEditing}>
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         ) : (
           <span
-            className="text-sm text-primary underline cursor-pointer hover:text-primary/80 hover:bg-accent/30 p-1 rounded transition-colors"
+            className="text-sm text-primary underline cursor-pointer p-1 rounded"
             onClick={() => startEditing(row.id, "solicitation", row.solicitation)}
           >
             {row.solicitation}
@@ -309,27 +271,21 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
             <Input
               ref={inputRef}
               value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
+              onChange={(e) => updateOptimisticData(row.id, "company", e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") saveEdit(row, "company", editValue);
+                if (e.key === "Enter") savePendingChanges();
                 else if (e.key === "Escape") cancelEditing();
                 else if (e.key === "Tab") {
                   e.preventDefault();
-                  handleTabNavigation(row, "company", editValue);
+                  handleTabNavigation(row, "company");
                 }
               }}
               className="h-8"
             />
-            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => saveEdit(row, "company", editValue)}>
-              <Check className="h-4 w-4" />
-            </Button>
-            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={cancelEditing}>
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         ) : (
           <span
-            className="text-sm cursor-pointer hover:bg-accent/50 hover:border hover:border-accent p-1 rounded block transition-colors"
+            className="text-sm cursor-pointer p-1 rounded block"
             onClick={() => startEditing(row.id, "company", row.company)}
           >
             {row.company}
@@ -349,27 +305,21 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
             <Input
               ref={inputRef}
               value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
+              onChange={(e) => updateOptimisticData(row.id, "value", e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") saveEdit(row, "value", editValue);
+                if (e.key === "Enter") savePendingChanges();
                 else if (e.key === "Escape") cancelEditing();
                 else if (e.key === "Tab") {
                   e.preventDefault();
-                  handleTabNavigation(row, "value", editValue);
+                  handleTabNavigation(row, "value");
                 }
               }}
               className="h-8"
             />
-            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => saveEdit(row, "value", editValue)}>
-              <Check className="h-4 w-4" />
-            </Button>
-            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={cancelEditing}>
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         ) : (
           <span
-            className="text-sm cursor-pointer hover:bg-accent/50 hover:border hover:border-accent p-1 rounded block transition-colors"
+            className="text-sm cursor-pointer p-1 rounded block"
             onClick={() => startEditing(row.id, "value", row.value)}
           >
             ${parseFloat(row.value).toLocaleString()}
@@ -392,32 +342,21 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
               min="0"
               max="100"
               value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
+              onChange={(e) => updateOptimisticData(row.id, "probability", parseInt(e.target.value))}
               onKeyDown={(e) => {
-                if (e.key === "Enter") saveEdit(row, "probability", parseInt(editValue));
+                if (e.key === "Enter") savePendingChanges();
                 else if (e.key === "Escape") cancelEditing();
                 else if (e.key === "Tab") {
                   e.preventDefault();
-                  handleTabNavigation(row, "probability", parseInt(editValue));
+                  handleTabNavigation(row, "probability");
                 }
               }}
               className="h-8"
             />
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-6 w-6"
-              onClick={() => saveEdit(row, "probability", parseInt(editValue))}
-            >
-              <Check className="h-4 w-4" />
-            </Button>
-            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={cancelEditing}>
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         ) : (
           <span
-            className="text-sm cursor-pointer hover:bg-accent/50 hover:border hover:border-accent p-1 rounded block transition-colors"
+            className="text-sm cursor-pointer p-1 rounded block"
             onClick={() => startEditing(row.id, "probability", row.probability)}
           >
             {row.probability}%
@@ -438,32 +377,21 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
               ref={inputRef}
               type="date"
               value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
+              onChange={(e) => updateOptimisticData(row.id, "close_date", e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") saveEdit(row, "close_date", editValue);
+                if (e.key === "Enter") savePendingChanges();
                 else if (e.key === "Escape") cancelEditing();
                 else if (e.key === "Tab") {
                   e.preventDefault();
-                  handleTabNavigation(row, "close_date", editValue);
+                  handleTabNavigation(row, "close_date");
                 }
               }}
               className="h-8"
             />
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-6 w-6"
-              onClick={() => saveEdit(row, "close_date", editValue)}
-            >
-              <Check className="h-4 w-4" />
-            </Button>
-            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={cancelEditing}>
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         ) : (
           <span
-            className="text-sm cursor-pointer hover:bg-accent/50 hover:border hover:border-accent p-1 rounded block transition-colors"
+            className="text-sm cursor-pointer p-1 rounded block"
             onClick={() => {
               const date = new Date(row.close_date);
               const formattedDate = date.toISOString().split("T")[0];
@@ -489,54 +417,66 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
       width: "100px",
       right: true,
       cell: (row) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
+        <div className="flex items-center gap-2">
+          {editingCell?.opportunityId === row.id && hasPendingChanges && (
+            <Button
+              size="sm"
+              variant="default"
+              onClick={savePendingChanges}
+              className="h-7"
+            >
+              Save
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                togglePin(row.id, row);
-              }}
-            >
-              {isPinned(row.id) || row.pinned ? (
-                <>
-                  <PinOff className="mr-2 h-4 w-4" />
-                  Unpin
-                </>
-              ) : (
-                <>
-                  <Pin className="mr-2 h-4 w-4" />
-                  Pin to top
-                </>
-              )}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleViewOpportunity(row);
-              }}
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              View Details
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="cursor-pointer text-destructive focus:text-destructive"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDeleteOpportunity(row);
-              }}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  togglePin(row.id, row);
+                }}
+              >
+                {isPinned(row.id) || row.pinned ? (
+                  <>
+                    <PinOff className="mr-2 h-4 w-4" />
+                    Unpin
+                  </>
+                ) : (
+                  <>
+                    <Pin className="mr-2 h-4 w-4" />
+                    Pin to top
+                  </>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleViewOpportunity(row);
+                }}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer text-destructive focus:text-destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteOpportunity(row);
+                }}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       ),
     },
   };

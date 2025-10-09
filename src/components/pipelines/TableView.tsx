@@ -42,6 +42,8 @@ export function TableView({
     field: string;
   } | null>(null);
   const [editValue, setEditValue] = useState<string>("");
+  const [pendingChanges, setPendingChanges] = useState<Record<string, any>>({});
+  const [optimisticData, setOptimisticData] = useState<IOpportunity[]>(opportunities);
   const inputRef = useRef<HTMLInputElement>(null);
   const [lastTabTime, setLastTabTime] = useState<number>(0);
   
@@ -59,20 +61,45 @@ export function TableView({
   };
 
   const startEditing = (opportunityId: string, field: string, currentValue: any) => {
+    // If switching to a different row, save pending changes first
+    if (editingCell && editingCell.opportunityId !== opportunityId && Object.keys(pendingChanges).length > 0) {
+      savePendingChanges();
+    }
+    
     setEditingCell({ opportunityId, field });
-    setEditValue(currentValue?.toString() || "");
+    
+    // Get the current value from optimistic data if available, otherwise from current value
+    const optimisticOpp = optimisticData.find(o => o.id === opportunityId);
+    const valueToEdit = optimisticOpp ? optimisticOpp[field as keyof IOpportunity] : currentValue;
+    setEditValue(valueToEdit?.toString() || "");
   };
 
   const cancelEditing = () => {
+    // Revert optimistic changes
+    setOptimisticData(opportunities);
+    setPendingChanges({});
     setEditingCell(null);
     setEditValue("");
   };
 
-  const saveEdit = async (opportunity: IOpportunity, field: string, value: any) => {
+  const updateOptimisticData = (opportunityId: string, field: string, value: any) => {
+    // Update optimistic data immediately
+    setOptimisticData(prev => prev.map(opp => 
+      opp.id === opportunityId ? { ...opp, [field]: value } : opp
+    ));
+    
+    // Track pending change
+    setPendingChanges(prev => ({ ...prev, [field]: value }));
+    setEditValue(value?.toString() || "");
+  };
+
+  const savePendingChanges = async () => {
+    if (!editingCell || Object.keys(pendingChanges).length === 0) return;
+    
     try {
       await updateTrigger({
-        id: opportunity.id,
-        body: { [field]: value },
+        id: editingCell.opportunityId,
+        body: pendingChanges,
       }).unwrap();
       
       toast({
@@ -80,9 +107,12 @@ export function TableView({
         description: "Opportunity updated successfully",
       });
       
+      setPendingChanges({});
       setEditingCell(null);
       setEditValue("");
     } catch (error) {
+      // Revert optimistic changes on error
+      setOptimisticData(opportunities);
       toast({
         title: "Error",
         description: "Failed to update opportunity",
@@ -91,24 +121,19 @@ export function TableView({
     }
   };
 
-  const handleTabNavigation = (currentOpportunity: IOpportunity, currentField: string, currentValue: any) => {
+  const handleTabNavigation = (currentOpportunity: IOpportunity, currentField: string) => {
     const currentTime = Date.now();
-    const isDoubleTap = currentTime - lastTabTime < 300; // 300ms threshold for double-tap
+    const isDoubleTap = currentTime - lastTabTime < 300;
     setLastTabTime(currentTime);
     
-    // Save current cell
-    saveEdit(currentOpportunity, currentField, currentValue);
-    
     if (isDoubleTap) {
-      // Double-tab: Move to next row, same column
-      const currentIndex = opportunities.findIndex(opp => opp.id === currentOpportunity.id);
-      if (currentIndex < opportunities.length - 1) {
-        const nextOpportunity = opportunities[currentIndex + 1];
+      // Double-tab: Save and move to next row, same column
+      savePendingChanges();
+      const currentIndex = optimisticData.findIndex(opp => opp.id === currentOpportunity.id);
+      if (currentIndex < optimisticData.length - 1) {
+        const nextOpportunity = optimisticData[currentIndex + 1];
         const fieldValue = nextOpportunity[currentField as keyof IOpportunity];
         startEditing(nextOpportunity.id, currentField, fieldValue);
-      } else {
-        // Last row, exit editing
-        cancelEditing();
       }
     } else {
       // Single tab: Move to next cell in same row
@@ -117,12 +142,16 @@ export function TableView({
         const nextField = editableColumns[currentFieldIndex + 1];
         const fieldValue = currentOpportunity[nextField as keyof IOpportunity];
         startEditing(currentOpportunity.id, nextField, fieldValue);
-      } else {
-        // Last cell in row, exit editing
-        cancelEditing();
       }
     }
   };
+
+  // Sync optimistic data with opportunities when they change
+  useEffect(() => {
+    if (!editingCell) {
+      setOptimisticData(opportunities);
+    }
+  }, [opportunities, editingCell]);
 
   useEffect(() => {
     if (editingCell && inputRef.current) {
@@ -158,10 +187,10 @@ export function TableView({
   const columns = createOpportunityColumns({
     editingCell,
     editValue,
-    setEditValue,
+    updateOptimisticData,
     startEditing,
     cancelEditing,
-    saveEdit,
+    savePendingChanges,
     handleTabNavigation,
     handleViewOpportunity,
     handleDeleteOpportunity,
@@ -169,6 +198,7 @@ export function TableView({
     isPinned,
     inputRef,
     visibleColumns: columnManager.visibleColumns,
+    hasPendingChanges: Object.keys(pendingChanges).length > 0,
   });
 
   return (
@@ -190,7 +220,7 @@ export function TableView({
       </div>
 
       <DataTable
-        data={opportunities}
+        data={optimisticData}
         columns={columns}
         isLoading={false}
         emptyMessage="No opportunities found matching your search criteria."
