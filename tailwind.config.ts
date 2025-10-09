@@ -37,18 +37,7 @@ export default {
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
-					foreground: 'hsl(var(--destructive-foreground))',
-					light: 'hsl(var(--destructive-light))'
-				},
-				success: {
-					DEFAULT: 'hsl(var(--success))',
-					foreground: 'hsl(var(--success-foreground))',
-					light: 'hsl(var(--success-light))'
-				},
-				warning: {
-					DEFAULT: 'hsl(var(--warning))',
-					foreground: 'hsl(var(--warning-foreground))',
-					light: 'hsl(var(--warning-light))'
+					foreground: 'hsl(var(--destructive-foreground))'
 				},
 				muted: {
 					DEFAULT: 'hsl(var(--muted))',
@@ -75,13 +64,6 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				},
-				stage: {
-					lead: 'hsl(var(--stage-lead))',
-					qualified: 'hsl(var(--stage-qualified))',
-					proposal: 'hsl(var(--stage-proposal))',
-					negotiation: 'hsl(var(--stage-negotiation))',
-					won: 'hsl(var(--stage-won))'
 				}
 			},
 			backgroundImage: {

@@ -12,26 +12,6 @@ import { MoreHorizontal, Eye, Pin, PinOff, Trash2, Check, X } from "lucide-react
 import { IOpportunity } from "@/api/opportunity/opportunityTypes";
 import { ColumnDef } from "@/components/ui/data-table";
 
-const getStageColor = (stage: string) => {
-  const stageColors = {
-    Lead: "bg-stage-lead text-white",
-    Qualified: "bg-stage-qualified text-white",
-    Proposal: "bg-stage-proposal text-white",
-    Negotiation: "bg-stage-negotiation text-white",
-    "Closed Won": "bg-stage-won text-white",
-  };
-  return stageColors[stage as keyof typeof stageColors] || "bg-muted";
-};
-
-const getAwardTypeColor = (awardType: string) => {
-  const awardTypeColors = {
-    Contract: "bg-primary text-primary-foreground",
-    Grant: "bg-success text-success-foreground",
-    "Cooperative Agreement": "bg-warning text-warning-foreground",
-    "Purchase Order": "bg-muted text-muted-foreground",
-  };
-  return awardTypeColors[awardType as keyof typeof awardTypeColors] || "bg-muted";
-};
 
 export interface OpportunityColumnsContext {
   editingCell: { opportunityId: string; field: string } | null;
@@ -151,7 +131,8 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
           </div>
         ) : (
           <Badge
-            className={`${getStageColor(row.stage)} border-0 cursor-pointer`}
+            variant="secondary"
+            className="cursor-pointer"
             onClick={() => startEditing(row.id, "stage", row.stage)}
           >
             {row.stage}
@@ -185,7 +166,8 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
           </div>
         ) : (
           <Badge
-            className={`${getAwardTypeColor(row.award_type)} border-0 text-xs cursor-pointer`}
+            variant="outline"
+            className="cursor-pointer text-xs"
             onClick={() => startEditing(row.id, "award_type", row.award_type)}
           >
             {row.award_type}
