@@ -115,10 +115,20 @@ export const createOpportunityColumns = (actionsContext: OpportunityActionsConte
               value={context.editValue}
               onValueChange={(value) => context.updateOptimisticData(row.id, "stage", value)}
             >
-              <SelectTrigger className="h-8 w-full">
+              <SelectTrigger className="h-8 w-full" onKeyDown={(e) => {
+                if (e.key === 'Tab') {
+                  e.preventDefault();
+                  context.handleTabNavigation(row, 'stage');
+                }
+              }}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent onKeyDown={(e) => {
+                if (e.key === 'Tab') {
+                  e.preventDefault();
+                  context.handleTabNavigation(row, 'stage');
+                }
+              }}>
                 <SelectItem value="Lead">Lead</SelectItem>
                 <SelectItem value="Qualified">Qualified</SelectItem>
                 <SelectItem value="Proposal">Proposal</SelectItem>
@@ -151,10 +161,20 @@ export const createOpportunityColumns = (actionsContext: OpportunityActionsConte
               value={context.editValue}
               onValueChange={(value) => context.updateOptimisticData(row.id, "award_type", value)}
             >
-              <SelectTrigger className="h-8 w-full">
+              <SelectTrigger className="h-8 w-full" onKeyDown={(e) => {
+                if (e.key === 'Tab') {
+                  e.preventDefault();
+                  context.handleTabNavigation(row, 'award_type');
+                }
+              }}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent onKeyDown={(e) => {
+                if (e.key === 'Tab') {
+                  e.preventDefault();
+                  context.handleTabNavigation(row, 'award_type');
+                }
+              }}>
                 <SelectItem value="Contract">Contract</SelectItem>
                 <SelectItem value="Grant">Grant</SelectItem>
                 <SelectItem value="Cooperative Agreement">Cooperative Agreement</SelectItem>
@@ -465,17 +485,6 @@ export const createOpportunityColumns = (actionsContext: OpportunityActionsConte
 
   // Define column order: editable first, then non-editable, actions last
   const editableColumnIds = ['title', 'stage', 'awardType', 'agency', 'solicitation', 'company', 'value', 'probability', 'closeDate'];
-  const nonEditableColumnIds = ['createdAt'];
-  const actionsColumnId = 'actions';
-  
-  // Separate visible columns into categories
-  const editableVisible = visibleColumns.filter(col => editableColumnIds.includes(col.id));
-  const nonEditableVisible = visibleColumns.filter(col => nonEditableColumnIds.includes(col.id));
-  const actionsVisible = visibleColumns.filter(col => col.id === actionsColumnId);
-  
-  // Combine in the correct order: editable -> non-editable -> actions
-  const orderedColumns = [...editableVisible, ...nonEditableVisible, ...actionsVisible];
-  
-  // Return only the columns that exist in columnMap
-  return orderedColumns.map((col) => columnMap[col.id]).filter(Boolean);
+  // Return only the columns that are visible, preserving the configured order
+  return visibleColumns.map((col) => columnMap[col.id]).filter(Boolean);
 };

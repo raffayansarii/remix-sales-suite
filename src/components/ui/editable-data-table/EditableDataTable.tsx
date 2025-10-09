@@ -89,10 +89,10 @@ export function EditableDataTable<TData extends Record<string, any>>({
   enableDoubleTabNavigation = true,
 }: EditableDataTableProps<TData>) {
   
-  // Get visible field names from columns
+  // Get visible field names from columns (prefer accessorKey to match data keys)
   const visibleFields = columns
     .filter(col => !col.omit)
-    .map(col => col.id);
+    .map(col => (col.accessorKey ? String(col.accessorKey) : col.id));
 
   // Initialize inline editing hook
   const editing = useInlineEditing({
