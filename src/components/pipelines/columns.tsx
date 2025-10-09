@@ -465,6 +465,19 @@ export const createOpportunityColumns = (context: OpportunityColumnsContext): Co
     },
   };
 
-  // Return only the columns that are visible
-  return visibleColumns.map((col) => columnMap[col.id]).filter(Boolean);
+  // Define column order: editable first, then non-editable, actions last
+  const editableColumnIds = ['title', 'stage', 'awardType', 'agency', 'solicitation', 'company', 'value', 'probability', 'closeDate'];
+  const nonEditableColumnIds = ['createdAt'];
+  const actionsColumnId = 'actions';
+  
+  // Separate visible columns into categories
+  const editableVisible = visibleColumns.filter(col => editableColumnIds.includes(col.id));
+  const nonEditableVisible = visibleColumns.filter(col => nonEditableColumnIds.includes(col.id));
+  const actionsVisible = visibleColumns.filter(col => col.id === actionsColumnId);
+  
+  // Combine in the correct order: editable -> non-editable -> actions
+  const orderedColumns = [...editableVisible, ...nonEditableVisible, ...actionsVisible];
+  
+  // Return only the columns that exist in columnMap
+  return orderedColumns.map((col) => columnMap[col.id]).filter(Boolean);
 };
