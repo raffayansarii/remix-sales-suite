@@ -14,7 +14,7 @@ interface KanbanHeaderProps {
 
 export function KanbanHeader({ stage, count, totalValue }: KanbanHeaderProps) {
   return (
-    <div className={`${stage.color} ${stage.textColor} p-4 rounded-t-lg`}>
+    <div className="bg-[#333] text-white p-4 rounded-t-lg">
       <div className="flex items-center justify-between mb-2">
         <h3 className="font-semibold text-lg">{stage.name}</h3>
         <Badge variant="secondary" className="bg-white/20 text-white border-0">
