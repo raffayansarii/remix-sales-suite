@@ -170,7 +170,7 @@ export function useInlineEditing<TData = any>({
     }
   }, [editingCell]);
 
-  // Handle click outside to cancel editing
+  // Handle click outside to save pending changes
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (!editingCell || !editingContainerRef.current) return;
@@ -184,8 +184,8 @@ export function useInlineEditing<TData = any>({
       const radixPortal = (target as Element).closest('[data-radix-popper-content-wrapper], [data-radix-portal]');
       if (radixPortal) return;
       
-      // Otherwise, cancel editing
-      cancelEditing();
+      // Otherwise, save pending changes
+      savePendingChanges();
     };
 
     if (editingCell) {
@@ -197,7 +197,7 @@ export function useInlineEditing<TData = any>({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [editingCell, cancelEditing]);
+  }, [editingCell, savePendingChanges]);
 
   return {
     editingCell,
