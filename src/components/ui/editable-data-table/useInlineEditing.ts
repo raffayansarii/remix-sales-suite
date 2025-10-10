@@ -173,10 +173,19 @@ export function useInlineEditing<TData = any>({
   // Handle click outside to cancel editing
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (editingCell && editingContainerRef.current && 
-          !editingContainerRef.current.contains(event.target as Node)) {
-        cancelEditing();
-      }
+      if (!editingCell || !editingContainerRef.current) return;
+      
+      const target = event.target as Node;
+      
+      // Check if click is inside the editing container
+      if (editingContainerRef.current.contains(target)) return;
+      
+      // Check if click is inside a Radix portal (dropdown, popover, etc.)
+      const radixPortal = (target as Element).closest('[data-radix-popper-content-wrapper], [data-radix-portal]');
+      if (radixPortal) return;
+      
+      // Otherwise, cancel editing
+      cancelEditing();
     };
 
     if (editingCell) {
