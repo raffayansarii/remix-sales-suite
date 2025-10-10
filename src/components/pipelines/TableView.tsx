@@ -83,33 +83,36 @@ export function TableView({
    * Handle saving inline edits
    * This function is called by EditableDataTable when user saves changes
    * If stage is being changed, use the kanban API (same as drag-and-drop)
+   * If other fields are changed, use the regular update API
+   * Both mutations can be called if both types of changes exist
    */
   const handleSaveChanges = async (opportunityId: string, changes: Partial<IOpportunity>) => {
     try {
+      const stageChanged = 'stage' in changes;
+      const otherChanges = { ...changes };
+      delete otherChanges.stage;
+      const hasOtherChanges = Object.keys(otherChanges).length > 0;
+      
       // If stage is being changed, use the kanban move API (same as kanban board)
-      if (changes.stage && userData?.id) {
+      if (stageChanged && userData?.id) {
         const opportunity = opportunities.find(opp => opp.id === opportunityId);
         if (!opportunity) throw new Error("Opportunity not found");
         
         await moveToStage({
           p_opportunity_id: opportunityId,
-          p_new_stage: changes.stage,
+          p_new_stage: changes.stage!,
           p_tenant_id: opportunity.tenant_id,
           p_user_id: userData.id,
         }).unwrap();
-        
-        toast({
-          title: "Success",
-          description: "Stage updated successfully",
-        });
-        return;
       }
       
       // For all other changes, use the regular update API
-      await updateTrigger({
-        id: opportunityId,
-        body: changes,
-      }).unwrap();
+      if (hasOtherChanges) {
+        await updateTrigger({
+          id: opportunityId,
+          body: otherChanges,
+        }).unwrap();
+      }
       
       toast({
         title: "Success",

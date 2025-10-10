@@ -126,8 +126,8 @@ export function useInlineEditing<TData = any>({
 
   /**
    * Handle Tab key navigation between editable cells
-   * Single Tab: Move to next editable field in same row
-   * Double Tab (optional): Move to same field in next row
+   * Each Tab: Save current field and move to next editable field in same row
+   * Double Tab (optional): Save and move to same field in next row
    */
   const handleTabNavigation = useCallback((currentRow: TData, currentField: string) => {
     const currentTime = Date.now();
@@ -146,12 +146,18 @@ export function useInlineEditing<TData = any>({
         startEditing(String(nextRow[rowIdKey]), currentField, fieldValue);
       }
     } else {
-      // Single tab: Move to next visible editable field in same row
+      // Single tab: Save current field and move to next visible editable field in same row
+      savePendingChanges();
       const currentFieldIndex = visibleEditableFields.indexOf(currentField);
       if (currentFieldIndex < visibleEditableFields.length - 1) {
-        const nextField = visibleEditableFields[currentFieldIndex + 1];
-        const fieldValue = currentRow[nextField as keyof TData];
-        startEditing(String(currentRow[rowIdKey]), nextField, fieldValue);
+        const nextRow = optimisticData.find(
+          row => String(row[rowIdKey]) === String(currentRow[rowIdKey])
+        );
+        if (nextRow) {
+          const nextField = visibleEditableFields[currentFieldIndex + 1];
+          const fieldValue = nextRow[nextField as keyof TData];
+          startEditing(String(nextRow[rowIdKey]), nextField, fieldValue);
+        }
       }
     }
   }, [enableDoubleTab, optimisticData, rowIdKey, visibleEditableFields, startEditing, savePendingChanges]);
