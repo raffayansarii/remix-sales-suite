@@ -1,6 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 export type ColumnType = "system" | "default" | "custom";
+
+// Local storage key for persisting column preferences
+const STORAGE_KEY = "pipelines-column-preferences";
 
 export interface ColumnDefinition {
   id: string;
@@ -124,10 +127,37 @@ export interface UseColumnManagerReturn {
 }
 
 export function useColumnManager(): UseColumnManagerReturn {
-  const [columns, setColumns] = useState<ColumnDefinition[]>(() => DEFAULT_COLUMNS.map((c) => ({ ...c })));
+  // Initialize columns from local storage or use defaults
+  const [columns, setColumns] = useState<ColumnDefinition[]>(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsedColumns = JSON.parse(stored) as ColumnDefinition[];
+        // Validate that stored columns have all required fields
+        const isValid = parsedColumns.every(col => 
+          col.id && col.label && col.type !== undefined && col.visible !== undefined
+        );
+        if (isValid) {
+          return parsedColumns;
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load column preferences from local storage:", error);
+    }
+    return DEFAULT_COLUMNS.map((c) => ({ ...c }));
+  });
 
   const visibleColumns = columns.filter((col) => col.visible);
   const hiddenColumns = columns.filter((col) => !col.visible);
+
+  // Persist columns to local storage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(columns));
+    } catch (error) {
+      console.error("Failed to save column preferences to local storage:", error);
+    }
+  }, [columns]);
 
   const toggleColumnVisibility = useCallback((columnId: string) => {
     setColumns((prev) =>
