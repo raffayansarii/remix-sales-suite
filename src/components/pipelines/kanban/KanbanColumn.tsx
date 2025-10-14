@@ -28,7 +28,7 @@ export function KanbanColumn({ stage, opportunities, onOpportunityClick }: Kanba
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={`bg-slate-100 p-1 rounded-b-lg overflow-y-auto h-[420px] space-y-1 transition-colors ${
+            className={`bg-slate-100 border-slate-300 dark:bg-slate-900 dark:border-slate-700 border p-1 rounded-b-lg overflow-y-auto h-[420px] space-y-1 transition-colors ${
               snapshot.isDraggingOver ? "bg-muted/70" : ""
             }`}
           >
