@@ -1,6 +1,6 @@
 /**
  * Opportunity Table Columns
- * 
+ *
  * This file defines the column configurations for the opportunities table.
  * Uses the EditableDataTable component for inline editing functionality.
  */
@@ -34,18 +34,14 @@ export interface OpportunityActionsContext {
 
 /**
  * Creates column definitions for the opportunities table
- * 
+ *
  * @param actionsContext - Context containing action handlers (view, delete, pin)
  * @returns Array of column definitions ordered by: editable -> non-editable -> actions
  */
-export const createOpportunityColumns = (actionsContext: OpportunityActionsContext): EditableColumnDef<IOpportunity>[] => {
-  const {
-    handleViewOpportunity,
-    handleDeleteOpportunity,
-    togglePin,
-    isPinned,
-    visibleColumns,
-  } = actionsContext;
+export const createOpportunityColumns = (
+  actionsContext: OpportunityActionsContext,
+): EditableColumnDef<IOpportunity>[] => {
+  const { handleViewOpportunity, handleDeleteOpportunity, togglePin, isPinned, visibleColumns } = actionsContext;
 
   // All available columns with their configurations
   const columnMap: Record<string, EditableColumnDef<IOpportunity>> = {
@@ -115,20 +111,25 @@ export const createOpportunityColumns = (actionsContext: OpportunityActionsConte
               value={context.editValue}
               onValueChange={(value) => context.updateOptimisticData(row.id, "stage", value)}
             >
-              <SelectTrigger className="h-8 w-full" onKeyDown={(e) => {
-                if (e.key === 'Tab') {
-                  e.preventDefault();
-                  context.handleTabNavigation(row, 'stage');
-                }
-              }}>
+              <SelectTrigger
+                className="h-8 w-full"
+                onKeyDown={(e) => {
+                  if (e.key === "Tab") {
+                    e.preventDefault();
+                    context.handleTabNavigation(row, "stage");
+                  }
+                }}
+              >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent onKeyDown={(e) => {
-                if (e.key === 'Tab') {
-                  e.preventDefault();
-                  context.handleTabNavigation(row, 'stage');
-                }
-              }}>
+              <SelectContent
+                onKeyDown={(e) => {
+                  if (e.key === "Tab") {
+                    e.preventDefault();
+                    context.handleTabNavigation(row, "stage");
+                  }
+                }}
+              >
                 <SelectItem value="Lead">Lead</SelectItem>
                 <SelectItem value="Qualified">Qualified</SelectItem>
                 <SelectItem value="Proposal">Proposal</SelectItem>
@@ -140,7 +141,7 @@ export const createOpportunityColumns = (actionsContext: OpportunityActionsConte
         ) : (
           <Badge
             variant="secondary"
-            className="cursor-pointer"
+            className="cursor-pointer min-w-[60%] justify-center border-slate-400"
             onClick={() => context.startEditing(row.id, "stage", row.stage)}
           >
             {row.stage}
@@ -161,20 +162,25 @@ export const createOpportunityColumns = (actionsContext: OpportunityActionsConte
               value={context.editValue}
               onValueChange={(value) => context.updateOptimisticData(row.id, "award_type", value)}
             >
-              <SelectTrigger className="h-8 w-full" onKeyDown={(e) => {
-                if (e.key === 'Tab') {
-                  e.preventDefault();
-                  context.handleTabNavigation(row, 'award_type');
-                }
-              }}>
+              <SelectTrigger
+                className="h-8 w-full"
+                onKeyDown={(e) => {
+                  if (e.key === "Tab") {
+                    e.preventDefault();
+                    context.handleTabNavigation(row, "award_type");
+                  }
+                }}
+              >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent onKeyDown={(e) => {
-                if (e.key === 'Tab') {
-                  e.preventDefault();
-                  context.handleTabNavigation(row, 'award_type');
-                }
-              }}>
+              <SelectContent
+                onKeyDown={(e) => {
+                  if (e.key === "Tab") {
+                    e.preventDefault();
+                    context.handleTabNavigation(row, "award_type");
+                  }
+                }}
+              >
                 <SelectItem value="Contract">Contract</SelectItem>
                 <SelectItem value="Grant">Grant</SelectItem>
                 <SelectItem value="Cooperative Agreement">Cooperative Agreement</SelectItem>
@@ -185,7 +191,7 @@ export const createOpportunityColumns = (actionsContext: OpportunityActionsConte
         ) : (
           <Badge
             variant="outline"
-            className="cursor-pointer text-xs"
+            className="cursor-pointer text-xs border-slate-400 min-w-[60%] justify-center"
             onClick={() => context.startEditing(row.id, "award_type", row.award_type)}
           >
             {row.award_type}
@@ -412,79 +418,85 @@ export const createOpportunityColumns = (actionsContext: OpportunityActionsConte
       grow: 1,
       cell: (row) => <span className="text-sm">{new Date(row.created_at).toLocaleDateString()}</span>,
     },
-    actions: {
-      id: "actions",
-      header: "Actions",
-      grow: 0,
-      width: "100px",
-      right: true,
-      cell: (row, context: EditingContext<IOpportunity>) => (
-        <div className="flex items-center gap-2">
-          {context.editingCell?.rowId === row.id && context.hasPendingChanges && (
-            <Button
-              size="sm"
-              variant="default"
-              onClick={() => context.savePendingChanges()}
-              className="h-7"
-            >
-              Save
-            </Button>
-          )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  togglePin(row.id, row);
-                }}
-              >
-                {isPinned(row.id) || row.pinned ? (
-                  <>
-                    <PinOff className="mr-2 h-4 w-4" />
-                    Unpin
-                  </>
-                ) : (
-                  <>
-                    <Pin className="mr-2 h-4 w-4" />
-                    Pin to top
-                  </>
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleViewOpportunity(row);
-                }}
-              >
-                <Eye className="mr-2 h-4 w-4" />
-                View Details
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer text-destructive focus:text-destructive"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteOpportunity(row);
-                }}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      ),
-    },
   };
 
+  const actions = {
+    id: "actions",
+    header: "Actions",
+    grow: 0,
+    width: "100px",
+    right: true,
+    cell: (row, context: EditingContext<IOpportunity>) => (
+      <div className="flex items-center gap-2">
+        {context.editingCell?.rowId === row.id && context.hasPendingChanges && (
+          <Button size="sm" variant="default" onClick={() => context.savePendingChanges()} className="h-7">
+            Save
+          </Button>
+        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePin(row.id, row);
+              }}
+            >
+              {isPinned(row.id) || row.pinned ? (
+                <>
+                  <PinOff className="mr-2 h-4 w-4" />
+                  Unpin
+                </>
+              ) : (
+                <>
+                  <Pin className="mr-2 h-4 w-4" />
+                  Pin to top
+                </>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewOpportunity(row);
+              }}
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              View Details
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer text-destructive focus:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteOpportunity(row);
+              }}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    ),
+  };
   // Define column order: editable first, then non-editable, actions last
-  const editableColumnIds = ['title', 'stage', 'awardType', 'agency', 'solicitation', 'company', 'value', 'probability', 'closeDate'];
+  const editableColumnIds = [
+    "title",
+    "stage",
+    "awardType",
+    "agency",
+    "solicitation",
+    "company",
+    "value",
+    "probability",
+    "closeDate",
+  ];
   // Return only the columns that are visible, preserving the configured order
-  return visibleColumns.map((col) => columnMap[col.id]).filter(Boolean);
+  const columnns = visibleColumns.map((col) => columnMap[col.id]).filter(Boolean);
+  return [...columnns, actions];
 };
