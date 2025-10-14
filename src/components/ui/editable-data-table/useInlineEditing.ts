@@ -126,41 +126,22 @@ export function useInlineEditing<TData = any>({
 
   /**
    * Handle Tab key navigation between editable cells
-   * Each Tab: Save current field and move to next editable field in same row
-   * Double Tab (optional): Save and move to same field in next row
+   * Single Tab: Move to next editable field in same row WITHOUT saving
    */
   const handleTabNavigation = useCallback((currentRow: TData, currentField: string) => {
-    const currentTime = Date.now();
-    const isDoubleTap = enableDoubleTab && (currentTime - lastTabTimeRef.current < 300);
-    lastTabTimeRef.current = currentTime;
-    
-    if (isDoubleTap) {
-      // Double-tab: Save and move to next row, same column
-      savePendingChanges();
-      const currentIndex = optimisticData.findIndex(
+    // Single tab: Move to next visible editable field in same row without saving
+    const currentFieldIndex = visibleEditableFields.indexOf(currentField);
+    if (currentFieldIndex < visibleEditableFields.length - 1) {
+      const nextRow = optimisticData.find(
         row => String(row[rowIdKey]) === String(currentRow[rowIdKey])
       );
-      if (currentIndex < optimisticData.length - 1) {
-        const nextRow = optimisticData[currentIndex + 1];
-        const fieldValue = nextRow[currentField as keyof TData];
-        startEditing(String(nextRow[rowIdKey]), currentField, fieldValue);
-      }
-    } else {
-      // Single tab: Save current field and move to next visible editable field in same row
-      savePendingChanges();
-      const currentFieldIndex = visibleEditableFields.indexOf(currentField);
-      if (currentFieldIndex < visibleEditableFields.length - 1) {
-        const nextRow = optimisticData.find(
-          row => String(row[rowIdKey]) === String(currentRow[rowIdKey])
-        );
-        if (nextRow) {
-          const nextField = visibleEditableFields[currentFieldIndex + 1];
-          const fieldValue = nextRow[nextField as keyof TData];
-          startEditing(String(nextRow[rowIdKey]), nextField, fieldValue);
-        }
+      if (nextRow) {
+        const nextField = visibleEditableFields[currentFieldIndex + 1];
+        const fieldValue = nextRow[nextField as keyof TData];
+        startEditing(String(nextRow[rowIdKey]), nextField, fieldValue);
       }
     }
-  }, [enableDoubleTab, optimisticData, rowIdKey, visibleEditableFields, startEditing, savePendingChanges]);
+  }, [optimisticData, rowIdKey, visibleEditableFields, startEditing]);
 
   // Sync optimistic data with source data when not editing
   useEffect(() => {

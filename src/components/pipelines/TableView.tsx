@@ -148,7 +148,7 @@ export function TableView({ opportunities }: TableViewProps) {
             classNames: ["bg-green-50 dark:bg-green-900  hover:bg-green-100"],
           },
         ]}
-        enableDoubleTabNavigation={true}
+        enableDoubleTabNavigation={false}
       />
       <ColumnManagerModal open={columnModalOpen} onOpenChange={setColumnModalOpen} columnManager={columnManager} />
       {viewModalOpen && (
