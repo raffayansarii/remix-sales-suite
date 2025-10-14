@@ -9,54 +9,24 @@ import { z } from "zod";
 // Table View
 export interface TableViewProps {
   opportunities: IOpportunity[];
-  currentPage: number;
-  rowsPerPage: number;
-  totalCount: number;
-  onPageChange: (page: number) => void;
 }
 
 // Opportunity Form Schema and Types
 export const opportunitySchema = z.object({
-  title: z
-    .string()
-    .min(1, "Title is required")
-    .max(200, "Title must be less than 200 characters"),
-  company: z
-    .string()
-    .min(1, "Company is required")
-    .max(100, "Company must be less than 100 characters"),
-  contact: z
-    .string()
-    .min(1, "Contact is required")
-    .max(100, "Contact must be less than 100 characters"),
+  title: z.string().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
+  company: z.string().min(1, "Company is required").max(100, "Company must be less than 100 characters"),
+  contact: z.string().min(1, "Contact is required").max(100, "Contact must be less than 100 characters"),
   value: z
     .string()
     .min(1, "Value is required")
     .regex(/^\d+(\.\d{2})?$/, "Value must be a valid number"),
   stage: z.enum(["Lead", "Qualified", "Proposal", "Negotiation", "Closed Won"]),
-  award_type: z.enum([
-    "Contract",
-    "Grant",
-    "Cooperative Agreement",
-    "Purchase Order",
-  ]),
-  agency: z
-    .string()
-    .min(1, "Agency is required")
-    .max(100, "Agency must be less than 100 characters"),
-  solicitation: z
-    .string()
-    .min(1, "Solicitation is required")
-    .max(50, "Solicitation must be less than 50 characters"),
-  probability: z
-    .number()
-    .min(0, "Probability must be at least 0")
-    .max(100, "Probability must be at most 100"),
+  award_type: z.enum(["Contract", "Grant", "Cooperative Agreement", "Purchase Order"]),
+  agency: z.string().min(1, "Agency is required").max(100, "Agency must be less than 100 characters"),
+  solicitation: z.string().min(1, "Solicitation is required").max(50, "Solicitation must be less than 50 characters"),
+  probability: z.number().min(0, "Probability must be at least 0").max(100, "Probability must be at most 100"),
   close_date: z.string().min(1, "Close date is required"),
-  description: z
-    .string()
-    .max(1000, "Description must be less than 1000 characters")
-    .optional(),
+  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
   pinned: z.boolean(),
   tenant_id: z.string(),
   created_by: z.string(),
@@ -209,25 +179,15 @@ export const getOperatorsForField = (fieldType: string) => {
           "not_equals",
           "is_empty",
           "is_not_empty",
-        ].includes(op.value)
+        ].includes(op.value),
       );
     case "select":
       return FILTER_OPERATORS.filter((op) =>
-        ["equals", "not_equals", "contains_any_of", "contains_all_of"].includes(
-          op.value
-        )
+        ["equals", "not_equals", "contains_any_of", "contains_all_of"].includes(op.value),
       );
     case "number":
       return FILTER_OPERATORS.filter((op) =>
-        [
-          "equals",
-          "not_equals",
-          "greater_than",
-          "less_than",
-          "between",
-          "is_empty",
-          "is_not_empty",
-        ].includes(op.value)
+        ["equals", "not_equals", "greater_than", "less_than", "between", "is_empty", "is_not_empty"].includes(op.value),
       );
     case "date":
       return FILTER_OPERATORS.filter((op) =>
@@ -240,7 +200,7 @@ export const getOperatorsForField = (fieldType: string) => {
           "in_last_days",
           "is_empty",
           "is_not_empty",
-        ].includes(op.value)
+        ].includes(op.value),
       );
     default:
       return FILTER_OPERATORS;
