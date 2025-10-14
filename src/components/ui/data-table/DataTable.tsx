@@ -8,16 +8,14 @@ export function DataTable<TData extends Record<string, any>>({
   isLoading,
   emptyMessage = "No data available",
   onRowClick,
-  getRowClassName,
+  conditionalRowStyles,
 }: DataTableProps<TData>) {
   // Convert our column format to react-data-table-component format
   const reactTableColumns = columns.map((column) => {
     const reactColumn: any = {
       name: typeof column.header === "function" ? column.header(data) : column.header,
-      selector: column.accessorKey 
-        ? (row: TData) => row[column.accessorKey!]
-        : undefined,
-      cell: column.cell 
+      selector: column.accessorKey ? (row: TData) => row[column.accessorKey!] : undefined,
+      cell: column.cell
         ? (row: TData) => {
             const value = column.accessorKey ? row[column.accessorKey] : null;
             return column.cell!(row, value);
@@ -57,42 +55,42 @@ export function DataTable<TData extends Record<string, any>>({
   const customStyles = {
     headRow: {
       style: {
-        borderTopStyle: 'solid' as const,
-        borderTopWidth: '1px',
-        borderTopColor: 'hsl(var(--border))',
-        backgroundColor: 'hsl(var(--muted) / 0.5)',
+        borderTopStyle: "solid",
+        borderTopWidth: "1px",
+        borderTopColor: "var(--table-header-border, hsl(var(--border)))",
+        backgroundColor: "#333",
       },
     },
     headCells: {
       style: {
-        fontSize: '0.875rem',
+        fontSize: "0.875rem",
         fontWeight: 500,
-        color: 'hsl(var(--muted-foreground))',
-        paddingLeft: '1rem',
-        paddingRight: '1rem',
+        color: "#fff",
+        paddingLeft: "1rem",
+        paddingRight: "1rem",
       },
     },
     rows: {
       style: {
-        fontSize: '0.875rem',
-        color: 'hsl(var(--foreground))',
-        backgroundColor: 'hsl(var(--background))',
-        borderBottomStyle: 'solid' as const,
-        borderBottomWidth: '1px',
-        borderBottomColor: 'hsl(var(--border))',
-        '&:hover': {
-          backgroundColor: 'hsl(var(--muted) / 0.5)',
-          cursor: onRowClick ? 'pointer' : 'default',
+        fontSize: "0.875rem",
+        color: "hsl(var(--foreground))",
+        backgroundColor: "hsl(var(--background))",
+        borderBottomStyle: "solid",
+        borderBottomWidth: "1px",
+        borderBottomColor: "hsl(var(--border))",
+        "&:hover": {
+          // backgroundColor: 'hsl(var(--muted) / 0.5)',
+          cursor: onRowClick ? "pointer" : "default",
         },
       },
     },
     cells: {
       style: {
-        paddingLeft: '1rem',
-        paddingRight: '1rem',
+        paddingLeft: "1rem",
+        paddingRight: "1rem",
       },
     },
-  };
+  } as const;
 
   return (
     <div className="border rounded-lg overflow-hidden">
@@ -101,13 +99,12 @@ export function DataTable<TData extends Record<string, any>>({
         data={data}
         progressPending={isLoading}
         progressComponent={<ContentLoader type="table" rows={5} />}
-        noDataComponent={
-          <div className="text-center py-8 text-muted-foreground">
-            {emptyMessage}
-          </div>
-        }
+        noDataComponent={<div className="text-center py-8 text-muted-foreground">{emptyMessage}</div>}
         onRowClicked={onRowClick}
         customStyles={customStyles}
+        conditionalRowStyles={conditionalRowStyles}
+        fixedHeader
+        responsive
       />
     </div>
   );
