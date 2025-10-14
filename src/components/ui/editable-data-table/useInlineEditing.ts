@@ -1,12 +1,12 @@
 /**
  * Custom hook for managing inline editing state and logic
- * 
+ *
  * This hook handles all the editing logic including:
  * - Optimistic updates (UI updates immediately)
  * - Pending changes tracking
  * - Tab navigation between editable cells
  * - Click-outside to cancel editing
- * 
+ *
  * @example
  * ```tsx
  * const editing = useInlineEditing({
@@ -51,32 +51,35 @@ export function useInlineEditing<TData = any>({
   const [pendingChanges, setPendingChanges] = useState<Record<string, any>>({});
   const [optimisticData, setOptimisticData] = useState<TData[]>(data);
   const lastTabTimeRef = useRef<number>(0);
-  
+
   const inputRef = useRef<HTMLInputElement>(null);
   const editingContainerRef = useRef<HTMLDivElement>(null);
 
   // Calculate visible editable fields
   const visibleEditableFields = visibleFields
-    ? editableFields.filter(field => visibleFields.includes(field))
+    ? editableFields.filter((field) => visibleFields.includes(field))
     : editableFields;
 
   /**
    * Start editing a cell
    * Automatically saves pending changes if switching to a different row
    */
-  const startEditing = useCallback((rowId: string, field: string, currentValue: any) => {
-    // If switching to a different row, save pending changes first
-    if (editingCell && editingCell.rowId !== rowId && Object.keys(pendingChanges).length > 0) {
-      savePendingChanges();
-    }
-    
-    setEditingCell({ rowId, field });
-    
-    // Get the current value from optimistic data if available
-    const optimisticRow = optimisticData.find(row => String(row[rowIdKey]) === rowId);
-    const valueToEdit = optimisticRow ? optimisticRow[field as keyof TData] : currentValue;
-    setEditValue(valueToEdit?.toString() || "");
-  }, [editingCell, pendingChanges, optimisticData, rowIdKey]);
+  const startEditing = useCallback(
+    (rowId: string, field: string, currentValue: any) => {
+      // If switching to a different row, save pending changes first
+      if (editingCell && editingCell.rowId !== rowId && Object.keys(pendingChanges).length > 0) {
+        savePendingChanges();
+      }
+
+      setEditingCell({ rowId, field });
+
+      // Get the current value from optimistic data if available
+      const optimisticRow = optimisticData.find((row) => String(row[rowIdKey]) === rowId);
+      const valueToEdit = optimisticRow ? optimisticRow[field as keyof TData] : currentValue;
+      setEditValue(valueToEdit?.toString() || "");
+    },
+    [editingCell, pendingChanges, optimisticData, rowIdKey],
+  );
 
   /**
    * Cancel editing and revert all optimistic changes
@@ -92,14 +95,17 @@ export function useInlineEditing<TData = any>({
    * Update optimistic data immediately (before API call)
    * This provides instant feedback to the user
    */
-  const updateOptimisticData = useCallback((rowId: string, field: string, value: any) => {
-    setOptimisticData(prev => prev.map(row => 
-      String(row[rowIdKey]) === rowId ? { ...row, [field]: value } : row
-    ));
-    
-    setPendingChanges(prev => ({ ...prev, [field]: value }));
-    setEditValue(value?.toString() || "");
-  }, [rowIdKey]);
+  const updateOptimisticData = useCallback(
+    (rowId: string, field: string, value: any) => {
+      setOptimisticData((prev) =>
+        prev.map((row) => (String(row[rowIdKey]) === rowId ? { ...row, [field]: value } : row)),
+      );
+
+      setPendingChanges((prev) => ({ ...prev, [field]: value }));
+      setEditValue(value?.toString() || "");
+    },
+    [rowIdKey],
+  );
 
   /**
    * Save all pending changes to the server
@@ -107,12 +113,12 @@ export function useInlineEditing<TData = any>({
    */
   const savePendingChanges = useCallback(async () => {
     if (!editingCell || Object.keys(pendingChanges).length === 0) return;
-    
+
     try {
       if (onSave) {
         await onSave(editingCell.rowId, pendingChanges as Partial<TData>);
       }
-      
+
       setPendingChanges({});
       setEditingCell(null);
       setEditValue("");
@@ -128,20 +134,21 @@ export function useInlineEditing<TData = any>({
    * Handle Tab key navigation between editable cells
    * Single Tab: Move to next editable field in same row WITHOUT saving
    */
-  const handleTabNavigation = useCallback((currentRow: TData, currentField: string) => {
-    // Single tab: Move to next visible editable field in same row without saving
-    const currentFieldIndex = visibleEditableFields.indexOf(currentField);
-    if (currentFieldIndex < visibleEditableFields.length - 1) {
-      const nextRow = optimisticData.find(
-        row => String(row[rowIdKey]) === String(currentRow[rowIdKey])
-      );
-      if (nextRow) {
-        const nextField = visibleEditableFields[currentFieldIndex + 1];
-        const fieldValue = nextRow[nextField as keyof TData];
-        startEditing(String(nextRow[rowIdKey]), nextField, fieldValue);
+  const handleTabNavigation = useCallback(
+    (currentRow: TData, currentField: string) => {
+      // Single tab: Move to next visible editable field in same row without saving
+      const currentFieldIndex = visibleEditableFields.indexOf(currentField);
+      if (currentFieldIndex < visibleEditableFields.length - 1) {
+        const nextRow = optimisticData.find((row) => String(row[rowIdKey]) === String(currentRow[rowIdKey]));
+        if (nextRow) {
+          const nextField = visibleEditableFields[currentFieldIndex + 1];
+          const fieldValue = nextRow[nextField as keyof TData];
+          startEditing(String(nextRow[rowIdKey]), nextField, fieldValue);
+        }
       }
-    }
-  }, [optimisticData, rowIdKey, visibleEditableFields, startEditing]);
+    },
+    [optimisticData, rowIdKey, visibleEditableFields, startEditing],
+  );
 
   // Sync optimistic data with source data when not editing
   useEffect(() => {
@@ -161,28 +168,28 @@ export function useInlineEditing<TData = any>({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (!editingCell || !editingContainerRef.current) return;
-      
+
       const target = event.target as Node;
-      
+
       // Check if click is inside the editing container
       if (editingContainerRef.current.contains(target)) return;
-      
+
       // Check if click is inside a Radix portal (dropdown, popover, etc.)
-      const radixPortal = (target as Element).closest('[data-radix-popper-content-wrapper], [data-radix-portal]');
+      const radixPortal = (target as Element).closest("[data-radix-popper-content-wrapper], [data-radix-portal]");
       if (radixPortal) return;
-      
+
       // Otherwise, save pending changes
-      savePendingChanges();
+      // savePendingChanges();
     };
 
     if (editingCell) {
       setTimeout(() => {
-        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener("mousedown", handleClickOutside);
       }, 0);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [editingCell, savePendingChanges]);
 
