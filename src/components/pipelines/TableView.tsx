@@ -7,42 +7,34 @@ import { ColumnManagerModal } from "./ColumnManagerModal";
 import { CreateColumnButton } from "./CreateColumnButton";
 import { IOpportunity } from "@/api/opportunity/opportunityTypes";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationPrevious,
-  PaginationNext,
-  PaginationLink,
-} from "@/components/ui/pagination";
 import { TableViewProps } from "./types-and-schemas";
 import { useDeleteOpportunityMutation, useUpdateOpportunityMutation } from "@/api/opportunity/opportunityApi";
-import { useMoveOpportunityToStageMutation } from "@/api/kanban/kanbanApi";
 import { DeleteModal } from "../ui/delete-modal";
 import { OpportunityDetailModal } from "./OpportunityDetailModal";
-import { EditableDataTable } from "@/components/ui/editable-data-table";
 import { createOpportunityColumns } from "./columns";
+import { EditableDataTable } from "../ui/editable-data-table";
+import { useMoveOpportunityToStageMutation } from "@/api/kanban/kanbanApi";
 
-export function TableView({
-  opportunities,
-  currentPage,
-  rowsPerPage,
-  totalCount,
-  onPageChange,
-}: TableViewProps) {
-
+export function TableView({ opportunities }: TableViewProps) {
   const [columnModalOpen, setColumnModalOpen] = useState(false);
-  const [selectedOpportunity, setSelectedOpportunity] =
-    useState<IOpportunity | null>(null);
+  const [selectedOpportunity, setSelectedOpportunity] = useState<IOpportunity | null>(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [opportunityToDelete, setOpportunityToDelete] =
-    useState<IOpportunity | null>(null);
-  
+  const [opportunityToDelete, setOpportunityToDelete] = useState<IOpportunity | null>(null);
+
   // Define editable columns in order for Tab navigation
-  const editableFields = ['title', 'stage', 'award_type', 'agency', 'solicitation', 'company', 'value', 'probability', 'close_date'];
-  
   const { toast } = useToast();
+  const editableFields = [
+    "title",
+    "stage",
+    "award_type",
+    "agency",
+    "solicitation",
+    "company",
+    "value",
+    "probability",
+    "close_date",
+  ];
 
   const columnManager = useColumnManager();
   const { togglePin, isPinned } = usePinnedItems<IOpportunity>();
@@ -50,6 +42,48 @@ export function TableView({
   const handleViewOpportunity = (opportunity: IOpportunity) => {
     setSelectedOpportunity(opportunity);
     setViewModalOpen(true);
+  };
+
+  const [moveToStage] = useMoveOpportunityToStageMutation();
+
+  const userData = JSON.parse(localStorage.getItem("user") || "null");
+
+  const handleSaveChanges = async (opportunityId: string, changes: Partial<IOpportunity>) => {
+    try {
+      if (changes.stage && userData?.id) {
+        const opportunity = opportunities.find((opp) => opp.id === opportunityId);
+        if (!opportunity) throw new Error("Opportunity not found");
+
+        await moveToStage({
+          p_opportunity_id: opportunityId,
+          p_new_stage: changes.stage,
+          p_tenant_id: opportunity.tenant_id,
+          p_user_id: userData.id,
+        }).unwrap();
+
+        toast({
+          title: "Success",
+          description: "Stage updated successfully",
+        });
+        // return;
+      }
+      await updateTrigger({
+        id: opportunityId,
+        body: changes,
+      }).unwrap();
+
+      toast({
+        title: "Success",
+        description: "Opportunity updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update opportunity",
+        variant: "destructive",
+      });
+      throw error; // Re-throw to let EditableDataTable handle optimistic revert
+    }
   };
 
   const handleDeleteOpportunity = (opportunity: IOpportunity) => {
@@ -72,63 +106,10 @@ export function TableView({
     }
   };
 
-  const totalPages = Math.ceil(totalCount / rowsPerPage);
   const [updateTrigger, updateStatus] = useUpdateOpportunityMutation();
   const [deleteTrigger, deleteStatus] = useDeleteOpportunityMutation();
-  const [moveToStage] = useMoveOpportunityToStageMutation();
-  
-  const userData = JSON.parse(localStorage.getItem("user") || "null");
 
-  /**
-   * Handle saving inline edits
-   * This function is called by EditableDataTable when user saves changes
-   * If stage is being changed, use the kanban API (same as drag-and-drop)
-   * If other fields are changed, use the regular update API
-   * Both mutations can be called if both types of changes exist
-   */
-  const handleSaveChanges = async (opportunityId: string, changes: Partial<IOpportunity>) => {
-    try {
-      const stageChanged = 'stage' in changes;
-      const otherChanges = { ...changes };
-      delete otherChanges.stage;
-      const hasOtherChanges = Object.keys(otherChanges).length > 0;
-      
-      // If stage is being changed, use the kanban move API (same as kanban board)
-      if (stageChanged && userData?.id) {
-        const opportunity = opportunities.find(opp => opp.id === opportunityId);
-        if (!opportunity) throw new Error("Opportunity not found");
-        
-        await moveToStage({
-          p_opportunity_id: opportunityId,
-          p_new_stage: changes.stage!,
-          p_tenant_id: opportunity.tenant_id,
-          p_user_id: userData.id,
-        }).unwrap();
-      }
-      
-      // For all other changes, use the regular update API
-      if (hasOtherChanges) {
-        await updateTrigger({
-          id: opportunityId,
-          body: otherChanges,
-        }).unwrap();
-      }
-      
-      toast({
-        title: "Success",
-        description: "Opportunity updated successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update opportunity",
-        variant: "destructive",
-      });
-      throw error; // Re-throw to let EditableDataTable handle optimistic revert
-    }
-  };
-
-  // Create columns with additional context for actions
+  // Create columns with context
   const columns = createOpportunityColumns({
     handleViewOpportunity,
     handleDeleteOpportunity,
@@ -143,12 +124,7 @@ export function TableView({
         <h2 className="text-lg font-semibold">Opportunities</h2>
         <div className="flex items-center gap-2">
           <CreateColumnButton />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setColumnModalOpen(true)}
-            className="gap-2"
-          >
+          <Button variant="outline" size="sm" onClick={() => setColumnModalOpen(true)} className="gap-2">
             <Settings className="h-4 w-4" />
             Manage Columns
           </Button>
@@ -161,54 +137,20 @@ export function TableView({
         editableFields={editableFields}
         rowIdKey="id"
         onSave={handleSaveChanges}
-        isLoading={false}
+        isLoading={updateStatus.isLoading}
         emptyMessage="No opportunities found matching your search criteria."
-        getRowClassName={(row) =>
-          row.pinned
-            ? "bg-yellow-50 dark:bg-yellow-950/30 hover:bg-yellow-100"
-            : ""
-        }
+        conditionalRowStyles={[
+          {
+            when: (row) => !!row.pinned,
+            style: {
+              backgroundColor: "rgb(240 253 244)",
+            },
+            classNames: ["bg-green-50 dark:bg-green-900  hover:bg-green-100"],
+          },
+        ]}
         enableDoubleTabNavigation={true}
       />
-
-      {totalPages > 1 && (
-        <div className="flex justify-center py-4">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-                  aria-disabled={currentPage === 1}
-                />
-              </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <PaginationItem key={i}>
-                  <PaginationLink
-                    isActive={currentPage === i + 1}
-                    onClick={() => onPageChange(i + 1)}
-                  >
-                    {i + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() =>
-                    onPageChange(Math.min(totalPages, currentPage + 1))
-                  }
-                  aria-disabled={currentPage === totalPages}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
-
-      <ColumnManagerModal
-        open={columnModalOpen}
-        onOpenChange={setColumnModalOpen}
-        columnManager={columnManager}
-      />
+      <ColumnManagerModal open={columnModalOpen} onOpenChange={setColumnModalOpen} columnManager={columnManager} />
       {viewModalOpen && (
         <OpportunityDetailModal
           opportunity={selectedOpportunity}
