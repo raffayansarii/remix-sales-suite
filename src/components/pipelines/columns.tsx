@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Eye, Pin, PinOff, Trash2 } from "lucide-react";
+import { MoreHorizontal, Eye, Pin, PinOff, Trash2, Check, X } from "lucide-react";
 import { IOpportunity } from "@/api/opportunity/opportunityTypes";
 import { EditableColumnDef, EditingContext } from "@/components/ui/editable-data-table";
 import { ColumnDefinition } from "@/hooks/useColumnManager";
@@ -428,9 +428,14 @@ export const createOpportunityColumns = (
     right: true,
     cell: (row, context: EditingContext<IOpportunity>) => (
       <div className="flex items-center gap-2">
+        {context.editingCell?.rowId === row.id && context.editingCell && (
+          <Button size="sm" variant="destructive" onClick={() => context.cancelEditing()} className="h-7">
+            <X />
+          </Button>
+        )}
         {context.editingCell?.rowId === row.id && context.hasPendingChanges && (
           <Button size="sm" variant="default" onClick={() => context.savePendingChanges()} className="h-7">
-            Save
+            <Check />
           </Button>
         )}
         <DropdownMenu>
