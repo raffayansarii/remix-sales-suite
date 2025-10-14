@@ -1,32 +1,9 @@
-import {
-  LayoutDashboard,
-  Target,
-  CheckSquare,
-  Users,
-  UserCog,
-  Settings,
-  Building2,
-  ChevronRight,
-} from "lucide-react";
+import { LayoutDashboard, Target, CheckSquare, Users, UserCog, Settings, Building2, ChevronRight } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useState } from "react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import brandLogo from "@/assets/brand-logo.png";
 
 interface MenuItem {
@@ -63,7 +40,7 @@ const menuGroups: MenuGroup[] = [
         icon: Users,
       },
       {
-        title: "Opportunity Pipelines",
+        title: "Pipelines",
         url: "/pipelines",
         icon: Target,
       },
@@ -110,7 +87,7 @@ export function AppSidebar() {
 
   const renderMenuItem = (group: MenuGroup) => {
     const isSingleItem = group.items.length === 1;
-    
+
     if (isSingleItem) {
       // Single item: Direct navigation with tooltip
       const item = group.items[0];
@@ -140,10 +117,7 @@ export function AppSidebar() {
 
     // Multiple items: Interactive popover menu
     return (
-      <Popover
-        open={openPopover === group.title}
-        onOpenChange={(open) => setOpenPopover(open ? group.title : null)}
-      >
+      <Popover open={openPopover === group.title} onOpenChange={(open) => setOpenPopover(open ? group.title : null)}>
         <PopoverTrigger asChild>
           <button
             className={`
@@ -168,9 +142,7 @@ export function AppSidebar() {
           onMouseLeave={() => setOpenPopover(null)}
         >
           <div className="p-2">
-            <div className="px-3 py-2 text-xs font-semibold text-white/50 uppercase tracking-wider">
-              {group.title}
-            </div>
+            <div className="px-3 py-2 text-xs font-semibold text-white/50 uppercase tracking-wider">{group.title}</div>
             <div className="space-y-1">
               {group.items.map((item) => (
                 <NavLink
@@ -178,11 +150,7 @@ export function AppSidebar() {
                   to={item.url}
                   className={`
                     flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group
-                    ${
-                      isActive(item.url)
-                        ? "bg-primary text-white"
-                        : "text-white/80 hover:text-white hover:bg-white/10"
-                    }
+                    ${isActive(item.url) ? "bg-primary text-white" : "text-white/80 hover:text-white hover:bg-white/10"}
                   `}
                   onClick={() => setOpenPopover(null)}
                 >
@@ -212,9 +180,7 @@ export function AppSidebar() {
         <TooltipProvider delayDuration={0}>
           <SidebarMenu className="px-2 py-4 space-y-2">
             {menuGroups.map((group) => (
-              <SidebarMenuItem key={group.title}>
-                {renderMenuItem(group)}
-              </SidebarMenuItem>
+              <SidebarMenuItem key={group.title}>{renderMenuItem(group)}</SidebarMenuItem>
             ))}
           </SidebarMenu>
         </TooltipProvider>
