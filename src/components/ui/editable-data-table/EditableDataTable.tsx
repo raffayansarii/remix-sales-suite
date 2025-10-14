@@ -1,8 +1,8 @@
 /**
  * EditableDataTable Component
- * 
+ *
  * A flexible, inline-editable data table with optimistic updates.
- * 
+ *
  * Features:
  * - Inline editing with optimistic updates
  * - Tab navigation between editable cells
@@ -10,11 +10,11 @@
  * - Double-tab to move to next row (optional)
  * - Automatic save on Enter key
  * - Escape to cancel editing
- * 
+ *
  * @example Basic Usage
  * ```tsx
  * import { EditableDataTable } from '@/components/ui/editable-data-table';
- * 
+ *
  * function MyTable() {
  *   const columns = [
  *     {
@@ -31,7 +31,7 @@
  *       ),
  *     },
  *   ];
- * 
+ *
  *   return (
  *     <EditableDataTable
  *       data={data}
@@ -45,14 +45,14 @@
  *   );
  * }
  * ```
- * 
+ *
  * @example With Custom Cell Editors
  * ```tsx
  * // Use the context in your cell renderer
  * cell: (row, context) => {
- *   const isEditing = context.editingCell?.rowId === row.id && 
+ *   const isEditing = context.editingCell?.rowId === row.id &&
  *                     context.editingCell?.field === 'status';
- *   
+ *
  *   return isEditing ? (
  *     <div ref={context.editingContainerRef}>
  *       <Select
@@ -80,19 +80,18 @@ export function EditableDataTable<TData extends Record<string, any>>({
   data,
   columns,
   editableFields,
-  rowIdKey = 'id' as keyof TData,
+  rowIdKey = "id" as keyof TData,
   onSave,
   isLoading = false,
   emptyMessage = "No data found",
   onRowClick,
-  getRowClassName,
+  conditionalRowStyles,
   enableDoubleTabNavigation = true,
 }: EditableDataTableProps<TData>) {
-  
   // Get visible field names from columns (prefer accessorKey to match data keys)
   const visibleFields = columns
-    .filter(col => !col.omit)
-    .map(col => (col.accessorKey ? String(col.accessorKey) : col.id));
+    .filter((col) => !col.omit)
+    .map((col) => (col.accessorKey ? String(col.accessorKey) : col.id));
 
   // Initialize inline editing hook
   const editing = useInlineEditing({
@@ -119,11 +118,9 @@ export function EditableDataTable<TData extends Record<string, any>>({
   };
 
   // Transform columns to inject editing context
-  const enhancedColumns = columns.map(col => ({
+  const enhancedColumns = columns.map((col) => ({
     ...col,
-    cell: col.cell 
-      ? (row: TData, value: any) => col.cell!(row, editingContext)
-      : undefined,
+    cell: col.cell ? (row: TData, value: any) => col.cell!(row, editingContext) : undefined,
   }));
 
   return (
@@ -133,18 +130,19 @@ export function EditableDataTable<TData extends Record<string, any>>({
       isLoading={isLoading}
       emptyMessage={emptyMessage}
       onRowClick={onRowClick}
-      getRowClassName={getRowClassName}
+      //   getRowClassName={getRowClassName}
+      conditionalRowStyles={conditionalRowStyles}
     />
   );
 }
 
 /**
  * Helper component for rendering editable input cells
- * 
+ *
  * @example
  * ```tsx
  * import { EditableCell } from '@/components/ui/editable-data-table';
- * 
+ *
  * cell: (row, context) => (
  *   <EditableCell
  *     row={row}
@@ -155,4 +153,4 @@ export function EditableDataTable<TData extends Record<string, any>>({
  * )
  * ```
  */
-export { EditableCell } from './EditableCell';
+export { EditableCell } from "./EditableCell";
