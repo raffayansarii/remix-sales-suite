@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Search, Kanban, Table, BarChart3, Plus, Filter, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ViewType } from "@/types/crm";
 import { KanbanView } from "@/components/pipelines/KanbanView";
 import { TableView } from "@/components/pipelines/TableView";
@@ -52,7 +52,7 @@ export function PipelinesFeature() {
 
   // API Calls
   const { data, isLoading, isFetching, isError, error } = useGetOpportunitiesQuery(queryString);
-
+  console.log(data);
   const [createHandler, createStatus] = useCreateOpportunityMutation();
 
   useEffect(() => {
@@ -245,9 +245,9 @@ export function PipelinesFeature() {
             ) : (
               <TableView opportunities={opportunities || []} />
             )}
-            <div className="flex justify-end items-center gap-4 w-full py-4 px-4">
+            <div className="flex justify-center w-full py-4">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Rows per page:</span>
+                <span className="text-sm text-muted-foreground text-nowrap">Rows per page:</span>
                 <Select
                   value={rowsPerPage.toString()}
                   onValueChange={(value) => {
@@ -267,7 +267,13 @@ export function PipelinesFeature() {
                   </SelectContent>
                 </Select>
               </div>
-              {totalPages > 1 && (
+              <div
+                className=" mx-2 min-h-10"
+                style={{
+                  borderLeft: "1px solid lightgray",
+                }}
+              />
+              <div>
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
@@ -291,7 +297,18 @@ export function PipelinesFeature() {
                     </PaginationItem>
                   </PaginationContent>
                 </Pagination>
-              )}
+              </div>
+              <div
+                className=" mx-2 min-h-10"
+                style={{
+                  borderLeft: "1px solid lightgray",
+                }}
+              />
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground text-nowrap">
+                  Total rows: <span className="font-medium">{totalCount} </span>
+                </span>
+              </div>
             </div>
           </div>
         )}
