@@ -246,7 +246,7 @@ export function PipelinesFeature() {
               <TableView opportunities={opportunities || []} />
             )}
             {totalPages > 1 && (
-              <div className="flex justify-between items-center w-full py-4 px-4">
+              <div className="flex justify-end items-center gap-4 w-full py-4 px-4">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">Rows per page:</span>
                   <Select
