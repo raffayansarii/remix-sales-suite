@@ -3,6 +3,7 @@ import { Search, Kanban, Table, BarChart3, Plus, Filter, X } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ViewType } from "@/types/crm";
 import { KanbanView } from "@/components/pipelines/KanbanView";
 import { TableView } from "@/components/pipelines/TableView";
@@ -31,7 +32,7 @@ export function PipelinesFeature() {
   const [rawSearchTerm, setRawSearchTerm] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 8;
+  const [rowsPerPage, setRowsPerPage] = useState(8);
   // TODO: Replace with API call - GET /api/opportunities with real-time updates
   const [opportunities, setOpportunities] = useState<IOpportunity[]>(null);
   const [totalCount, setTotalCount] = useState(0);
@@ -245,7 +246,28 @@ export function PipelinesFeature() {
               <TableView opportunities={opportunities || []} />
             )}
             {totalPages > 1 && (
-              <div className="flex justify-end w-full border-blue-600 py-4">
+              <div className="flex justify-between items-center w-full py-4 px-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Rows per page:</span>
+                  <Select
+                    value={rowsPerPage.toString()}
+                    onValueChange={(value) => {
+                      setRowsPerPage(Number(value));
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-[70px] h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="5">5</SelectItem>
+                      <SelectItem value="8">8</SelectItem>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="20">20</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
