@@ -2,17 +2,29 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { BarChart3, TrendingUp, Users, Target, Calendar, Plus } from 'lucide-react';
-import { mockOpportunities, mockTasks } from '@/data/mockData';
+import { useGetOpportunitiesQuery } from '@/api/opportunity/opportunityApi';
+import { useGetTasksQuery } from '@/api/tasks/tasksApi';
+import { ContentLoader } from '@/components/ui/content-loader';
 
 export function DashboardFeature() {
-  const totalOpportunities = mockOpportunities.length;
-  const totalValue = mockOpportunities.reduce((sum, opp) => sum + opp.value, 0);
-  const closedWonOpportunities = mockOpportunities.filter(opp => opp.stage === 'Closed Won');
-  const winRate = (closedWonOpportunities.length / totalOpportunities * 100).toFixed(1);
-  const avgDealSize = Math.round(totalValue / totalOpportunities);
+  const { data: opportunitiesData, isLoading: isLoadingOpportunities } = useGetOpportunitiesQuery('limit=100');
+  const { data: tasksData, isLoading: isLoadingTasks } = useGetTasksQuery('limit=100');
+
+  const opportunities = opportunitiesData?.data || [];
+  const tasks = tasksData || [];
+
+  const totalOpportunities = opportunities.length;
+  const totalValue = opportunities.reduce((sum, opp) => sum + (parseFloat(opp.value) || 0), 0);
+  const closedWonOpportunities = opportunities.filter(opp => opp.stage === 'Closed Won');
+  const winRate = totalOpportunities > 0 ? (closedWonOpportunities.length / totalOpportunities * 100).toFixed(1) : '0.0';
+  const avgDealSize = totalOpportunities > 0 ? Math.round(totalValue / totalOpportunities) : 0;
   
-  const recentOpportunities = mockOpportunities.slice(0, 5);
-  const upcomingTasks = mockTasks.filter(task => !task.completed).slice(0, 4);
+  const recentOpportunities = opportunities.slice(0, 5);
+  const upcomingTasks = tasks.filter(task => !task.completed).slice(0, 4);
+
+  if (isLoadingOpportunities || isLoadingTasks) {
+    return <ContentLoader />;
+  }
 
   return (
     <div className="flex-1 space-y-6 p-6 bg-muted/30">
@@ -99,7 +111,7 @@ export function DashboardFeature() {
                   <div className="text-xs text-muted-foreground">{opportunity.company}</div>
                 </div>
                 <div className="text-right">
-                  <div className="font-semibold text-success">${opportunity.value.toLocaleString()}</div>
+                  <div className="font-semibold text-success">${parseFloat(opportunity.value).toLocaleString()}</div>
                   <Badge variant="outline" className="text-xs">
                     {opportunity.stage}
                   </Badge>
@@ -122,7 +134,7 @@ export function DashboardFeature() {
                 <div className="flex-1">
                   <div className="font-medium text-sm">{task.title}</div>
                   <div className="text-xs text-muted-foreground">
-                    Due: {new Date(task.dueDate).toLocaleDateString()}
+                    Due: {new Date(task.due_date).toLocaleDateString()}
                   </div>
                 </div>
                 <div className="text-right">
